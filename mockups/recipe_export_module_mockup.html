@@ -1,0 +1,2912 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Interaktif — Modul Export Recipe (Video Mute Preview, Cloudflare R2 & Google Pixel 7)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root, [data-theme='dark'] {
+      color-scheme: dark;
+      --canvas: #090d16;
+      --sidebar: #0d1424;
+      --surface: #111a2e;
+      --surface-raised: #16223b;
+      --surface-interactive: #1d2c4b;
+      --surface-hover: #233559;
+      --input-bg: #0c1424;
+      --overlay-backdrop: rgba(3, 7, 18, 0.82);
+      --text-primary: #f8fafc;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --text-disabled: #64748b;
+      --border-subtle: #243552;
+      --border-strong: #3b5278;
+      --border-color: #243552;
+      --action-primary: #10b981;
+      --action-primary-hover: #34d399;
+      --on-action-primary: #022c22;
+      --accent-recipe: #8b5cf6;
+      --accent-recipe-light: #a78bfa;
+      --accent-recipe-soft: rgba(139, 92, 246, 0.15);
+      --status-info: #38bdf8;
+      --status-info-soft: rgba(56, 189, 248, 0.14);
+      --status-success: #34d399;
+      --status-success-soft: rgba(52, 211, 153, 0.14);
+      --status-warning: #fbbf24;
+      --status-warning-soft: rgba(251, 191, 36, 0.14);
+      --status-danger: #f87171;
+      --status-danger-soft: rgba(248, 113, 113, 0.14);
+      --shadow-card: 0 10px 28px rgba(0, 0, 0, 0.35);
+      --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.7);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    [data-theme='light'] {
+      color-scheme: light;
+      --canvas: #f1f5f9;
+      --sidebar: #ffffff;
+      --surface: #ffffff;
+      --surface-raised: #f8fafc;
+      --surface-interactive: #e2e8f0;
+      --surface-hover: #cbd5e1;
+      --input-bg: #ffffff;
+      --overlay-backdrop: rgba(15, 23, 42, 0.6);
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --text-disabled: #94a3b8;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-color: #e2e8f0;
+      --action-primary: #059669;
+      --action-primary-hover: #10b981;
+      --on-action-primary: #ffffff;
+      --accent-recipe: #7c3aed;
+      --accent-recipe-light: #6d28d9;
+      --accent-recipe-soft: rgba(124, 58, 237, 0.12);
+      --status-info: #0284c7;
+      --status-info-soft: rgba(2, 132, 199, 0.12);
+      --status-success: #059669;
+      --status-success-soft: rgba(5, 150, 105, 0.12);
+      --status-warning: #d97706;
+      --status-warning-soft: rgba(217, 119, 6, 0.12);
+      --status-danger: #dc2626;
+      --status-danger-soft: rgba(220, 38, 38, 0.12);
+      --shadow-card: 0 8px 24px rgba(15, 23, 42, 0.08);
+      --shadow-modal: 0 20px 50px rgba(15, 23, 42, 0.2);
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--canvas);
+      color: var(--text-primary);
+      padding: 24px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1360px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Top Navigation / Bar */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 16px 24px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: var(--accent-recipe-soft);
+      color: var(--accent-recipe-light);
+      border: 1px solid var(--accent-recipe-light);
+    }
+
+    .controls-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .theme-btn {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 8px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .theme-btn:hover {
+      background: var(--surface-interactive);
+      border-color: var(--border-strong);
+    }
+
+    /* Source Switcher */
+    .source-switcher {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface-raised);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .source-tab-btn {
+      background: transparent;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-muted);
+      transition: all 0.15s;
+    }
+    .source-tab-btn.active {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border: 1px solid var(--border-strong);
+    }
+
+    /* Context Card */
+    .campaign-context-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      padding: 18px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow-card);
+    }
+
+    .context-info h2 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .context-info p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .recipe-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 18px;
+    }
+
+    .recipe-card {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-card);
+      transition: border-color 0.2s;
+    }
+    .recipe-card:hover {
+      border-color: var(--border-strong);
+    }
+
+    .recipe-card-media {
+      height: 180px;
+      background: var(--surface-raised);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .recipe-card-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .recipe-card-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: var(--overlay-backdrop);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #ffffff;
+      border: 1px solid var(--border-subtle);
+      backdrop-filter: blur(4px);
+    }
+    .recipe-card-video-pill {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(220, 38, 38, 0.85);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      backdrop-filter: blur(4px);
+    }
+    .recipe-card-status-badge {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .recipe-card-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .recipe-card-title {
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .recipe-card-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      font-size: 0.72rem;
+    }
+    .chip {
+      background: var(--surface-interactive);
+      border: 1px solid var(--border-subtle);
+      padding: 2px 8px;
+      border-radius: 4px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .recipe-card-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .recipe-card-footer {
+      padding: 12px 16px;
+      background: var(--surface-raised);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--action-primary);
+      color: var(--on-action-primary);
+    }
+    .btn-primary:hover {
+      background: var(--action-primary-hover);
+    }
+    .btn-ai-magic {
+      background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
+      border: none;
+    }
+    .btn-ai-magic:hover {
+      filter: brightness(1.15);
+      transform: translateY(-1px);
+    }
+    .btn-r2 {
+      background: #f48120;
+      color: #ffffff;
+      border: none;
+    }
+    .btn-r2:hover {
+      background: #fa9b42;
+    }
+    .btn-outline {
+      background: transparent;
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+    .btn-outline:hover {
+      background: var(--surface-interactive);
+    }
+
+    /* =========================================================================
+       MODAL: EXPORT RECIPE & GOOGLE PIXEL 7 INSPECTOR
+       ========================================================================= */
+    .modal-backdrop {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--overlay-backdrop);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 16px;
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-window {
+      background: var(--surface);
+      border: 1px solid var(--border-strong);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 1340px;
+      height: 94vh;
+      max-height: 920px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-modal);
+      overflow: hidden;
+      animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalSlideUp {
+      from { transform: translateY(20px) scale(0.98); }
+      to { transform: translateY(0) scale(1); }
+    }
+
+    .modal-header {
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--surface-raised);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-title-group h3 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .modal-subtitle {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .modal-close-btn {
+      background: transparent;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      transition: all 0.15s;
+    }
+    .modal-close-btn:hover {
+      background: var(--surface-interactive);
+      color: var(--text-primary);
+      border-color: var(--border-strong);
+    }
+
+    .modal-body {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Left Pane: Tuning & Settings */
+    .pane-tuning {
+      flex: 1.35;
+      border-right: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 20px 24px;
+      gap: 18px;
+    }
+
+    /* Preset Box & Editable Config */
+    .preset-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .preset-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .preset-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .endpoint-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .form-control {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .form-control:focus {
+      border-color: var(--accent-recipe);
+    }
+    textarea.form-control {
+      resize: vertical;
+      min-height: 85px;
+      line-height: 1.45;
+    }
+
+    /* AI Magic Banner Box */
+    .ai-magic-box {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.14) 0%, rgba(236, 72, 153, 0.1) 100%);
+      border: 1px solid rgba(139, 92, 246, 0.4);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+    }
+    .ai-magic-text {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+    .ai-magic-text strong {
+      color: var(--accent-recipe-light);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    /* Video Pipeline Box (Pulling, Mute via FFmpeg & Cloudflare R2 Upload) */
+    .video-pipeline-box {
+      background: var(--surface-raised);
+      border: 1px solid #f48120;
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .video-pipeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .video-r2-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(244, 129, 32, 0.15);
+      color: #f48120;
+      border: 1px solid #f48120;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .video-steps-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .video-step-card {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 10px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .video-step-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .video-step-status {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    /* Dedicated Inline Video Preview Box for Muted Video */
+    .video-preview-inline-box {
+      background: var(--input-bg);
+      border: 1px dashed #f48120;
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .video-preview-player-wrapper {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #000000;
+      max-height: 240px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    }
+    .video-preview-player-wrapper video {
+      max-height: 240px;
+      width: 100%;
+      object-fit: contain;
+    }
+    .video-muted-floating-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.85);
+      color: #ffffff;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(4px);
+    }
+    .video-floating-expand-btn {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.75);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+    .video-floating-expand-btn:hover {
+      background: rgba(244, 129, 32, 0.9);
+      color: #ffffff;
+    }
+
+    /* Audio Silence VU Meter & Spectrum */
+    .audio-silence-meter {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.72rem;
+    }
+    .audio-meter-visual {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .audio-meter-bars {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      height: 14px;
+    }
+    .audio-bar {
+      width: 3px;
+      height: 3px;
+      background: var(--status-success);
+      border-radius: 2px;
+      transition: all 0.2s;
+    }
+    .audio-bar.active-sound {
+      background: var(--status-warning);
+      animation: audioPulse 0.4s infinite alternate;
+    }
+    .audio-bar.muted-flat {
+      background: var(--status-success);
+      height: 3px !important;
+      animation: none !important;
+    }
+    @keyframes audioPulse {
+      0% { height: 3px; }
+      100% { height: 13px; }
+    }
+
+    /* Video Quick Controls & Toolbar */
+    .video-quick-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-video-ctrl {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+    .btn-video-ctrl:hover {
+      border-color: #f48120;
+      color: #f48120;
+      background: var(--surface-interactive);
+    }
+    .btn-video-ctrl.active-mode {
+      background: rgba(244, 129, 32, 0.15);
+      border-color: #f48120;
+      color: #f48120;
+      font-weight: 700;
+    }
+
+    /* Dedicated Fullscreen / Lightbox Video Modal */
+    .video-lightbox-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 10000;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+    .video-lightbox-backdrop.open {
+      display: flex;
+    }
+    .video-lightbox-card {
+      background: var(--surface-raised);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      max-width: 860px;
+      width: 100%;
+      max-height: 92vh;
+      display: flex;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+    }
+    .video-lightbox-player-col {
+      flex: 1.1;
+      background: #000000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      min-height: 520px;
+    }
+    .video-lightbox-player-col video {
+      max-height: 520px;
+      width: 100%;
+      object-fit: contain;
+    }
+    .video-lightbox-info-col {
+      flex: 1;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 16px;
+      overflow-y: auto;
+      background: var(--surface);
+    }
+    .video-meta-badge {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: var(--surface-raised);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Sub Tabs */
+    .sub-tabs {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 8px;
+    }
+    .sub-tab-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sub-tab-btn.active {
+      background: var(--surface-interactive);
+      color: var(--accent-recipe-light);
+    }
+
+    /* T2I Prompt 4:3 Box */
+    .t2i-prompt-box {
+      background: var(--surface-raised);
+      border: 1px solid var(--accent-recipe);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .t2i-prompt-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .t2i-prompt-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--accent-recipe-soft);
+      color: var(--accent-recipe-light);
+      border: 1px solid var(--accent-recipe-light);
+    }
+
+    /* Ingredient Group Container */
+    .ing-group {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .ing-group-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .ing-group-name {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--accent-recipe-light);
+    }
+    .ing-list-textarea {
+      background: var(--surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+      min-height: 65px;
+    }
+
+    /* =========================================================================
+       RIGHT PANE: GOOGLE PIXEL 7 SIMULATOR (412 x 915 aspect ratio)
+       ========================================================================= */
+    .pane-simulator {
+      flex: 1;
+      background: var(--canvas);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .simulator-top-control {
+      position: absolute;
+      top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface);
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border-subtle);
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* GOOGLE PIXEL 7 PHYSICAL HARDWARE FRAME (412 x 915 scale) */
+    .pixel7-device {
+      width: 380px;
+      height: 780px;
+      border-radius: 40px;
+      background: #1e293b;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.12), inset 0 0 0 3px #334155;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      padding: 8px;
+      box-sizing: border-box;
+      margin-top: 24px;
+      transition: all 0.25s ease;
+    }
+
+    .pixel7-screen {
+      flex: 1;
+      border-radius: 32px;
+      background: #ffffff;
+      color: #0f172a;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      transition: background 0.2s, color 0.2s;
+    }
+    .pixel7-device.pixel-dark .pixel7-screen {
+      background: #111827;
+      color: #f3f4f6;
+    }
+
+    /* Pixel 7 Punch Hole Camera Cutout */
+    .pixel-punch-hole {
+      width: 14px;
+      height: 14px;
+      background: #000000;
+      border-radius: 50%;
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      box-shadow: inset 0 0 2px rgba(255, 255, 255, 0.3);
+    }
+
+    /* Pixel 7 Status Bar */
+    .pixel-status-bar {
+      height: 32px;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #64748b;
+      z-index: 10;
+    }
+
+    /* Android App Toolbar */
+    .pixel-app-bar {
+      height: 48px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+    .pixel7-device.pixel-dark .pixel-app-bar {
+      border-bottom-color: rgba(255, 255, 255, 0.08);
+    }
+
+    /* Android WebView Inner Body (Tools.displayPostDescription) */
+    .pixel-webview-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .pixel7-device:not(.pixel-dark) .pixel-webview-body {
+      color: #1e293b;
+    }
+    .pixel7-device.pixel-dark .pixel-webview-body {
+      color: #e2e8f0;
+    }
+
+    /* Media Switcher Tab on Android (Photo vs Video) */
+    .pixel-media-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+      background: rgba(148, 163, 184, 0.15);
+      padding: 3px;
+      border-radius: 8px;
+    }
+    .pixel-media-tab-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: inherit;
+      transition: all 0.15s;
+    }
+    .pixel-media-tab-btn.active {
+      background: #ffffff;
+      color: #0f172a;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .pixel7-device.pixel-dark .pixel-media-tab-btn.active {
+      background: #334155;
+      color: #ffffff;
+    }
+
+    /* Cover Photo Strictly 4:3 Aspect Ratio for Android Cover */
+    .pixel-hero-img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      height: auto;
+      border-radius: 14px;
+      object-fit: cover;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    /* Simulated Video Player with Mute Badge */
+    .pixel-video-player-container {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 14px;
+      position: relative;
+      background: #000000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(244, 129, 32, 0.35);
+      display: none;
+    }
+    .pixel-video-player-container.show {
+      display: block;
+    }
+    .pixel-video-element {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .pixel-video-mute-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.75);
+      color: #ffffff;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .pixel-video-r2-pill {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(244, 129, 32, 0.9);
+      color: #ffffff;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 700;
+    }
+
+    .pixel-recipe-title {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .pixel-chips-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      font-size: 0.75rem;
+    }
+    .pixel-chip {
+      background: rgba(148, 163, 184, 0.18);
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+
+    .pixel-webview-body p {
+      margin-bottom: 10px;
+    }
+    .pixel-webview-body hr {
+      border: 0;
+      height: 1px;
+      background: rgba(148, 163, 184, 0.25);
+      margin: 16px 0;
+    }
+    .pixel-webview-body ul, .pixel-webview-body ol {
+      padding-left: 20px;
+      margin-bottom: 12px;
+    }
+    .pixel-webview-body li {
+      margin-bottom: 6px;
+      font-size: 0.82rem;
+    }
+
+    /* Pixel 7 Navigation Bar Gesture Pill */
+    .pixel-nav-bar {
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pixel-gesture-pill {
+      width: 72px;
+      height: 4px;
+      border-radius: 2px;
+      background: #94a3b8;
+    }
+
+    /* Modal Footer */
+    .modal-footer {
+      padding: 14px 24px;
+      background: var(--surface-raised);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .push-status-toast {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: none;
+    }
+    .push-status-toast.show {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .push-status-toast.success {
+      background: var(--status-success-soft);
+      color: var(--status-success);
+      border: 1px solid var(--status-success);
+    }
+    .push-status-toast.loading {
+      background: var(--status-info-soft);
+      color: var(--status-info);
+      border: 1px solid var(--status-info);
+    }
+
+    /* Code View Area */
+    .code-view {
+      background: var(--input-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      max-height: 320px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    /* Preset Editor Drawer / Popover */
+    .preset-editor-card {
+      background: var(--surface);
+      border: 1px dashed var(--accent-recipe);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .preset-editor-card.open {
+      display: flex;
+    }
+
+    /* Responsiveness */
+    @media (max-width: 992px) {
+      .modal-body {
+        flex-direction: column;
+      }
+      .pane-tuning {
+        border-right: none;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .pixel7-device {
+        width: 100%;
+        max-width: 340px;
+        height: 600px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Top Navigation & Global Controls -->
+  <div class="top-bar">
+    <div class="brand-title">
+      <span style="font-size:1.4rem;">🍳</span>
+      <div>
+        <h1 style="font-size:1.05rem; font-weight:800;">MAKNA Flow — Modul Export Recipe ke Android Apps</h1>
+        <div style="font-size:0.75rem; color:var(--text-muted);">AI Auto Enrich • Video Mute & Inline Preview • Cloudflare R2 Sync • Google Pixel 7 Simulator</div>
+      </div>
+      <span class="brand-badge">R2 CDN + Pixel 7 Verified</span>
+    </div>
+
+    <div class="controls-right">
+      <!-- Source Switcher Demo -->
+      <div class="source-switcher">
+        <span style="font-size:0.78rem; font-weight:700; color:var(--text-secondary);">Sumber Resep:</span>
+        <button class="source-tab-btn active" id="btnSourceLabs" onclick="switchSource('labs')">🧪 Recipe Labs</button>
+        <button class="source-tab-btn" id="btnSourceCampaign" onclick="switchSource('campaign')">📊 Recipe Campaign (Content Planner)</button>
+      </div>
+
+      <!-- Theme Switcher -->
+      <button class="theme-btn" onclick="toggleMainTheme()">
+        <span id="themeIcon">☀️</span> Light / Dark
+      </button>
+    </div>
+  </div>
+
+  <!-- Campaign Context Card -->
+  <div class="campaign-context-card">
+    <div class="context-info">
+      <h2 id="contextTitle">🧪 Recipe Labs: Studio Resep, Video & Collage</h2>
+      <p id="contextDesc">Dilengkapi pipeline pulling video resep, mute audio via FFmpeg, preview video ter-mute, upload ke Cloudflare R2, dan simpan URL ke database webadmin.</p>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <span class="chip" style="background:var(--accent-recipe-soft); color:var(--accent-recipe-light); border-color:var(--accent-recipe-light); padding:6px 12px; font-size:0.8rem;">
+        ⚡ Ready for Android & R2 Sync
+      </span>
+    </div>
+  </div>
+
+  <!-- Recipe Cards Grid -->
+  <div class="recipe-cards-grid" id="recipeCardsGrid">
+    <!-- Populated by JS -->
+  </div>
+
+</div>
+
+<!-- =========================================================================
+     MODAL: EXPORT RECIPE & GOOGLE PIXEL 7 INSPECTOR
+     ========================================================================= -->
+<div class="modal-backdrop" id="exportModal">
+  <div class="modal-window">
+    
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div class="modal-title-group">
+        <h3>
+          <span>📱</span>
+          <span id="modalRecipeTitle">Ultimate Crispy Air Fryer Baked Potato</span>
+        </h3>
+        <div class="modal-subtitle">
+          <span class="chip" id="modalSourceBadge" style="background:var(--accent-recipe-soft); color:var(--accent-recipe-light);">🧪 Sumber: Recipe Labs #rcitem_1</span>
+          <span>•</span>
+          <span>Target Simulator: Google Pixel 7 (412 × 915 WebView Standard • Cover 4:3 & R2 Video)</span>
+        </div>
+      </div>
+      <button class="modal-close-btn" onclick="closeExportModal()">✕</button>
+    </div>
+
+    <!-- Modal Body: Split 2 Panes -->
+    <div class="modal-body">
+      
+      <!-- PANE KIRI: TUNING, PRESET APP & EXPORT CONTROL -->
+      <div class="pane-tuning">
+
+        <!-- 1. Preset Target App & Category Manager (FULL EDITABLE) -->
+        <div class="preset-box">
+          <div class="preset-header">
+            <span class="preset-title">🎯 Preset Target Aplikasi & Kategori:</span>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span class="endpoint-badge" id="endpointStatusBadge">
+                <span style="font-size:8px;">●</span> Online (HTTP 200)
+              </span>
+              <button type="button" class="btn btn-outline" style="padding:2px 8px; font-size:0.72rem;" onclick="togglePresetEditor()">
+                ⚙️ Edit Preset & API
+              </button>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <div class="form-group">
+              <label class="form-label">
+                <span>Preset Aplikasi Tujuan</span>
+                <span style="font-size:0.7rem; color:var(--accent-recipe-light);">Tersimpan</span>
+              </label>
+              <select class="form-control" id="targetAppSelect" onchange="handleTargetAppChange()">
+                <option value="airfry" selected>🥔 Air Fryer Recipes App (app_airfry)</option>
+                <option value="proteinprep">🥗 Protein Prep App (app_proteinprep)</option>
+                <option value="yourrecipe">📖 Your Recipes App (app_yourrecipe)</option>
+                <option value="custom">⚙️ Custom Webadmin Receiver</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">
+                <span>Kategori di Aplikasi</span>
+                <button type="button" style="background:transparent; border:none; color:var(--accent-recipe-light); cursor:pointer; font-size:0.7rem;" onclick="addNewCategory()">+ Baru</button>
+              </label>
+              <div style="display:flex; gap:6px;">
+                <select class="form-control" id="targetCategorySelect" style="flex:1;" onchange="handleCategorySelectChange()">
+                  <option value="Air Fryer" selected>Air Fryer</option>
+                  <option value="Main Course">Main Course</option>
+                  <option value="Vegetarian">Vegetarian & Sides</option>
+                  <option value="High Protein">High Protein Meals</option>
+                </select>
+                <input type="text" class="form-control" id="customCategoryInput" placeholder="Ketik custom..." style="display:none; flex:1;" oninput="updateLiveSimulator()">
+                <button type="button" class="btn btn-outline" id="btnToggleCustomCat" style="padding:0 8px; font-size:0.72rem;" title="Edit Teks Kategori Bebas" onclick="toggleCustomCategoryMode()">✏️</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Target API Endpoint details & Quick Ping -->
+          <div style="display:flex; justify-content:space-between; align-items:center; background:var(--input-bg); padding:8px 12px; border-radius:6px; font-size:0.75rem; border:1px solid var(--border-subtle);">
+            <div style="display:flex; flex-direction:column; gap:2px; overflow:hidden;">
+              <span style="color:var(--text-muted); font-size:0.7rem;">Endpoint Receiver URL:</span>
+              <span id="targetEndpointText" style="font-family:'JetBrains Mono', monospace; color:var(--text-primary); font-size:0.75rem; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">https://api.airfryerapp.com/api_sync_recipe.php</span>
+            </div>
+            <button type="button" class="btn btn-outline" style="padding:4px 10px; font-size:0.72rem; white-space:nowrap;" onclick="testPingEndpoint()">
+              ⚡ Ping API
+            </button>
+          </div>
+
+          <!-- Inline Drawer: Edit Preset Details (Endpoint URL, Token, etc.) -->
+          <div class="preset-editor-card" id="presetEditorCard">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <strong style="font-size:0.8rem; color:var(--accent-recipe-light);">⚙️ Edit Konfigurasi Preset Aktif:</strong>
+              <button type="button" onclick="togglePresetEditor()" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer;">✕</button>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nama Aplikasi Label</label>
+              <input type="text" class="form-control" id="editPresetName" value="Air Fryer Recipes App">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Target URL (api_sync_recipe.php)</label>
+              <input type="text" class="form-control" id="editPresetUrl" value="https://api.airfryerapp.com/api_sync_recipe.php">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Secret Sync Token (AIRFRY_SYNC_SECRET_TOKEN)</label>
+              <input type="password" class="form-control" id="editPresetToken" value="SAMPLE_SYNC_KEY_88f9e2c4a1b0d7e">
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:8px;">
+              <button type="button" class="btn btn-primary" style="padding:4px 12px; font-size:0.75rem;" onclick="saveCurrentPreset()">
+                💾 Simpan Preset
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. AI AUTO ENRICH (PRODUCE: SUMMARY, INGREDIENTS, DIRECTIONS, T2I_PROMPT_4_3) -->
+        <div class="ai-magic-box">
+          <div class="ai-magic-text">
+            <strong>✨ AI Auto Enrich (1-Klik Lengkap)</strong>
+            Menghasilkan sekaligus 4 elemen standar: <strong>SUMMARY</strong>, <strong>INGREDIENTS</strong> (Grouped Toppings), <strong>DIRECTIONS</strong>, dan <strong>T2I_PROMPT_4_3</strong> untuk foto resep mobile.
+          </div>
+          <button type="button" class="btn btn-ai-magic" id="btnAiEnrich" onclick="executeAiAutoEnrich()">
+            <span>✨</span>
+            <span>AI Auto Enrich</span>
+          </button>
+        </div>
+
+        <!-- =========================================================================
+             VIDEO PIPELINE BOX (PULLING, MUTE VIA FFMPEG, PREVIEW & CLOUDFLARE R2 UPLOAD)
+             ========================================================================= -->
+        <div class="video-pipeline-box">
+          <div class="video-pipeline-header">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:1.1rem;">🎬</span>
+              <div>
+                <strong style="font-size:0.85rem; color:var(--text-primary);">Video Resep (Pulling, Mute via FFmpeg & Cloudflare R2 Sync)</strong>
+                <div style="font-size:0.72rem; color:var(--text-muted);" id="videoSourceStatusLabel">🎥 Video Kampanye Terdeteksi: 1080x1920 MP4 (38 Detik)</div>
+              </div>
+            </div>
+            <span class="video-r2-badge" id="r2StatusBadge">
+              <span>☁️</span> Cloudflare R2 Ready
+            </span>
+          </div>
+
+          <!-- Video Processing Actions Grid -->
+          <div class="video-steps-row">
+            <!-- Step 1: Pull & Mute Video via FFmpeg -->
+            <div class="video-step-card">
+              <div class="video-step-title">
+                <span>🔇</span>
+                <span>1. Pull & Mute Audio (FFmpeg)</span>
+              </div>
+              <div class="video-step-status" id="ffmpegStatusText">
+                Tarik video dari output kampanye dan hilangkan trek audio (<code>-c:v copy -an</code>).
+              </div>
+              <div style="display:flex; gap:6px; margin-top:4px;">
+                <button type="button" class="btn btn-outline" id="btnFfmpegMute" style="padding:4px 10px; font-size:0.75rem; flex:1;" onclick="runFfmpegMute()">
+                  <span>✂️</span> <span>Mute Video</span>
+                </button>
+                <button type="button" class="btn btn-outline" id="btnToggleMutedPreview" style="padding:4px 8px; font-size:0.75rem; display:none;" onclick="toggleInlineMutedPreview()" title="Lihat Preview Video yang sudah di-mute">
+                  <span>👁️</span> <span>Preview</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 2: Upload to Cloudflare R2 -->
+            <div class="video-step-card">
+              <div class="video-step-title">
+                <span>☁️</span>
+                <span>2. Upload ke Cloudflare R2</span>
+              </div>
+              <div class="video-step-status" id="r2UploadStatusText">
+                Simpan video ter-mute ke bucket R2 CDN publik dan tautkan ke database webadmin.
+              </div>
+              <button type="button" class="btn btn-r2" id="btnR2Upload" style="padding:4px 10px; font-size:0.75rem; margin-top:4px;" onclick="uploadToCloudflareR2()">
+                <span>🚀</span> <span>Upload ke R2 Bucket</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- DEDICATED INLINE VIDEO PREVIEW DRAWER (SETELAH DI-MUTE) -->
+          <div class="video-preview-inline-box" id="mutedVideoPreviewBox" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:0.82rem; font-weight:700; color:#f48120; display:flex; align-items:center; gap:6px;">
+                  <span>👁️</span> <span>Pratinjau Video Ter-Mute (Hasil FFmpeg):</span>
+                </span>
+                <span class="video-meta-badge" id="previewVideoMetaBadge">1080×1920 MP4 • 38 Detik</span>
+              </div>
+              <button type="button" onclick="toggleInlineMutedPreview()" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:0.75rem;">✕ Sembunyikan</button>
+            </div>
+            
+            <!-- Video Player Screen -->
+            <div class="video-preview-player-wrapper">
+              <video id="inlineMutedVideoPlayer" controls muted playsinline poster="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80">
+                <source src="https://assets.mixkit.co/videos/preview/mixkit-vegetables-and-meat-simmering-in-a-pan-43407-large.mp4" type="video/mp4">
+                Browser tidak mendukung video player.
+              </video>
+              <div class="video-muted-floating-badge" id="inlineVideoBadge">
+                <span>🔇</span>
+                <span id="inlineVideoBadgeText">100% Muted (Audio Track Removed)</span>
+              </div>
+              <button type="button" class="video-floating-expand-btn" onclick="openCurrentVideoInLightbox()" title="Buka dalam Lightbox Layar Penuh">
+                <span>🔍</span> <span>Layar Penuh 9:16</span>
+              </button>
+            </div>
+
+            <!-- Audio Silence Spectrum & VU Meter Visualizer -->
+            <div class="audio-silence-meter">
+              <div class="audio-meter-visual">
+                <span style="font-weight:700; color:var(--text-primary); font-size:0.72rem;">Track Audio:</span>
+                <div class="audio-meter-bars" id="audioMeterBars">
+                  <div class="audio-bar muted-flat"></div>
+                  <div class="audio-bar muted-flat"></div>
+                  <div class="audio-bar muted-flat"></div>
+                  <div class="audio-bar muted-flat"></div>
+                  <div class="audio-bar muted-flat"></div>
+                  <div class="audio-bar muted-flat"></div>
+                  <div class="audio-bar muted-flat"></div>
+                  <div class="audio-bar muted-flat"></div>
+                </div>
+                <span id="audioSilenceLabel" style="color:var(--status-success); font-weight:700; font-family:'JetBrains Mono', monospace; font-size:0.7rem;">🔇 -inf dB (Audio Stripped)</span>
+              </div>
+
+              <!-- Audio A/B Test Switcher -->
+              <div style="display:flex; align-items:center; gap:4px;">
+                <span style="color:var(--text-muted); font-size:0.68rem;">Uji Dengar:</span>
+                <button type="button" class="btn-video-ctrl active-mode" id="btnAudioModeMuted" onclick="setAudioPreviewMode('muted')">🔇 Hening</button>
+                <button type="button" class="btn-video-ctrl" id="btnAudioModeOriginal" onclick="setAudioPreviewMode('original')" title="Uji suara asli untuk membandingkan">🔊 Asli</button>
+              </div>
+            </div>
+
+            <!-- Video Quick Controls Toolbar -->
+            <div class="video-quick-controls">
+              <button type="button" class="btn-video-ctrl" onclick="togglePlayInlineVideo()" id="btnPlayPauseInline">
+                <span id="playPauseIcon">▶️</span> <span id="playPauseText">Putar Video</span>
+              </button>
+              <button type="button" class="btn-video-ctrl" onclick="restartInlineVideo()">
+                <span>🔄</span> <span>Ulangi (0s)</span>
+              </button>
+              <button type="button" class="btn-video-ctrl" onclick="previewVideoOnPixel()" style="border-color:#f48120; color:#f48120;">
+                <span>📱</span> <span>Tonton di Layar Pixel 7</span>
+              </button>
+              <button type="button" class="btn-video-ctrl" onclick="openCurrentVideoInLightbox()">
+                <span>🔍</span> <span>Buka Lightbox (9:16)</span>
+              </button>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; color:var(--text-muted); padding-top:4px; border-top:1px solid var(--border-subtle);">
+              <span>✓ Video ter-mute terverifikasi bersih. Siap diunggah ke Cloudflare R2 bucket.</span>
+              <button type="button" class="btn btn-r2" style="padding:4px 12px; font-size:0.72rem;" onclick="uploadToCloudflareR2()">
+                <span>☁️ Lanjut Upload R2</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- R2 URL & Database Storage Status -->
+          <div class="form-group" style="margin-top:2px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <label class="form-label" style="font-size:0.75rem;">
+                <span>Public R2 Video CDN URL (Disimpan di DB & Disinkronkan ke Webadmin):</span>
+                <span id="dbSavedStatusBadge" style="color:var(--status-success); font-size:0.7rem; font-weight:700;"></span>
+              </label>
+              <button type="button" class="btn btn-outline" style="padding:2px 8px; font-size:0.7rem;" onclick="copyR2VideoUrl()">📋 Salin URL</button>
+            </div>
+            <input type="text" class="form-control" id="inputVideoR2Url" placeholder="https://pub-r2.maknaflow.com/recipes/..." style="font-family:'JetBrains Mono', monospace; font-size:0.75rem;" oninput="handleVideoUrlChange()">
+          </div>
+
+          <!-- Quick 1-Click All Pipeline -->
+          <div style="display:flex; justify-content:space-between; align-items:center; background:var(--input-bg); padding:8px 12px; border-radius:6px; font-size:0.75rem; border:1px solid var(--border-subtle);">
+            <span style="color:var(--text-muted); font-size:0.72rem;">💡 Ingin cepat? Jalankan seluruh pipeline (Pull ➔ Mute ➔ Preview ➔ R2 Upload ➔ DB Save):</span>
+            <button type="button" class="btn btn-ai-magic" style="padding:4px 12px; font-size:0.72rem; white-space:nowrap;" onclick="runFullVideoPipeline()">
+              ⚡ 1-Klik Pull, Mute & Upload R2
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. Sub-Tabs: Editor Penyesuaian, HTML Preview, Plain Text -->
+        <div class="sub-tabs">
+          <button class="sub-tab-btn active" id="tabBtnEditor" onclick="switchModalTab('editor')">
+            ✏️ Penyesuaian Resep
+          </button>
+          <button class="sub-tab-btn" id="tabBtnHtml" onclick="switchModalTab('html')">
+            🌐 Live HTML Inspector
+          </button>
+          <button class="sub-tab-btn" id="tabBtnPlain" onclick="switchModalTab('plain')">
+            📄 Plain Text
+          </button>
+        </div>
+
+        <!-- TAB CONTENT: EDITOR -->
+        <div id="tabContentEditor" style="display:flex; flex-direction:column; gap:14px;">
+          
+          <div style="display:grid; grid-template-columns: 2fr 1fr; gap:10px;">
+            <div class="form-group">
+              <label class="form-label">Judul Resep (Recipe Title)</label>
+              <input type="text" class="form-control" id="inputRecipeTitle" value="Ultimate Crispy Air Fryer Baked Potato" oninput="updateLiveSimulator()">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Waktu Masak (Recipe Time)</label>
+              <input type="text" class="form-control" id="inputRecipeTime" value="10 mins prep | 45 mins cook" oninput="updateLiveSimulator()">
+            </div>
+          </div>
+
+          <!-- 4. T2I_PROMPT_4_3 (BOX KHUSUS ASPEK RASIO 4:3 UNTUK FOTO COVER ANDROID) -->
+          <div class="t2i-prompt-box">
+            <div class="t2i-prompt-header">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-weight:700; font-size:0.82rem; color:var(--text-primary);">📷 T2I_PROMPT_4_3 (Landscape Food Photography)</span>
+                <span class="t2i-prompt-badge">Rasio 4:3</span>
+              </div>
+              <div style="display:flex; gap:6px;">
+                <button type="button" class="btn btn-outline" style="padding:2px 8px; font-size:0.72rem;" onclick="copyT2iPrompt()">
+                  📋 Salin Prompt
+                </button>
+                <button type="button" class="btn btn-primary" id="btnGenImage" style="padding:2px 10px; font-size:0.72rem;" onclick="generate43CoverImage()">
+                  🎨 Generate Foto 4:3 (G-Labs)
+                </button>
+              </div>
+            </div>
+            <textarea class="form-control" id="inputT2iPrompt43" style="min-height:75px; font-family:'JetBrains Mono', monospace; font-size:0.76rem; line-height:1.45;" placeholder="T2I_PROMPT_4_3 akan otomatis terisi saat klik AI Auto Enrich...">Award-winning 4:3 food photography of ultimate crispy air fryer baked potato, eye-level 45-degree angle, split open with fluffy steaming interior, lavishly topped with melted cheddar, diced ripe tomatoes, and pickled jalapeños, resting on a rustic ceramic plate, cozy kitchen ambient lighting, warm shallow depth of field --ar 4:3 --stylize 250</textarea>
+            <div style="font-size:0.7rem; color:var(--text-muted); display:flex; justify-content:space-between;">
+              <span>💡 Diformulasikan khusus untuk cover horizontal Android card agar tidak terpotong (zoom-in).</span>
+              <span id="genImageStatus" style="color:var(--status-success); font-weight:700;"></span>
+            </div>
+          </div>
+
+          <!-- 1. SUMMARY Section -->
+          <div class="form-group">
+            <label class="form-label">
+              <span>SUMMARY (Paragraf Narasi Pembuka / Sensory Hook)</span>
+              <span style="color:var(--accent-recipe-light); font-size:0.72rem;">&lt;p&gt;&lt;strong&gt;SUMMARY :&lt;/strong&gt;&lt;/p&gt;</span>
+            </label>
+            <textarea class="form-control" id="inputSummary" oninput="updateLiveSimulator()">Experience the ultimate baked potato transformation with your air fryer! This method delivers an incredibly crispy, golden-brown skin that gives way to a luxuriously fluffy and tender interior, all achieved in a fraction of the traditional oven time. A versatile canvas for three distinct, delectable toppings, this dish proves that convenience doesn't compromise on gourmet flavor or satisfying texture.</textarea>
+          </div>
+
+          <!-- 2. INGREDIENTS Section (Support Grouping / Toppings) -->
+          <div class="form-group">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+              <label class="form-label" style="margin-bottom:0;">
+                <span>INGREDIENTS (Bahan Pokok & Kelompok Topping)</span>
+              </label>
+              <button type="button" class="btn btn-outline" style="padding:2px 8px; font-size:0.72rem;" onclick="addIngredientGroup()">
+                + Tambah Kelompok Topping
+              </button>
+            </div>
+            
+            <div id="ingredientGroupsContainer">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- 3. DIRECTION Section -->
+          <div class="form-group">
+            <label class="form-label">
+              <span>DIRECTION (Langkah-Langkah Pembuatan Bernomor)</span>
+              <span style="color:var(--accent-recipe-light); font-size:0.72rem;">&lt;p&gt;&lt;strong&gt;DIRECTION :&lt;/strong&gt;&lt;/p&gt;</span>
+            </label>
+            <textarea class="form-control" id="inputDirections" style="min-height:140px; font-family:'JetBrains Mono', monospace; font-size:0.78rem;" oninput="updateLiveSimulator()">Prepare your potato by thoroughly scrubbing and drying it. Lightly rub the entire surface with your choice of light rapeseed, vegetable, or sunflower oil, then season generously with salt and freshly ground black pepper. The salt on the skin aids in achieving that desired crispiness.
+Place the prepared potato directly into the air fryer basket, ensuring it rests in a single layer without overlapping. Set the air fryer temperature to 200°C (400°F). Crucially, do not preheat the air fryer for this recipe, as preheating can cause the potato skin to burn before the interior is fully cooked. Air fry for 20 minutes, then carefully flip the potato to ensure even cooking and browning. Continue air frying for an additional 20-30 minutes, depending on the potato's size (a small potato will take approximately 20 minutes more, while a larger one may require 25-30 minutes).
+To check for doneness, carefully insert a table knife into the center of the potato; it should slide in effortlessly, indicating a perfectly soft and fluffy interior. If the potato isn't quite tender, return it to the air fryer and cook in 1-minute increments until it reaches desired softness.
+For the Cheddar and Jalapeño Topping: In a small bowl, combine the small handful of grated cheddar, 1 diced ripe tomato, and a few green jalapeño pepper slices from a jar. Once the potato is cooked, carefully split it open and spoon the cheese mixture generously over the fluffy interior.
+For the Smashed Avocado Topping: Mash 1 small, ripe avocado (or a few frozen avocado slices) with the juice of ½ lime or lemon, seasoning with salt and pepper to taste. Split the cooked potato, spoon in the smashed avocado mixture, and scatter with a handful of mixed seeds, dukkah, za’atar, or chilli flakes.
+For the Curried Beans Topping: Gently heat the 227g tin of baked beans with ½ tsp curry powder in a saucepan until hot but not boiling. Split the cooked potato, pile on the flavorful curried beans, and, if desired, top with dollops of natural yoghurt and a spoonful of lime pickle.</textarea>
+          </div>
+
+        </div>
+
+        <!-- TAB CONTENT: LIVE HTML INSPECTOR -->
+        <div id="tabContentHtml" style="display:none; flex-direction:column; gap:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:0.8rem; color:var(--text-muted);">
+              Kode HTML murni yang akan disimpan di kolom <code>tbl_recipes.recipe_description</code> dan dirender oleh WebView Android:
+            </div>
+            <button type="button" class="btn btn-outline" style="padding:4px 10px; font-size:0.75rem;" onclick="copyHtmlCode()">
+              📋 Salin Kode HTML
+            </button>
+          </div>
+          <pre class="code-view" id="liveHtmlCode"></pre>
+        </div>
+
+        <!-- TAB CONTENT: PLAIN TEXT -->
+        <div id="tabContentPlain" style="display:none; flex-direction:column; gap:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="font-size:0.8rem; color:var(--text-muted);">
+              Format teks polos standar untuk dokumentasi naskah atau pengarsipan:
+            </div>
+            <button type="button" class="btn btn-outline" style="padding:4px 10px; font-size:0.75rem;" onclick="copyPlainText()">
+              📋 Salin Teks Polos
+            </button>
+          </div>
+          <pre class="code-view" id="livePlainText"></pre>
+        </div>
+
+      </div>
+
+      <!-- PANE KANAN: GOOGLE PIXEL 7 SIMULATOR (412 x 915 Viewport) -->
+      <div class="pane-simulator">
+        
+        <!-- Controls on Top of Simulator -->
+        <div class="simulator-top-control">
+          <span>📱 Google Pixel 7 (412 × 915)</span>
+          <span>|</span>
+          <button type="button" onclick="togglePixelTheme()" style="background:transparent; border:none; cursor:pointer; color:inherit; font-weight:700; display:flex; align-items:center; gap:4px;">
+            <span id="pixelThemeIcon">🌙</span> <span id="pixelThemeLabel">Dark Theme</span>
+          </button>
+        </div>
+
+        <!-- GOOGLE PIXEL 7 PHYSICAL HARDWARE FRAME -->
+        <div class="pixel7-device pixel-dark" id="pixel7Device">
+          
+          <!-- Inner Screen -->
+          <div class="pixel7-screen">
+            
+            <!-- Centered Punch Hole Camera -->
+            <div class="pixel-punch-hole"></div>
+
+            <!-- Android Status Bar -->
+            <div class="pixel-status-bar">
+              <span>9:41</span>
+              <span>5G  100% 🔋</span>
+            </div>
+
+            <!-- App Bar / Action Bar -->
+            <div class="pixel-app-bar">
+              <span>←</span>
+              <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" id="pixelBarTitle">Recipe Detail</span>
+              <span>❤️</span>
+              <span>⋮</span>
+            </div>
+
+            <!-- Android WebView Scrollable Canvas -->
+            <div class="pixel-webview-body" id="pixelWebView">
+              
+              <!-- Media View Switcher on Pixel 7 (Photo 4:3 vs Video Muted R2) -->
+              <div class="pixel-media-tabs" id="pixelMediaTabs">
+                <button type="button" class="pixel-media-tab-btn active" id="btnTabMediaPhoto" onclick="switchPixelMedia('photo')">
+                  🖼️ Foto Cover (4:3)
+                </button>
+                <button type="button" class="pixel-media-tab-btn" id="btnTabMediaVideo" onclick="switchPixelMedia('video')">
+                  🎬 Video Muted (R2)
+                </button>
+              </div>
+
+              <!-- Cover Hero Image Strictly 4:3 Landscape Ratio -->
+              <img id="pixelHeroImg" class="pixel-hero-img" src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80" alt="Recipe Hero 4:3">
+
+              <!-- Video Player Container (Muted Video from Cloudflare R2) -->
+              <div class="pixel-video-player-container" id="pixelVideoContainer">
+                <video class="pixel-video-element" id="pixelVideoPlayer" autoplay loop muted playsinline poster="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80">
+                  <source src="https://assets.mixkit.co/videos/preview/mixkit-vegetables-and-meat-simmering-in-a-pan-43407-large.mp4" type="video/mp4">
+                  Browser tidak mendukung video player.
+                </video>
+                <div class="pixel-video-mute-badge">
+                  <span>🔇</span>
+                  <span>Audio Muted (No-Voiceover)</span>
+                </div>
+                <div class="pixel-video-r2-pill">
+                  <span>⚡ Cloudflare R2 Stream</span>
+                </div>
+              </div>
+
+              <!-- Title & Chips -->
+              <div class="pixel-recipe-title" id="simTitle">Ultimate Crispy Air Fryer Baked Potato</div>
+              
+              <div class="pixel-chips-row">
+                <span class="pixel-chip" id="simTime">⏱️ 10 mins prep | 45 mins cook</span>
+                <span class="pixel-chip" id="simCat">🏷️ Air Fryer</span>
+                <span class="pixel-chip" id="simVideoIndicator" style="display:none; background:rgba(244, 129, 32, 0.2); color:#f48120;">🎥 Video R2 Ready</span>
+              </div>
+
+              <!-- Dynamic HTML Rendered Container -->
+              <div id="simHtmlContainer">
+                <!-- Filled by JS -->
+              </div>
+
+            </div>
+
+            <!-- Pixel Gesture Pill Bar -->
+            <div class="pixel-nav-bar">
+              <div class="pixel-gesture-pill"></div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer">
+      <div class="footer-left">
+        <span class="push-status-toast" id="pushStatusToast"></span>
+      </div>
+
+      <div style="display:flex; gap:10px;">
+        <button type="button" class="btn btn-outline" onclick="closeExportModal()">Batal</button>
+        <button type="button" class="btn btn-outline" onclick="downloadJsonExport()">💾 Unduh JSON</button>
+        <button type="button" class="btn btn-primary" id="btnPushDirect" onclick="executeDirectPush()">
+          <span>🚀</span>
+          <span>Push ke Webadmin Sekarang (Direct API)</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- =========================================================================
+     MODAL LIGHTBOX DEDICATED PREVIEW VIDEO TER-MUTE (9:16 RESOLUSI TINGGI)
+     ========================================================================= -->
+<div class="video-lightbox-backdrop" id="videoLightboxModal">
+  <div class="video-lightbox-card">
+    
+    <!-- Video Player Column (Vertical 9:16) -->
+    <div class="video-lightbox-player-col">
+      <video id="lightboxVideoPlayer" controls playsinline loop poster="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80">
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-vegetables-and-meat-simmering-in-a-pan-43407-large.mp4" type="video/mp4">
+        Browser tidak mendukung video player.
+      </video>
+      <div class="video-muted-floating-badge" id="lightboxAudioBadge">
+        <span>🔇</span>
+        <span id="lightboxAudioBadgeText">100% Muted (Audio Track Removed via FFmpeg)</span>
+      </div>
+    </div>
+
+    <!-- Metadata & Controls Column -->
+    <div class="video-lightbox-info-col">
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>
+            <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+              <span class="chip" style="background:rgba(244, 129, 32, 0.2); color:#f48120; border-color:#f48120;">🎬 Video Vertikal 9:16</span>
+              <span class="chip" id="lightboxSourceBadge" style="background:var(--surface-interactive); color:var(--text-secondary);">🧪 Recipe Labs</span>
+            </div>
+            <h2 id="lightboxRecipeTitle" style="font-size:1.1rem; font-weight:800; color:var(--text-primary); margin:0;">Ultimate Crispy Air Fryer Baked Potato</h2>
+          </div>
+          <button type="button" onclick="closeDedicatedVideoLightbox()" style="background:transparent; border:none; color:var(--text-muted); cursor:pointer; font-size:1.2rem; padding:4px 8px;">✕</button>
+        </div>
+
+        <!-- Audio Verification Indicator -->
+        <div style="background:var(--input-bg); border:1px solid var(--border-subtle); border-radius:8px; padding:12px; display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <strong style="font-size:0.78rem; color:var(--text-primary); display:flex; align-items:center; gap:6px;">
+              <span>🔇</span> <span>Status Trek Audio Video:</span>
+            </strong>
+            <span id="lightboxDbSilenceLabel" style="font-size:0.72rem; color:var(--status-success); font-weight:700;">-inf dB (Hening Sempurna)</span>
+          </div>
+          <div class="audio-meter-bars" id="lightboxMeterBars" style="height:18px;">
+            <div class="audio-bar muted-flat" style="width:4px;"></div>
+            <div class="audio-bar muted-flat" style="width:4px;"></div>
+            <div class="audio-bar muted-flat" style="width:4px;"></div>
+            <div class="audio-bar muted-flat" style="width:4px;"></div>
+            <div class="audio-bar muted-flat" style="width:4px;"></div>
+            <div class="audio-bar muted-flat" style="width:4px;"></div>
+            <div class="audio-bar muted-flat" style="width:4px;"></div>
+            <div class="audio-bar muted-flat" style="width:4px;"></div>
+            <div class="audio-bar muted-flat" style="width:4px;"></div>
+            <div class="audio-bar muted-flat" style="width:4px;"></div>
+          </div>
+          <p style="font-size:0.72rem; color:var(--text-muted); margin:0;">
+            FFmpeg mengeksekusi <code>-c:v copy -an</code>. Trek suara voiceover/musik telah dihapus bersih sehingga video di aplikasi mobile berputar hening tanpa mengganggu audio sistem pengguna.
+          </p>
+        </div>
+
+        <!-- Technical Metadata Grid -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:0.75rem;">
+          <div style="background:var(--input-bg); padding:8px 10px; border-radius:6px; border:1px solid var(--border-subtle);">
+            <div style="color:var(--text-muted); font-size:0.68rem;">Resolusi Video:</div>
+            <strong style="color:var(--text-primary);">1080 × 1920 (9:16)</strong>
+          </div>
+          <div style="background:var(--input-bg); padding:8px 10px; border-radius:6px; border:1px solid var(--border-subtle);">
+            <div style="color:var(--text-muted); font-size:0.68rem;">Durasi Pemutaran:</div>
+            <strong style="color:var(--text-primary);">00:38 Detik</strong>
+          </div>
+          <div style="background:var(--input-bg); padding:8px 10px; border-radius:6px; border:1px solid var(--border-subtle);">
+            <div style="color:var(--text-muted); font-size:0.68rem;">Audio Codec / Track:</div>
+            <strong style="color:var(--status-success);">NONE (Audio Muted)</strong>
+          </div>
+          <div style="background:var(--input-bg); padding:8px 10px; border-radius:6px; border:1px solid var(--border-subtle);">
+            <div style="color:var(--text-muted); font-size:0.68rem;">Ukuran Berkas:</div>
+            <strong style="color:var(--text-primary);">14.2 MB (MP4 FastStart)</strong>
+          </div>
+        </div>
+
+        <!-- Audio Test Switcher -->
+        <div style="display:flex; align-items:center; justify-content:space-between; background:var(--input-bg); padding:8px 12px; border-radius:6px; border:1px solid var(--border-subtle);">
+          <span style="font-size:0.72rem; color:var(--text-secondary); font-weight:600;">Uji Dengar Suara:</span>
+          <div style="display:flex; gap:6px;">
+            <button type="button" class="btn-video-ctrl active-mode" id="btnLightboxAudioMuted" onclick="setLightboxAudioMode('muted')">🔇 Hening (Ter-Mute)</button>
+            <button type="button" class="btn-video-ctrl" id="btnLightboxAudioOrig" onclick="setLightboxAudioMode('original')">🔊 Suara Asli</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display:flex; flex-direction:column; gap:8px; padding-top:12px; border-top:1px solid var(--border-subtle);">
+        <button type="button" class="btn btn-primary" onclick="proceedFromLightboxToExport()" style="width:100%; justify-content:center;">
+          <span>🚀</span>
+          <span>Buka di Modal Export Resep</span>
+        </button>
+        <button type="button" class="btn btn-outline" onclick="closeDedicatedVideoLightbox()" style="width:100%; justify-content:center;">
+          Tutup Pratinjau
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // SAMPLE DATA: Termasuk Resep Lama & Resep Video
+  const SAMPLE_RECIPES = {
+    labs: [
+      {
+        id: 'rcitem_1',
+        source: 'Recipe Labs (#rcitem_1)',
+        hasSummary: true,
+        hasVideo: true,
+        videoMutedReady: true,
+        videoR2Url: 'https://pub-r2.maknaflow.com/recipes/rcitem_1_muted.mp4',
+        title: 'Ultimate Crispy Air Fryer Baked Potato',
+        time: '10 mins prep | 45 mins cook',
+        category: 'Air Fryer',
+        image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80',
+        t2i_prompt_4_3: "Award-winning 4:3 food photography of ultimate crispy air fryer baked potato, eye-level 45-degree angle, split open with fluffy steaming interior, lavishly topped with melted cheddar, diced ripe tomatoes, and pickled jalapeños, resting on a rustic ceramic plate, cozy kitchen ambient lighting, warm shallow depth of field --ar 4:3 --stylize 250",
+        summary: "Experience the ultimate baked potato transformation with your air fryer! This method delivers an incredibly crispy, golden-brown skin that gives way to a luxuriously fluffy and tender interior, all achieved in a fraction of the traditional oven time. A versatile canvas for three distinct, delectable toppings, this dish proves that convenience doesn't compromise on gourmet flavor or satisfying texture.",
+        baseIng: "1 baking potato (see recipe tips and weigh before cooking), scrubbed and dried\nlight rapeseed, vegetable or sunflower oil\nsalt and freshly ground black pepper",
+        groups: [
+          { name: "For the cheddar and jalapeño topping :", items: "small handful grated cheddar\n1 ripe tomato, diced\nfew green jalapeño pepper slices from a jar" },
+          { name: "For the smashed avocado topping :", items: "1 small, ripe avocado (or a few frozen avocado slices)\n½ lime or lemon, juice only\nhandful mixed seeds, dukkah, za’atar or chilli flakes" },
+          { name: "For the curried beans topping :", items: "227g tin baked beans\n½ tsp curry powder\nnatural yoghurt and lime pickle (optional), to serve" }
+        ],
+        directions: "Prepare your potato by thoroughly scrubbing and drying it. Lightly rub the entire surface with your choice of light rapeseed, vegetable, or sunflower oil, then season generously with salt and freshly ground black pepper. The salt on the skin aids in achieving that desired crispiness.\nPlace the prepared potato directly into the air fryer basket, ensuring it rests in a single layer without overlapping. Set the air fryer temperature to 200°C (400°F). Crucially, do not preheat the air fryer for this recipe, as preheating can cause the potato skin to burn before the interior is fully cooked. Air fry for 20 minutes, then carefully flip the potato to ensure even cooking and browning. Continue air frying for an additional 20-30 minutes, depending on the potato's size (a small potato will take approximately 20 minutes more, while a larger one may require 25-30 minutes).\nTo check for doneness, carefully insert a table knife into the center of the potato; it should slide in effortlessly, indicating a perfectly soft and fluffy interior. If the potato isn't quite tender, return it to the air fryer and cook in 1-minute increments until it reaches desired softness.\nFor the Cheddar and Jalapeño Topping: In a small bowl, combine the small handful of grated cheddar, 1 diced ripe tomato, and a few green jalapeño pepper slices from a jar. Once the potato is cooked, carefully split it open and spoon the cheese mixture generously over the fluffy interior.\nFor the Smashed Avocado Topping: Mash 1 small, ripe avocado (or a few frozen avocado slices) with the juice of ½ lime or lemon, seasoning with salt and pepper to taste. Split the cooked potato, spoon in the smashed avocado mixture, and scatter with a handful of mixed seeds, dukkah, za’atar, or chilli flakes.\nFor the Curried Beans Topping: Gently heat the 227g tin of baked beans with ½ tsp curry powder in a saucepan until hot but not boiling. Split the cooked potato, pile on the flavorful curried beans, and, if desired, top with dollops of natural yoghurt and a spoonful of lime pickle."
+      },
+      {
+        id: 'rcitem_legacy_1',
+        source: 'Recipe Labs (#rcitem_old_99)',
+        hasSummary: false,
+        hasVideo: false,
+        videoMutedReady: false,
+        videoR2Url: '',
+        title: 'Spicy Garlic Butter Shrimp Skewers',
+        time: '15 mins',
+        category: 'Main Course',
+        image: 'https://images.unsplash.com/photo-1559742811-822873691df8?w=600&auto=format&fit=crop&q=80',
+        t2i_prompt_4_3: "",
+        summary: '',
+        baseIng: "400g raw tiger prawns, peeled and deveined\n3 cloves garlic, minced\n2 tbsp unsalted butter, melted\n1 tsp red chili flakes\n1 tbsp fresh chopped parsley\n1 lime, cut into wedges for serving",
+        groups: [],
+        directions: "Thread peeled prawns onto wooden skewers.\nWhisk melted butter, minced garlic, and chili flakes in a bowl.\nBrush garlic butter generously over shrimp.\nAir fry or grill for 5-7 minutes until pink and lightly charred. Serve with fresh lime."
+      }
+    ],
+    campaign: [
+      {
+        id: 'pln_row_video_1',
+        source: 'Recipe Campaign (OPC Video Reel #1)',
+        hasSummary: false,
+        hasVideo: true,
+        videoMutedReady: false, // Perlu di-mute via tombol FFmpeg
+        videoR2Url: '',
+        title: 'Crispy Air Fryer Tofu Bites with Peanut Dip',
+        time: '25 mins',
+        category: 'Vegetarian',
+        image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80',
+        t2i_prompt_4_3: "",
+        summary: '',
+        baseIng: "1 block firm tofu, pressed and cubed\n1 tbsp cornstarch\n1 tbsp soy sauce\n3 tbsp smooth peanut butter\n1 tbsp maple syrup\n1 tbsp warm water\n1 tsp chili garlic sauce",
+        groups: [],
+        directions: "Toss tofu cubes with soy sauce and cornstarch until lightly coated.\nAir fry at 200°C for 15 minutes, shaking the basket halfway.\nMix peanut butter, maple syrup, chili garlic sauce, and warm water until silky.\nDip hot crispy tofu in spicy peanut sauce."
+      }
+    ]
+  };
+
+  let currentSource = 'labs';
+  let activeRecipe = SAMPLE_RECIPES.labs[0];
+
+  // EDITABLE PRESETS MANAGER
+  let APP_PRESETS = {
+    airfry: {
+      name: 'Air Fryer Recipes App',
+      url: 'https://api.airfryerapp.com/api_sync_recipe.php',
+      token: 'SAMPLE_AIRFRY_SYNC_KEY_88f9e2c4',
+      defaultCategory: 'Air Fryer'
+    },
+    proteinprep: {
+      name: 'Protein Prep App',
+      url: 'https://api.proteinprep.com/api_sync_recipe.php',
+      token: 'SAMPLE_PROTEINPREP_KEY_22b1c4',
+      defaultCategory: 'High Protein'
+    },
+    yourrecipe: {
+      name: 'Your Recipes App',
+      url: 'https://api.yourrecipesapp.com/api_sync_recipe.php',
+      token: 'SAMPLE_YOURRECIPES_KEY_99a7e3',
+      defaultCategory: 'Main Course'
+    },
+    custom: {
+      name: 'Custom Webadmin Receiver',
+      url: 'http://127.0.0.1:8088/api_sync_recipe.php',
+      token: 'SAMPLE_CUSTOM_KEY_55d0f1',
+      defaultCategory: 'Air Fryer'
+    }
+  };
+
+  function renderRecipeCards() {
+    const list = SAMPLE_RECIPES[currentSource];
+    const container = document.getElementById('recipeCardsGrid');
+    container.innerHTML = '';
+
+    list.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'recipe-card';
+      const statusBadge = item.hasSummary
+        ? `<span class="recipe-card-status-badge" style="background:var(--status-success-soft); color:var(--status-success); border:1px solid var(--status-success);">✓ Full Android Standard</span>`
+        : `<span class="recipe-card-status-badge" style="background:var(--status-warning-soft); color:var(--status-warning); border:1px solid var(--status-warning);">⚠️ Resep Lama (Perlu AI Enrich)</span>`;
+
+      const videoPill = item.hasVideo
+        ? `<span class="recipe-card-video-pill"><span>🎬</span> Video Available</span>`
+        : '';
+
+      card.innerHTML = `
+        <div class="recipe-card-media">
+          <img src="${item.image}" alt="${item.title}">
+          <span class="recipe-card-badge">${item.source}</span>
+          ${videoPill}
+          ${statusBadge}
+        </div>
+        <div class="recipe-card-body">
+          <div class="recipe-card-title">${item.title}</div>
+          <div class="recipe-card-chips">
+            <span class="chip">⏱️ ${item.time}</span>
+            <span class="chip">🏷️ ${item.category}</span>
+            ${item.videoR2Url ? '<span class="chip" style="background:rgba(244, 129, 32, 0.15); color:#f48120;">☁️ R2 Video Synced</span>' : ''}
+          </div>
+          <p class="recipe-card-desc">${item.summary ? item.summary : '<em>(Belum ada Summary, Topping Group, atau T2I_PROMPT_4_3. Klik Export untuk jalankan AI Auto Enrich).</em>'}</p>
+        </div>
+        <div class="recipe-card-footer" style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+          <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Status: ${item.hasSummary ? 'Ready' : 'Legacy / Flat'}</span>
+          <div style="display:flex; gap:6px;">
+            ${item.hasVideo ? `
+              <button type="button" class="btn btn-outline" style="padding:4px 10px; font-size:0.75rem;" onclick="openDedicatedVideoLightbox('${item.id}')" title="Pratinjau Video Ter-Mute (FFmpeg)">
+                <span>🔇</span>
+                <span>Preview Video</span>
+              </button>
+            ` : ''}
+            <button class="btn btn-primary" onclick="openExportModal('${item.id}')">
+              <span>🚀</span>
+              <span>Export ke Android App</span>
+            </button>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function switchSource(source) {
+    currentSource = source;
+    document.getElementById('btnSourceLabs').classList.toggle('active', source === 'labs');
+    document.getElementById('btnSourceCampaign').classList.toggle('active', source === 'campaign');
+    
+    if (source === 'labs') {
+      document.getElementById('contextTitle').textContent = '🧪 Recipe Labs: Studio Resep, Video & Collage';
+      document.getElementById('contextDesc').textContent = 'Dilengkapi pipeline pulling video resep, mute audio via FFmpeg, preview video ter-mute, upload ke Cloudflare R2, dan simpan URL ke database webadmin.';
+    } else {
+      document.getElementById('contextTitle').textContent = '📊 Recipe Campaign: Content Planner & OPC Pipeline';
+      document.getElementById('contextDesc').textContent = 'Menampilkan ide resep kuliner hasil kurasi Content Planner yang siap dipublikasikan ke aplikasi mobile.';
+    }
+    renderRecipeCards();
+  }
+
+  // PRESET MANAGER & EDITING
+  function handleTargetAppChange() {
+    const val = document.getElementById('targetAppSelect').value;
+    const preset = APP_PRESETS[val];
+    document.getElementById('targetEndpointText').textContent = preset.url;
+    document.getElementById('targetCategorySelect').value = preset.defaultCategory;
+    document.getElementById('endpointStatusBadge').innerHTML = '<span style="font-size:8px;">●</span> Online (HTTP 200)';
+
+    document.getElementById('editPresetName').value = preset.name;
+    document.getElementById('editPresetUrl').value = preset.url;
+    document.getElementById('editPresetToken').value = preset.token;
+    updateLiveSimulator();
+  }
+
+  function togglePresetEditor() {
+    const card = document.getElementById('presetEditorCard');
+    card.classList.toggle('open');
+    if (card.classList.contains('open')) {
+      const val = document.getElementById('targetAppSelect').value;
+      const preset = APP_PRESETS[val];
+      document.getElementById('editPresetName').value = preset.name;
+      document.getElementById('editPresetUrl').value = preset.url;
+      document.getElementById('editPresetToken').value = preset.token;
+    }
+  }
+
+  function saveCurrentPreset() {
+    const val = document.getElementById('targetAppSelect').value;
+    const newName = document.getElementById('editPresetName').value.trim();
+    const newUrl = document.getElementById('editPresetUrl').value.trim();
+    const newToken = document.getElementById('editPresetToken').value.trim();
+
+    APP_PRESETS[val].name = newName;
+    APP_PRESETS[val].url = newUrl;
+    APP_PRESETS[val].token = newToken;
+
+    document.getElementById('targetEndpointText').textContent = newUrl;
+    document.getElementById('presetEditorCard').classList.remove('open');
+    alert(`Konfigurasi preset "${newName}" berhasil diperbarui!`);
+  }
+
+  // CATEGORY EDITING
+  function addNewCategory() {
+    const newCat = prompt('Masukkan nama kategori baru:', 'Snack & Sides');
+    if (!newCat || !newCat.trim()) return;
+
+    const clean = newCat.trim();
+    const select = document.getElementById('targetCategorySelect');
+    const opt = document.createElement('option');
+    opt.value = clean;
+    opt.textContent = clean;
+    opt.selected = true;
+    select.appendChild(opt);
+    updateLiveSimulator();
+  }
+
+  function toggleCustomCategoryMode() {
+    const select = document.getElementById('targetCategorySelect');
+    const input = document.getElementById('customCategoryInput');
+    const btn = document.getElementById('btnToggleCustomCat');
+
+    if (input.style.display === 'none') {
+      input.style.display = 'block';
+      select.style.display = 'none';
+      input.value = select.value;
+      input.focus();
+      btn.textContent = '📋';
+      btn.title = 'Kembali ke dropdown';
+    } else {
+      input.style.display = 'none';
+      select.style.display = 'block';
+      btn.textContent = '✏️';
+      btn.title = 'Edit teks kategori bebas';
+    }
+    updateLiveSimulator();
+  }
+
+  function handleCategorySelectChange() {
+    updateLiveSimulator();
+  }
+
+  function getActiveCategory() {
+    const input = document.getElementById('customCategoryInput');
+    if (input.style.display !== 'none' && input.value.trim()) {
+      return input.value.trim();
+    }
+    return document.getElementById('targetCategorySelect').value;
+  }
+
+  function testPingEndpoint() {
+    const badge = document.getElementById('endpointStatusBadge');
+    badge.innerHTML = '⏳ Pinging...';
+    badge.style.color = 'var(--status-info)';
+    badge.style.borderColor = 'var(--status-info)';
+    badge.style.background = 'var(--status-info-soft)';
+
+    setTimeout(() => {
+      badge.innerHTML = '✅ Terhubung (18ms)';
+      badge.style.color = 'var(--status-success)';
+      badge.style.borderColor = 'var(--status-success)';
+      badge.style.background = 'var(--status-success-soft)';
+    }, 500);
+  }
+
+  // OPEN EXPORT MODAL
+  function openExportModal(recipeId) {
+    const all = [...SAMPLE_RECIPES.labs, ...SAMPLE_RECIPES.campaign];
+    activeRecipe = all.find(r => r.id === recipeId) || SAMPLE_RECIPES.labs[0];
+
+    document.getElementById('modalRecipeTitle').textContent = activeRecipe.title;
+    document.getElementById('modalSourceBadge').textContent = activeRecipe.source;
+    document.getElementById('inputRecipeTitle').value = activeRecipe.title;
+    document.getElementById('inputRecipeTime').value = activeRecipe.time;
+    document.getElementById('inputSummary').value = activeRecipe.summary;
+    document.getElementById('inputDirections').value = activeRecipe.directions;
+    document.getElementById('inputT2iPrompt43').value = activeRecipe.t2i_prompt_4_3 || '';
+    document.getElementById('genImageStatus').textContent = '';
+
+    // Reset Custom category
+    document.getElementById('customCategoryInput').style.display = 'none';
+    document.getElementById('targetCategorySelect').style.display = 'block';
+    document.getElementById('btnToggleCustomCat').textContent = '✏️';
+    document.getElementById('targetCategorySelect').value = activeRecipe.category;
+
+    // Video R2 & Preview Initial Setup
+    document.getElementById('inputVideoR2Url').value = activeRecipe.videoR2Url || '';
+    document.getElementById('mutedVideoPreviewBox').style.display = 'none';
+
+    if (activeRecipe.videoR2Url) {
+      document.getElementById('dbSavedStatusBadge').textContent = '✓ Tersimpan di Database';
+      document.getElementById('r2StatusBadge').innerHTML = '<span>✅</span> R2 URL Synced';
+      document.getElementById('r2StatusBadge').style.borderColor = 'var(--status-success)';
+      document.getElementById('r2StatusBadge').style.color = 'var(--status-success)';
+      document.getElementById('simVideoIndicator').style.display = 'inline-block';
+      document.getElementById('btnTabMediaVideo').style.display = 'inline-block';
+      document.getElementById('btnToggleMutedPreview').style.display = 'inline-block';
+    } else {
+      document.getElementById('dbSavedStatusBadge').textContent = '';
+      document.getElementById('r2StatusBadge').innerHTML = '<span>☁️</span> Cloudflare R2 Ready';
+      document.getElementById('r2StatusBadge').style.borderColor = '#f48120';
+      document.getElementById('r2StatusBadge').style.color = '#f48120';
+      document.getElementById('simVideoIndicator').style.display = 'none';
+
+      if (activeRecipe.videoMutedReady) {
+        document.getElementById('btnToggleMutedPreview').style.display = 'inline-block';
+      } else {
+        document.getElementById('btnToggleMutedPreview').style.display = 'none';
+      }
+
+      if (!activeRecipe.hasVideo) {
+        document.getElementById('videoSourceStatusLabel').textContent = '⚠️ Belum ada video rendered (Klik 1-Klik AI Video untuk generate)';
+      } else {
+        document.getElementById('videoSourceStatusLabel').textContent = '🎥 Video Kampanye Terdeteksi: 1080x1920 MP4 (38 Detik)';
+      }
+    }
+
+    // Default to photo media tab on Pixel 7
+    switchPixelMedia('photo');
+
+    // Render groups
+    renderIngredientGroups(activeRecipe.baseIng, activeRecipe.groups || []);
+
+    document.getElementById('pixelHeroImg').src = activeRecipe.image;
+    updateLiveSimulator();
+    document.getElementById('exportModal').classList.add('open');
+  }
+
+  function renderIngredientGroups(baseIngText, groups) {
+    const container = document.getElementById('ingredientGroupsContainer');
+    const baseGroupHtml = `
+      <div class="ing-group">
+        <div class="ing-group-header">
+          <span class="ing-group-name">Bahan Dasar (Base Ingredients)</span>
+          <span style="font-size:0.7rem; color:var(--text-muted);">1 baris per bahan</span>
+        </div>
+        <textarea class="ing-list-textarea" id="ingBase" oninput="updateLiveSimulator()">${baseIngText}</textarea>
+      </div>
+    `;
+
+    let subGroupsHtml = '';
+    groups.forEach((g, idx) => {
+      subGroupsHtml += `
+        <div class="ing-group">
+          <div class="ing-group-header">
+            <span class="ing-group-name">${g.name}</span>
+            <button type="button" onclick="this.closest('.ing-group').remove(); updateLiveSimulator();" style="background:transparent; border:none; color:var(--status-danger); cursor:pointer; font-size:0.75rem;">Hapus</button>
+          </div>
+          <textarea class="ing-list-textarea" oninput="updateLiveSimulator()">${g.items}</textarea>
+        </div>
+      `;
+    });
+
+    container.innerHTML = baseGroupHtml + subGroupsHtml;
+  }
+
+  function closeExportModal() {
+    document.getElementById('exportModal').classList.remove('open');
+    document.getElementById('presetEditorCard').classList.remove('open');
+    document.getElementById('mutedVideoPreviewBox').style.display = 'none';
+    const inlineVid = document.getElementById('inlineMutedVideoPlayer');
+    if (inlineVid) inlineVid.pause();
+    hidePushToast();
+  }
+
+  // =========================================================================
+  // VIDEO PIPELINE: PULLING, MUTE VIA FFMPEG, PREVIEW & CLOUDFLARE R2 UPLOAD
+  // =========================================================================
+  function runFfmpegMute() {
+    const btn = document.getElementById('btnFfmpegMute');
+    const status = document.getElementById('ffmpegStatusText');
+    const btnPreview = document.getElementById('btnToggleMutedPreview');
+
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳</span> <span>Memproses FFmpeg...</span>';
+    status.innerHTML = '<code>[FFmpeg]</code> Menarik video kampanye & mengeksekusi <code>-c:v copy -an</code>...';
+
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.innerHTML = '<span>✓</span> <span>Video Ter-Mute Selesai</span>';
+      status.innerHTML = '✅ Audio berhasil dinonaktifkan murni tanpa re-encoding (14.2 MB). Pratinjau video terbuka di bawah!';
+      
+      activeRecipe.videoMutedReady = true;
+      btnPreview.style.display = 'inline-flex';
+
+      // Automatically open the inline preview so user can immediately verify muted video
+      showInlineMutedPreview();
+
+      // Reset audio mode to muted
+      setAudioPreviewMode('muted');
+
+      // Also enable video tab on Pixel 7
+      document.getElementById('btnTabMediaVideo').style.display = 'inline-block';
+      document.getElementById('btnR2Upload').focus();
+    }, 900);
+  }
+
+  // Dedicated Inline Video Preview Toggle
+  function showInlineMutedPreview() {
+    const previewBox = document.getElementById('mutedVideoPreviewBox');
+    const player = document.getElementById('inlineMutedVideoPlayer');
+    previewBox.style.display = 'flex';
+    setAudioPreviewMode('muted');
+    try {
+      player.currentTime = 0;
+      player.play();
+      updatePlayPauseButton(true);
+    } catch (_) {}
+  }
+
+  function toggleInlineMutedPreview() {
+    const previewBox = document.getElementById('mutedVideoPreviewBox');
+    const player = document.getElementById('inlineMutedVideoPlayer');
+    if (previewBox.style.display === 'none' || !previewBox.style.display) {
+      previewBox.style.display = 'flex';
+      try { 
+        player.play();
+        updatePlayPauseButton(true);
+      } catch (_) {}
+    } else {
+      previewBox.style.display = 'none';
+      try { 
+        player.pause(); 
+        updatePlayPauseButton(false);
+      } catch (_) {}
+    }
+  }
+
+  // Inline Player Controls
+  function togglePlayInlineVideo() {
+    const player = document.getElementById('inlineMutedVideoPlayer');
+    if (player.paused) {
+      player.play();
+      updatePlayPauseButton(true);
+    } else {
+      player.pause();
+      updatePlayPauseButton(false);
+    }
+  }
+
+  function restartInlineVideo() {
+    const player = document.getElementById('inlineMutedVideoPlayer');
+    player.currentTime = 0;
+    player.play();
+    updatePlayPauseButton(true);
+  }
+
+  function updatePlayPauseButton(isPlaying) {
+    const icon = document.getElementById('playPauseIcon');
+    const text = document.getElementById('playPauseText');
+    if (isPlaying) {
+      icon.textContent = '⏸️';
+      text.textContent = 'Jeda Video';
+    } else {
+      icon.textContent = '▶️';
+      text.textContent = 'Putar Video';
+    }
+  }
+
+  // Audio Mode A/B Tester (Simulasi Suara Hening vs Asli)
+  function setAudioPreviewMode(mode) {
+    const player = document.getElementById('inlineMutedVideoPlayer');
+    const btnMuted = document.getElementById('btnAudioModeMuted');
+    const btnOrig = document.getElementById('btnAudioModeOriginal');
+    const label = document.getElementById('audioSilenceLabel');
+    const badgeText = document.getElementById('inlineVideoBadgeText');
+    const bars = document.querySelectorAll('#audioMeterBars .audio-bar');
+
+    if (mode === 'muted') {
+      player.muted = true;
+      btnMuted.classList.add('active-mode');
+      btnOrig.classList.remove('active-mode');
+      label.textContent = '🔇 -inf dB (Audio Stripped / Hening)';
+      label.style.color = 'var(--status-success)';
+      badgeText.textContent = '100% Muted (Audio Track Removed via FFmpeg)';
+      bars.forEach(b => {
+        b.className = 'audio-bar muted-flat';
+      });
+    } else {
+      player.muted = false;
+      player.volume = 0.6;
+      btnOrig.classList.add('active-mode');
+      btnMuted.classList.remove('active-mode');
+      label.textContent = '🔊 ~ -12 dB (Trek Audio Asli Voiceover)';
+      label.style.color = 'var(--status-warning)';
+      badgeText.textContent = '⚠️ Simulasi Trek Audio Asli (Sebelum di-Mute)';
+      bars.forEach(b => {
+        b.className = 'audio-bar active-sound';
+      });
+    }
+  }
+
+  // Scroll & Play on Google Pixel 7 Simulator
+  function previewVideoOnPixel() {
+    switchPixelMedia('video');
+    const device = document.getElementById('pixel7Device');
+    device.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // Open Current Video into Dedicated 9:16 Lightbox
+  function openCurrentVideoInLightbox() {
+    openDedicatedVideoLightbox(activeRecipe.id);
+  }
+
+  // DEDICATED FULLSCREEN 9:16 LIGHTBOX MODAL HANDLERS
+  function openDedicatedVideoLightbox(recipeId) {
+    const all = [...SAMPLE_RECIPES.labs, ...SAMPLE_RECIPES.campaign];
+    const rec = all.find(r => r.id === recipeId) || activeRecipe;
+    
+    document.getElementById('lightboxRecipeTitle').textContent = rec.title;
+    document.getElementById('lightboxSourceBadge').textContent = rec.source;
+    
+    const player = document.getElementById('lightboxVideoPlayer');
+    player.poster = rec.image;
+    setLightboxAudioMode('muted');
+
+    document.getElementById('videoLightboxModal').classList.add('open');
+    try {
+      player.currentTime = 0;
+      player.play();
+    } catch (_) {}
+  }
+
+  function closeDedicatedVideoLightbox() {
+    const player = document.getElementById('lightboxVideoPlayer');
+    try { player.pause(); } catch (_) {}
+    document.getElementById('videoLightboxModal').classList.remove('open');
+  }
+
+  function setLightboxAudioMode(mode) {
+    const player = document.getElementById('lightboxVideoPlayer');
+    const btnMuted = document.getElementById('btnLightboxAudioMuted');
+    const btnOrig = document.getElementById('btnLightboxAudioOrig');
+    const label = document.getElementById('lightboxDbSilenceLabel');
+    const badgeText = document.getElementById('lightboxAudioBadgeText');
+    const bars = document.querySelectorAll('#lightboxMeterBars .audio-bar');
+
+    if (mode === 'muted') {
+      player.muted = true;
+      btnMuted.classList.add('active-mode');
+      btnOrig.classList.remove('active-mode');
+      label.textContent = '-inf dB (Hening Sempurna)';
+      label.style.color = 'var(--status-success)';
+      badgeText.textContent = '100% Muted (Audio Track Removed via FFmpeg)';
+      bars.forEach(b => {
+        b.className = 'audio-bar muted-flat';
+      });
+    } else {
+      player.muted = false;
+      player.volume = 0.6;
+      btnOrig.classList.add('active-mode');
+      btnMuted.classList.remove('active-mode');
+      label.textContent = '~ -12 dB (Trek Audio Asli Voiceover)';
+      label.style.color = 'var(--status-warning)';
+      badgeText.textContent = '⚠️ Simulasi Trek Audio Asli (Sebelum di-Mute)';
+      bars.forEach(b => {
+        b.className = 'audio-bar active-sound';
+      });
+    }
+  }
+
+  function proceedFromLightboxToExport() {
+    closeDedicatedVideoLightbox();
+    openExportModal(activeRecipe.id);
+  }
+
+  function uploadToCloudflareR2() {
+    const btn = document.getElementById('btnR2Upload');
+    const status = document.getElementById('r2UploadStatusText');
+    const inputUrl = document.getElementById('inputVideoR2Url');
+    const dbBadge = document.getElementById('dbSavedStatusBadge');
+    const r2Badge = document.getElementById('r2StatusBadge');
+
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳</span> <span>Mengunggah ke R2...</span>';
+    status.innerHTML = '<code>[Cloudflare R2]</code> Mengirimkan stream biner ke bucket <code>makna-recipe-videos</code>...';
+
+    setTimeout(() => {
+      const generatedR2Url = `https://pub-r2.maknaflow.com/recipes/video_${Date.now()}_muted.mp4`;
+      inputUrl.value = generatedR2Url;
+      activeRecipe.videoR2Url = generatedR2Url;
+
+      btn.disabled = false;
+      btn.innerHTML = '<span>✓</span> <span>Terunggah ke R2</span>';
+      status.innerHTML = `✅ Sukses! CDN Public Stream URL aktif. Video siap ditautkan ke webadmin.`;
+      dbBadge.textContent = '✓ Tersimpan di Database (recipe_items.video_url)';
+      
+      r2Badge.innerHTML = '<span>✅</span> R2 URL Synced';
+      r2Badge.style.borderColor = 'var(--status-success)';
+      r2Badge.style.color = 'var(--status-success)';
+
+      document.getElementById('simVideoIndicator').style.display = 'inline-block';
+      document.getElementById('btnTabMediaVideo').style.display = 'inline-block';
+
+      // Switch to video tab on Pixel 7 to show result
+      switchPixelMedia('video');
+    }, 1100);
+  }
+
+  function runFullVideoPipeline() {
+    runFfmpegMute();
+    setTimeout(() => {
+      uploadToCloudflareR2();
+    }, 1200);
+  }
+
+  function copyR2VideoUrl() {
+    const url = document.getElementById('inputVideoR2Url').value;
+    if (!url) {
+      alert('Belum ada URL video R2.');
+      return;
+    }
+    navigator.clipboard.writeText(url);
+    alert('URL Video Cloudflare R2 berhasil disalin!');
+  }
+
+  function handleVideoUrlChange() {
+    const url = document.getElementById('inputVideoR2Url').value.trim();
+    activeRecipe.videoR2Url = url;
+    if (url) {
+      document.getElementById('dbSavedStatusBadge').textContent = '✓ Manual URL';
+      document.getElementById('simVideoIndicator').style.display = 'inline-block';
+      document.getElementById('btnTabMediaVideo').style.display = 'inline-block';
+    } else {
+      document.getElementById('dbSavedStatusBadge').textContent = '';
+      document.getElementById('simVideoIndicator').style.display = 'none';
+      switchPixelMedia('photo');
+    }
+  }
+
+  // Media Tab Switcher on Google Pixel 7 (Photo vs Muted Video)
+  function switchPixelMedia(mode) {
+    const btnPhoto = document.getElementById('btnTabMediaPhoto');
+    const btnVideo = document.getElementById('btnTabMediaVideo');
+    const imgEl = document.getElementById('pixelHeroImg');
+    const vidContainer = document.getElementById('pixelVideoContainer');
+    const vidPlayer = document.getElementById('pixelVideoPlayer');
+
+    if (mode === 'video') {
+      btnVideo.classList.add('active');
+      btnPhoto.classList.remove('active');
+      imgEl.style.display = 'none';
+      vidContainer.classList.add('show');
+      try { vidPlayer.play(); } catch (_) {}
+    } else {
+      btnPhoto.classList.add('active');
+      btnVideo.classList.remove('active');
+      imgEl.style.display = 'block';
+      vidContainer.classList.remove('show');
+      try { vidPlayer.pause(); } catch (_) {}
+    }
+  }
+
+  // =========================================================================
+  // AI AUTO ENRICH:
+  // PRODUCE: 1. SUMMARY, 2. INGREDIENTS, 3. DIRECTIONS, 4. T2I_PROMPT_4_3
+  // =========================================================================
+  function executeAiAutoEnrich() {
+    const btn = document.getElementById('btnAiEnrich');
+    const origHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳</span><span>AI Menghasilkan 4 Komponen...</span>';
+
+    setTimeout(() => {
+      const title = document.getElementById('inputRecipeTitle').value;
+
+      if (title.toLowerCase().includes('shrimp')) {
+        // 1. SUMMARY
+        document.getElementById('inputSummary').value = "Plump, succulent tiger prawns seared to charred perfection and coated in a sizzling garlic herb butter. Each bite delivers a burst of fragrant aromatics and a zesty citrus kick, making this a restaurant-grade seafood indulgence cooked in under 10 minutes.";
+        document.getElementById('inputRecipeTime').value = "10 mins prep | 8 mins cook";
+        
+        // 2. INGREDIENTS (Grouped)
+        renderIngredientGroups(
+          "400g raw tiger prawns, peeled and deveined\n1 tbsp olive oil for grilling\n1 lime, cut into wedges for serving",
+          [
+            {
+              name: "For the sizzling garlic butter glaze :",
+              items: "3 cloves garlic, minced\n2 tbsp unsalted butter, melted\n1 tsp red chili flakes\n1 tbsp fresh chopped parsley"
+            }
+          ]
+        );
+
+        // 3. DIRECTIONS
+        document.getElementById('inputDirections').value = "Thread peeled prawns evenly onto soaked wooden skewers, leaving small gaps for heat circulation.\nWhisk melted butter with minced garlic, red chili flakes, and chopped fresh parsley in a heatproof bowl.\nBrush the seasoned garlic butter generously over both sides of the shrimp skewers.\nAir fry at 200°C (400°F) for 5-7 minutes until shrimp are opaque, golden-pink, and edges are gently caramelized.\nTransfer to a serving platter, baste with pan drippings, and serve immediately with fresh lime wedges.";
+
+        // 4. T2I_PROMPT_4_3
+        document.getElementById('inputT2iPrompt43').value = "Masterpiece 4:3 food photography of spicy garlic butter tiger prawn skewers, eye-level 45-degree angle, arranged neatly on a dark slate plate with charred grill marks, glistening melted herb butter glaze, sprinkled with chili flakes and parsley, fresh lime wedges on the side, soft directional side window daylight, shallow depth of field --ar 4:3 --stylize 250";
+
+      } else if (title.toLowerCase().includes('tofu')) {
+        // 1. SUMMARY
+        document.getElementById('inputSummary').value = "Golden and shatteringly crisp on the outside while cloud-soft within, these air-fried tofu bites redefine plant-based comfort food. Paired with a luscious, velvety peanut dipping sauce infused with sweet maple and fiery chili garlic, it is an irresistible snack loaded with clean protein.";
+        document.getElementById('inputRecipeTime').value = "10 mins prep | 15 mins cook";
+
+        // 2. INGREDIENTS (Grouped)
+        renderIngredientGroups(
+          "1 block firm tofu, pressed and cubed into 2cm pieces\n1 tbsp cornstarch\n1 tbsp soy sauce\n1 tsp toasted sesame oil",
+          [
+            {
+              name: "For the spicy peanut dipping sauce :",
+              items: "3 tbsp smooth peanut butter\n1 tbsp pure maple syrup\n1 tbsp warm water to thin\n1 tsp chili garlic sauce or sriracha\n½ tsp grated fresh ginger"
+            }
+          ]
+        );
+
+        // 3. DIRECTIONS
+        document.getElementById('inputDirections').value = "Press the firm tofu block with paper towels for 10 minutes to remove excess moisture, then cut into 2cm uniform cubes.\nToss tofu gently in a mixing bowl with soy sauce and sesame oil, then sprinkle cornstarch evenly until completely coated.\nArrange tofu cubes in a single layer in the air fryer basket with space between pieces. Air fry at 200°C for 15 minutes, shaking halfway.\nIn a small bowl, whisk smooth peanut butter, maple syrup, chili garlic sauce, grated ginger, and warm water until velvety smooth.\nPlate crispy tofu bites piping hot alongside the peanut dipping sauce, garnished with toasted sesame seeds.";
+
+        // 4. T2I_PROMPT_4_3
+        document.getElementById('inputT2iPrompt43').value = "Gourmet 4:3 food photography of golden crispy air fryer tofu cubes piled high in a shallow speckled ceramic bowl, accompanied by a small ceramic dipping ramekin of glossy chili peanut sauce, garnished with scallions and sesame seeds, horizontal 4:3 landscape framing, soft morning ambient daylight, clean minimalist kitchen backdrop --ar 4:3 --stylize 200";
+
+      } else {
+        document.getElementById('inputSummary').value = "Experience gourmet culinary perfection with this chef-crafted " + title + "! Featuring an impeccable balance of crisp textures, deep savory notes, and mouthwatering aromatics, this recipe elevates everyday cooking into a stunning culinary masterpiece.";
+        document.getElementById('inputRecipeTime').value = "15 mins prep | 30 mins cook";
+        document.getElementById('inputT2iPrompt43').value = "Professional 4:3 landscape food photography of " + title + ", beautifully plated on an artisanal ceramic dish, garnished with fresh herbs, eye-level angled shot, warm inviting ambient lighting, studio lighting setup, rich textured focus, shallow depth of field --ar 4:3 --stylize 250";
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = '<span>✅</span><span>4 Elemen Diperkaya AI!</span>';
+      setTimeout(() => { btn.innerHTML = origHtml; }, 2000);
+
+      updateLiveSimulator();
+    }, 700);
+  }
+
+  // T2I Prompt Actions
+  function copyT2iPrompt() {
+    const prompt = document.getElementById('inputT2iPrompt43').value;
+    navigator.clipboard.writeText(prompt);
+    alert('Prompt T2I 4:3 berhasil disalin ke clipboard!');
+  }
+
+  function generate43CoverImage() {
+    const btn = document.getElementById('btnGenImage');
+    const status = document.getElementById('genImageStatus');
+    const heroImg = document.getElementById('pixelHeroImg');
+
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Merender di G-Labs...';
+    status.textContent = 'Memproses prompt 4:3...';
+
+    setTimeout(() => {
+      const title = document.getElementById('inputRecipeTitle').value;
+      if (title.toLowerCase().includes('shrimp')) {
+        heroImg.src = 'https://images.unsplash.com/photo-1559742811-822873691df8?w=800&auto=format&fit=crop&q=80';
+      } else if (title.toLowerCase().includes('tofu')) {
+        heroImg.src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&auto=format&fit=crop&q=80';
+      } else {
+        heroImg.src = 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80';
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = '🎨 Generate Foto 4:3 (G-Labs)';
+      status.textContent = '✓ Foto 4:3 Terpasang di Cover Pixel 7';
+      setTimeout(() => { status.textContent = ''; }, 3000);
+      switchPixelMedia('photo');
+    }, 1200);
+  }
+
+  // =========================================================================
+  // LIVE SIMULATOR ENGINE (GOOGLE PIXEL 7 VIEWPORT & WEBVIEW RENDER)
+  // =========================================================================
+  function updateLiveSimulator() {
+    const title = document.getElementById('inputRecipeTitle').value;
+    const time = document.getElementById('inputRecipeTime').value;
+    const cat = getActiveCategory();
+    const summary = document.getElementById('inputSummary').value.trim();
+
+    document.getElementById('pixelBarTitle').textContent = title || 'Recipe Detail';
+    document.getElementById('simTitle').textContent = title || 'Untitled Recipe';
+    document.getElementById('simTime').textContent = '⏱️ ' + (time || '30 mins');
+    document.getElementById('simCat').textContent = '🏷️ ' + cat;
+
+    // Collect base ingredients
+    const baseText = document.getElementById('ingBase')?.value || '';
+    const baseItems = baseText.split('\n').map(s => s.trim()).filter(Boolean);
+
+    // Collect sub groups
+    const subGroups = [];
+    document.querySelectorAll('#ingredientGroupsContainer .ing-group').forEach((grpEl, idx) => {
+      if (idx === 0) return; // skip base
+      const name = grpEl.querySelector('.ing-group-name')?.textContent || '';
+      const text = grpEl.querySelector('.ing-list-textarea')?.value || '';
+      const items = text.split('\n').map(s => s.trim()).filter(Boolean);
+      if (items.length > 0) {
+        subGroups.push({ name, items });
+      }
+    });
+
+    // Collect directions
+    const dirText = document.getElementById('inputDirections').value;
+    const steps = dirText.split('\n').map(s => s.trim()).filter(Boolean);
+
+    // Build Standard HTML (Exact match with HtmlSanitizer::buildRecipeDescription)
+    let htmlParts = [];
+
+    // 1. SUMMARY
+    if (summary) {
+      htmlParts.push('<p><strong>SUMMARY :</strong></p>');
+      htmlParts.push('<p>' + escapeHtml(summary).replace(/\n/g, '<br>') + '</p>');
+    }
+
+    // 2. INGREDIENTS
+    if (baseItems.length > 0 || subGroups.length > 0) {
+      if (htmlParts.length > 0) htmlParts.push('<hr />');
+      htmlParts.push('<p><strong>INGREDIENTS :</strong></p>');
+
+      if (baseItems.length > 0) {
+        htmlParts.push('<ul>');
+        baseItems.forEach(it => htmlParts.push('  <li>' + escapeHtml(it) + '</li>'));
+        htmlParts.push('</ul>');
+      }
+
+      subGroups.forEach(sg => {
+        htmlParts.push('<p><strong>' + escapeHtml(sg.name) + '</strong></p>');
+        htmlParts.push('<ul>');
+        sg.items.forEach(it => htmlParts.push('  <li>' + escapeHtml(it) + '</li>'));
+        htmlParts.push('</ul>');
+      });
+    }
+
+    // 3. DIRECTION
+    if (steps.length > 0) {
+      if (htmlParts.length > 0) htmlParts.push('<hr />');
+      htmlParts.push('<p><strong>DIRECTION :</strong></p>');
+      htmlParts.push('<ol>');
+      steps.forEach(st => htmlParts.push('  <li>' + escapeHtml(st) + '</li>'));
+      htmlParts.push('</ol>');
+    }
+
+    const compiledHtml = htmlParts.join('\n\n');
+
+    // Update Pixel 7 DOM
+    document.getElementById('simHtmlContainer').innerHTML = compiledHtml;
+
+    // Update Live HTML Inspector View
+    document.getElementById('liveHtmlCode').textContent = compiledHtml;
+
+    // Build Plain Text Version
+    let plainParts = [];
+    plainParts.push(title);
+    plainParts.push('');
+    if (summary) {
+      plainParts.push('SUMMARY :');
+      plainParts.push('');
+      plainParts.push(summary);
+      plainParts.push('');
+    }
+    plainParts.push('INGREDIENTS :');
+    plainParts.push('');
+    baseItems.forEach(it => plainParts.push(it));
+    subGroups.forEach(sg => {
+      plainParts.push('');
+      plainParts.push(sg.name);
+      plainParts.push('');
+      sg.items.forEach(it => plainParts.push(it));
+    });
+    plainParts.push('');
+    plainParts.push('DIRECTION :');
+    plainParts.push('');
+    steps.forEach(st => plainParts.push(st));
+
+    document.getElementById('livePlainText').textContent = plainParts.join('\n');
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function switchModalTab(tab) {
+    document.getElementById('tabBtnEditor').classList.toggle('active', tab === 'editor');
+    document.getElementById('tabBtnHtml').classList.toggle('active', tab === 'html');
+    document.getElementById('tabBtnPlain').classList.toggle('active', tab === 'plain');
+
+    document.getElementById('tabContentEditor').style.display = tab === 'editor' ? 'flex' : 'none';
+    document.getElementById('tabContentHtml').style.display = tab === 'html' ? 'flex' : 'none';
+    document.getElementById('tabContentPlain').style.display = tab === 'plain' ? 'flex' : 'none';
+  }
+
+  function togglePixelTheme() {
+    const device = document.getElementById('pixel7Device');
+    const isDark = device.classList.toggle('pixel-dark');
+    document.getElementById('pixelThemeIcon').textContent = isDark ? '🌙' : '☀️';
+    document.getElementById('pixelThemeLabel').textContent = isDark ? 'Dark Theme' : 'Light Theme';
+  }
+
+  function toggleMainTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    document.getElementById('themeIcon').textContent = next === 'dark' ? '☀️' : '🌙';
+  }
+
+  function addIngredientGroup() {
+    const name = prompt('Masukkan nama kelompok bahan / topping:', 'For the topping :');
+    if (!name || !name.trim()) return;
+
+    const container = document.getElementById('ingredientGroupsContainer');
+    const div = document.createElement('div');
+    div.className = 'ing-group';
+    div.innerHTML = `
+      <div class="ing-group-header">
+        <span class="ing-group-name">${escapeHtml(name.trim())}</span>
+        <button type="button" onclick="this.closest('.ing-group').remove(); updateLiveSimulator();" style="background:transparent; border:none; color:var(--status-danger); cursor:pointer; font-size:0.75rem;">Hapus</button>
+      </div>
+      <textarea class="ing-list-textarea" oninput="updateLiveSimulator()"></textarea>
+    `;
+    container.appendChild(div);
+    div.querySelector('textarea').focus();
+  }
+
+  function copyHtmlCode() {
+    const code = document.getElementById('liveHtmlCode').textContent;
+    navigator.clipboard.writeText(code);
+    alert('Kode HTML terstandarisasi berhasil disalin ke clipboard!');
+  }
+
+  function copyPlainText() {
+    const text = document.getElementById('livePlainText').textContent;
+    navigator.clipboard.writeText(text);
+    alert('Teks polos standar berhasil disalin ke clipboard!');
+  }
+
+  function downloadJsonExport() {
+    const payload = {
+      recipe_title: document.getElementById('inputRecipeTitle').value,
+      recipe_time: document.getElementById('inputRecipeTime').value,
+      category: getActiveCategory(),
+      target_app: document.getElementById('targetAppSelect').value,
+      video_url: document.getElementById('inputVideoR2Url').value || null,
+      t2i_prompt_4_3: document.getElementById('inputT2iPrompt43').value,
+      recipe_description_html: document.getElementById('liveHtmlCode').textContent,
+      exported_at: new Date().toISOString()
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `recipe_export_${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // DIRECT PUSH VIA API SIMULATION (INCLUDES VIDEO URL)
+  function executeDirectPush() {
+    const btn = document.getElementById('btnPushDirect');
+    const toast = document.getElementById('pushStatusToast');
+    const appVal = document.getElementById('targetAppSelect').value;
+    const preset = APP_PRESETS[appVal];
+    const cat = getActiveCategory();
+    const videoUrl = document.getElementById('inputVideoR2Url').value.trim();
+
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Menghubungi API Receiver...';
+
+    toast.className = 'push-status-toast show loading';
+    toast.innerHTML = `Mengunggah berkas cover 4:3 & payload ${videoUrl ? '+ Tautan Video R2' : ''} ke <strong>${preset.name}</strong>...`;
+
+    setTimeout(() => {
+      btn.innerHTML = '📦 Memproses di MySQL tbl_recipes...';
+      toast.innerHTML = `Menyimpan resep & menautkan video_url ke database webadmin...`;
+
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<span>🚀</span><span>Push ke Webadmin Sekarang (Direct API)</span>';
+        toast.className = 'push-status-toast show success';
+        toast.innerHTML = `✅ Sukses! Resep berhasil diterbitkan ke <strong>${preset.name}</strong> (ID: #142) dengan cover 4:3 ${videoUrl ? 'dan tautan Video R2 terpasang' : ''}. Siap tampil di Android Pixel 7.`;
+      }, 900);
+    }, 800);
+  }
+
+  function hidePushToast() {
+    const toast = document.getElementById('pushStatusToast');
+    toast.className = 'push-status-toast';
+    toast.innerHTML = '';
+  }
+
+  // Keyboard escape
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const lightbox = document.getElementById('videoLightboxModal');
+      if (lightbox && lightbox.classList.contains('open')) {
+        closeDedicatedVideoLightbox();
+      } else {
+        closeExportModal();
+      }
+    }
+  });
+
+  // Init
+  renderRecipeCards();
+</script>
+
+</body>
+</html>

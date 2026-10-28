@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <title>Mockup Usulan: Generate Gambar G-Labs di Bawah Prompt T2I (Importer Resep)</title>
+    <!-- Google Fonts & Material Icons -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&subset=latin,cyrillic-ext" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" type="text/css">
+    <!-- Bootstrap Core CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Waves Effect CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/node-waves/0.7.6/waves.min.css" rel="stylesheet" />
+    
+    <style>
+        body {
+            background-color: #f1f2f7;
+            font-family: 'Roboto', Arial, Tahoma, sans-serif;
+            font-size: 13px;
+            color: #555;
+            padding: 20px 0;
+        }
+        .card {
+            background: #fff;
+            min-height: 50px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            border-radius: 6px;
+            margin-bottom: 25px;
+            border: none;
+        }
+        .card .header {
+            color: #555;
+            padding: 16px 20px;
+            position: relative;
+            border-bottom: 1px solid rgba(204, 204, 204, 0.35);
+        }
+        .card .header h2 {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+            text-transform: uppercase;
+        }
+        .card .body {
+            padding: 20px;
+        }
+        .step-circle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #6366f1;
+            color: #fff;
+            font-weight: 700;
+            font-size: 12px;
+            margin-right: 6px;
+        }
+        .btn {
+            border-radius: 3px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.16), 0 2px 10px rgba(0,0,0,0.12);
+            font-size: 12px;
+            font-weight: 600;
+            outline: none !important;
+        }
+        .bg-pink { background-color: #e91e63 !important; color: #fff !important; }
+        .bg-pink:hover { background-color: #d81557 !important; }
+        .bg-teal { background-color: #009688 !important; color: #fff !important; }
+        .bg-indigo { background-color: #3f51b5 !important; color: #fff !important; }
+        
+        /* AI Polish Banner */
+        .ai-polish-banner {
+            background: #fdfdfe;
+            border: 1px solid #c7d2fe;
+            border-radius: 8px;
+            margin-bottom: 22px;
+            box-shadow: 0 4px 12px rgba(99,102,241,0.06);
+            overflow: hidden;
+        }
+        .ai-polish-header {
+            background: linear-gradient(135deg, #eef2ff 0%, #fdf4ff 100%);
+            padding: 12px 16px;
+            border-bottom: 1px solid #c7d2fe;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .ai-title-btn {
+            transition: all 0.2s ease;
+        }
+        .ai-title-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        /* Mockup Phone Frame */
+        .preview-phone-frame {
+            width: 310px;
+            margin: 0 auto;
+            background: #1e293b;
+            border-radius: 36px;
+            padding: 12px;
+            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.3);
+        }
+        .preview-phone-screen {
+            background: #fff;
+            border-radius: 26px;
+            overflow: hidden;
+            height: 520px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .preview-phone-hero {
+            height: 180px;
+            width: 100%;
+            object-fit: cover;
+            background: #e2e8f0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Demo Controller */
+        .demo-bar {
+            background: #0f172a;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid" style="max-width: 1300px;">
+
+    <!-- Interactive Controller Info -->
+    <div class="demo-bar">
+        <div>
+            <span class="label label-danger" style="margin-right:8px; font-size:11px;">MOCKUP USULAN</span>
+            <strong style="font-size:14px;">Fitur: Direct G-Labs Image Generation di Bawah Prompt T2I</strong>
+            <span style="color:#94a3b8; margin-left:8px; font-size:12px;">(Harmonis &amp; Selaras dengan Tema Menu Importer)</span>
+        </div>
+        <div>
+            <button class="btn btn-default btn-xs waves-effect" onclick="resetMockupState()">
+                <i class="material-icons" style="font-size:13px; vertical-align:middle;">replay</i> Reset Mockup
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Kolom Kiri: Form Importer & AI Studio Section -->
+        <div class="col-md-7 col-xs-12">
+            <div class="card">
+                <div class="header">
+                    <h2>
+                        <span class="step-circle">2</span> Periksa, Susun &amp; Sempurnakan Resep
+                    </h2>
+                </div>
+                <div class="body">
+
+                    <!-- ========================================== -->
+                    <!-- KOMPONEN: AI MAGIC POLISH (SUDAH AKTIF)   -->
+                    <!-- ========================================== -->
+                    <div class="ai-polish-banner">
+                        <div class="ai-polish-header">
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <i class="material-icons" style="color:#6366f1; font-size:20px;">auto_awesome</i>
+                                <strong style="font-size:13px; color:#1e1b4b;">AI Magic Polish: Judul Menarik, Parafrase Resep &amp; Prompt Foto</strong>
+                                <span class="label bg-indigo" style="font-size:10px;">1-SINGLE-CALL</span>
+                            </div>
+                            <span class="label label-success">Aktif</span>
+                        </div>
+                        <div style="padding: 16px;">
+
+                            <!-- Alternatif Judul Click-Worthy -->
+                            <div style="margin-bottom: 14px;">
+                                <label style="font-size:11px; font-weight:700; color:#475569; text-transform:uppercase;">Pilihan Judul Menarik (Klik untuk memilih):</label>
+                                <button type="button" class="btn btn-block waves-effect ai-title-btn" style="text-align:left; border-radius:6px; padding:8px 12px; background:#e0e7ff; color:#3730a3; border:2px solid #6366f1; font-weight:700; font-size:12px; margin-bottom:6px;">
+                                    <span class="badge" style="background:#4338ca; margin-right:6px;">UTAMA</span> Ultra-Crispy Cajun Cornflake Chicken Burgers with Sizzled Bacon &amp; Brioche
+                                </button>
+                            </div>
+
+                            <!-- Ringkasan Hasil Parafrase -->
+                            <div style="margin-bottom:14px; padding:10px 12px; background:#f8fafc; border-radius:6px; border:1px solid #e2e8f0;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                    <span style="font-size:11px; font-weight:700; color:#475569; text-transform:uppercase;">Ringkasan Parafrase (Nutrisi Terjaga):</span>
+                                    <span class="label label-info" style="font-size:10px;">Nutrition Guardrail OK</span>
+                                </div>
+                                <div style="font-size:12px; color:#1e293b; line-height:1.45; background:#fff; padding:6px 10px; border-radius:4px; border:1px solid #cbd5e1;">
+                                    Succulent Cajun chicken fillets coated in a crunchy cornflake crust, air-fried to golden perfection. Each serving provides 507 kcal, 18g protein, 37g carbohydrate, 30g fat, 6.9g fibre and 1.7g salt.
+                                </div>
+                            </div>
+
+                            <!-- ======================================================== -->
+                            <!-- FITUR BARU: AREA PROMPT T2I + TOMBOL GENERATE G-LABS    -->
+                            <!-- ======================================================== -->
+                            <div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                    <label style="font-size:12px; font-weight:700; color:#1e1b4b; margin:0;">
+                                        <i class="material-icons" style="font-size:15px; vertical-align:middle; color:#ec4899;">camera_alt</i> Prompt Foto AI T2I (4:3 Modern Fine Dining):
+                                    </label>
+                                    <div style="display:flex; gap:6px;">
+                                        <button type="button" class="btn btn-default btn-xs waves-effect" title="Salin Prompt">
+                                            <i class="material-icons" style="font-size:13px; vertical-align:middle;">content_copy</i> Salin
+                                        </button>
+                                        <a href="ai-generator.php" target="_blank" class="btn btn-primary btn-xs waves-effect">
+                                            <i class="material-icons" style="font-size:13px; vertical-align:middle;">open_in_new</i> Buka AI Studio
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                <textarea id="promptField" rows="3" class="form-control" style="font-size:11px; font-family:monospace; background:#fff; border:1px solid #cbd5e1; border-radius:4px; line-height:1.4;" readonly>A high-end culinary food photograph of an ultra-crispy Cajun cornflake chicken burger. Golden fried chicken breast with visible textured cornflake crunch, nestled inside a toasted golden-brown brioche bun with crisp lettuce, fresh sliced tomato, and creamy remoulade dripping down. Studio softbox lighting, shallow depth of field, 4:3 aspect ratio, 8k resolution, food magazine cover aesthetic.</textarea>
+                                
+                                <!-- ================================================= -->
+                                <!-- [USULAN BARU] ACTION CONTAINER DI BAWAH PROMPT T2I -->
+                                <!-- ================================================= -->
+                                <div style="margin-top:10px; padding:12px 14px; background:#fff5f7; border:1px solid #fbcfe8; border-radius:6px;">
+                                    
+                                    <!-- Bar Tombol Pemicu -->
+                                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                                        <div>
+                                            <span style="font-size:12px; font-weight:700; color:#9d174d;">
+                                                <i class="material-icons" style="font-size:16px; vertical-align:middle; color:#db2777;">camera_enhance</i> Generasi Foto Menggunakan AI
+                                            </span>
+                                            <div style="font-size:11px; color:#9f1239; margin-top:2px;">
+                                                Model: <strong>Nano Banana</strong>
+                                            </div>
+                                        </div>
+                                        <button type="button" id="btnGenerateGlabs" class="btn bg-pink waves-effect" onclick="runMockGlabsGeneration();" style="border-radius:4px; font-weight:700; padding:7px 14px; box-shadow:0 2px 6px rgba(233,30,99,0.35);">
+                                            <i class="material-icons" style="font-size:15px; vertical-align:middle;">bolt</i> GENERATE GAMBAR SEKARANG
+                                        </button>
+                                    </div>
+
+                                    <!-- 1. State: Polling Progress Bar (Tampil saat proses generate) -->
+                                    <div id="glabsProgressBox" style="display:none; margin-top:12px; padding:12px; background:#fff; border:1px solid #f472b6; border-radius:6px;">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                            <strong id="glabsStatusTitle" style="font-size:12px; color:#1e293b;">Menyiapkan proses render foto...</strong>
+                                            <span id="glabsTaskId" class="badge bg-grey" style="font-family:monospace; font-size:10px;">Task #task_98214</span>
+                                        </div>
+                                        <div class="progress" style="height:10px; margin-bottom:6px; border-radius:4px; background:#f1f5f9;">
+                                            <div id="glabsProgressBar" class="progress-bar progress-bar-striped active bg-pink" style="width: 20%; transition: width 0.4s ease;"></div>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between; font-size:11px; color:#64748b;">
+                                            <span id="glabsStatusDesc">Menghubungkan ke sistem AI...</span>
+                                            <span><i class="material-icons" style="font-size:12px; vertical-align:middle;">timer</i> <span id="glabsTimer">0s</span></span>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2. State: Showcase Hasil Foto & Aksi Terapkan ke Resep -->
+                                    <div id="glabsResultBox" style="display:none; margin-top:12px; padding:14px; background:#fff; border:2px solid #10b981; border-radius:6px; box-shadow:0 3px 10px rgba(16,185,129,0.12);">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #e2e8f0; padding-bottom:6px;">
+                                            <span style="font-size:12px; font-weight:700; color:#065f46;">
+                                                <i class="material-icons" style="font-size:16px; vertical-align:middle; color:#10b981;">check_circle</i> FOTO BERHASIL DI-RENDER &amp; DIOPTIMASI (1080px)
+                                            </span>
+                                            <span class="label label-success">Progressive JPEG • 185 KB</span>
+                                        </div>
+                                        <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
+                                            <!-- Thumbnail Foto (Tanpa Label AI GPU) -->
+                                            <div style="position:relative; width:130px; height:98px; border-radius:6px; overflow:hidden; border:1px solid #cbd5e1; box-shadow:0 2px 4px rgba(0,0,0,0.1); background:#f1f5f9;">
+                                                <img id="glabsResultImg" src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=400&q=80" style="width:100%; height:100%; object-fit:cover;" alt="AI Generated Recipe">
+                                            </div>
+                                            <!-- Detail & Tombol Aksi -->
+                                            <div style="flex:1; min-width:240px;">
+                                                <div style="font-family:monospace; font-size:11px; font-weight:700; color:#1e293b; margin-bottom:4px;">ai_1729221643_c8f2a1b9.jpg</div>
+                                                <p style="font-size:11px; color:#64748b; margin-bottom:10px; line-height:1.4;">
+                                                    Foto telah dioptimasi otomatis (1080px, ringan &amp; cepat dimuat di aplikasi) dan siap digunakan sebagai gambar utama resep ini.
+                                                </p>
+                                                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                                    <button type="button" id="btnApplyImage" class="btn btn-success waves-effect" onclick="applyAiImageToRecipe();" style="border-radius:4px; font-weight:700;">
+                                                        <i class="material-icons" style="font-size:15px; vertical-align:middle;">star</i> GUNAKAN GAMBAR INI UNTUK RESEP
+                                                    </button>
+                                                    <button type="button" class="btn btn-default btn-xs waves-effect" onclick="alert('Membuka foto resolusi penuh di tab baru');" style="border-radius:4px;">
+                                                        <i class="material-icons" style="font-size:13px; vertical-align:middle;">zoom_in</i> Lihat Detail
+                                                    </button>
+                                                    <button type="button" class="btn btn-default btn-xs waves-effect" onclick="runMockGlabsGeneration();" style="border-radius:4px;">
+                                                        <i class="material-icons" style="font-size:13px; vertical-align:middle;">refresh</i> Render Ulang
+                                                    </button>
+                                                </div>
+
+                                                <!-- Notifikasi Sukses Terapkan -->
+                                                <div id="glabsAppliedNotice" style="display:none; margin-top:8px; font-size:11px; color:#065f46; background:#ecfdf5; padding:6px 10px; border-radius:4px; border:1px solid #a7f3d0;">
+                                                    <i class="material-icons" style="font-size:14px; vertical-align:middle;">verified</i> <strong>Foto AI Aktif:</strong> Gambar telah terpasang ke form draf dan tampil di Pratinjau HP!
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!-- ================================================= -->
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Form Input Biasa (Title & Image Candidates) -->
+                    <div class="form-group" style="margin-bottom:15px;">
+                        <label for="recipeTitle">Judul Resep <span class="text-danger">*</span></label>
+                        <input type="text" id="recipeTitle" class="form-control" value="Ultra-Crispy Cajun Cornflake Chicken Burgers with Sizzled Bacon &amp; Brioche">
+                    </div>
+
+                    <!-- Image Candidates Bar -->
+                    <div class="form-group">
+                        <label>Kandidat Gambar Sumber &amp; AI</label>
+                        <div id="candidatesWrap" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+                            <div id="thumbOriginal" style="width:65px; height:65px; border-radius:4px; border:2px solid #6366f1; overflow:hidden; cursor:pointer;" title="Gambar Sumber Web (Aktif Awal)">
+                                <img src="https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=300&q=80" style="width:100%; height:100%; object-fit:cover;">
+                            </div>
+                            <div id="thumbAi" style="display:none; width:65px; height:65px; border-radius:4px; border:2px solid #10b981; overflow:hidden; cursor:pointer; position:relative;" title="Gambar Hasil AI G-Labs (Aktif)">
+                                <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=300&q=80" style="width:100%; height:100%; object-fit:cover;">
+                                <span class="badge bg-teal" style="position:absolute; bottom:2px; right:2px; font-size:8px; padding:1px 3px;">AI</span>
+                            </div>
+                        </div>
+                        <small class="text-muted">Saat tombol <strong>"Gunakan Gambar Ini untuk Resep"</strong> diklik, foto AI akan terpilih otomatis di sini.</small>
+                    </div>
+
+                    <!-- Tombol Aksi Importer -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:25px; border-top:1px solid #eee; padding-top:15px;">
+                        <button type="button" class="btn btn-default waves-effect">
+                            <i class="material-icons" style="font-size:15px; vertical-align:middle;">close</i> Tolak Hasil
+                        </button>
+                        <div style="display:flex; gap:8px;">
+                            <button type="button" class="btn btn-warning waves-effect">
+                                <i class="material-icons" style="font-size:15px; vertical-align:middle;">save</i> Simpan Draf
+                            </button>
+                            <button type="button" class="btn btn-success waves-effect" style="font-weight:700;">
+                                <i class="material-icons" style="font-size:15px; vertical-align:middle;">publish</i> PUBLIKASIKAN RESEP
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Kolom Kanan: Phone Frame (Pratinjau Step 3) -->
+        <div class="col-md-5 col-xs-12">
+            <div class="card" style="position:sticky; top:20px;">
+                <div class="header">
+                    <h2><span class="step-circle" style="background:#10b981;">3</span> Pratinjau Aplikasi</h2>
+                </div>
+                <div class="body" style="text-align:center;">
+                    
+                    <div class="preview-phone-frame">
+                        <div class="preview-phone-screen">
+                            <!-- Hero Image -->
+                            <img id="phoneHeroImage" class="preview-phone-hero" src="https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=500&q=80" alt="Recipe Hero">
+                            
+                            <!-- Recipe Content -->
+                            <div style="padding:16px; text-align:left; overflow-y:auto; flex:1;">
+                                <h4 id="phoneRecipeTitle" style="font-size:14px; font-weight:700; color:#0f172a; margin-top:0; line-height:1.35;">
+                                    Ultra-Crispy Cajun Cornflake Chicken Burgers with Sizzled Bacon &amp; Brioche
+                                </h4>
+                                <div style="display:flex; gap:6px; margin-bottom:10px;">
+                                    <span class="label label-default" style="font-size:10px;">15 Min Prep</span>
+                                    <span class="label label-default" style="font-size:10px;">12 Min Cook</span>
+                                    <span class="label label-default" style="font-size:10px;">4 Porsi</span>
+                                </div>
+                                <div style="font-size:11px; color:#475569; line-height:1.5; background:#f8fafc; padding:8px 10px; border-radius:6px; border:1px solid #e2e8f0;">
+                                    Succulent Cajun chicken fillets coated in crunchy cornflakes, air-fried to golden perfection.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p style="margin-top:12px; font-size:11px; color:#64748b;">
+                        Header foto HP di atas akan berubah secara instan saat foto AI diterapkan.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let timerInterval = null;
+
+    function runMockGlabsGeneration() {
+        const btn = document.getElementById('btnGenerateGlabs');
+        const progressBox = document.getElementById('glabsProgressBox');
+        const progressBar = document.getElementById('glabsProgressBar');
+        const statusTitle = document.getElementById('glabsStatusTitle');
+        const statusDesc = document.getElementById('glabsStatusDesc');
+        const resultBox = document.getElementById('glabsResultBox');
+        const timerEl = document.getElementById('glabsTimer');
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="material-icons" style="font-size:15px; vertical-align:middle;">hourglass_empty</i> Memproses Task...';
+        
+        resultBox.style.display = 'none';
+        progressBox.style.display = 'block';
+        progressBar.style.width = '20%';
+        statusTitle.innerText = 'Mengirim task ke GPU Windows NUC...';
+        statusDesc.innerText = 'Menghubungkan ke Webhook G-Labs (100.64.70.61:8765)...';
+
+        let seconds = 0;
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            seconds++;
+            timerEl.innerText = seconds + 's';
+        }, 1000);
+
+        // Simulasi Fase 1: Task Diantrekan
+        setTimeout(() => {
+            progressBar.style.width = '45%';
+            statusTitle.innerText = 'Task berhasil diantrekan (pending)...';
+            statusDesc.innerText = 'GPU sedang mengalokasikan VRAM untuk model nano_banana_2...';
+        }, 1200);
+
+        // Simulasi Fase 2: Rendering (Running)
+        setTimeout(() => {
+            progressBar.style.width = '75%';
+            statusTitle.innerText = 'G-Labs sedang me-render foto makanan (running)...';
+            statusDesc.innerText = 'Sampling 30 steps • Resolusi 4:3 • Modern Fine Dining Lighting...';
+        }, 2600);
+
+        // Simulasi Fase 3: Selesai & Download
+        setTimeout(() => {
+            progressBar.style.width = '100%';
+            statusTitle.innerText = '✓ Render selesai! Mengunduh & mengoptimasi gambar...';
+            statusDesc.innerText = 'ImageOptimizer mengonversi ke Progressive JPEG 1080px (@82% quality)...';
+
+            setTimeout(() => {
+                clearInterval(timerInterval);
+                progressBox.style.display = 'none';
+                resultBox.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = '<i class="material-icons" style="font-size:15px; vertical-align:middle;">refresh</i> GENERATE VARIASI BARU';
+            }, 800);
+        }, 4200);
+    }
+
+    function applyAiImageToRecipe() {
+        const phoneHero = document.getElementById('phoneHeroImage');
+        const thumbAi = document.getElementById('thumbAi');
+        const thumbOrig = document.getElementById('thumbOriginal');
+        const notice = document.getElementById('glabsAppliedNotice');
+        const btnApply = document.getElementById('btnApplyImage');
+
+        // 1. Perbarui gambar emulator HP secara instan
+        phoneHero.src = 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=500&q=80';
+
+        // 2. Tandai thumbnail kandidat gambar AI sebagai terpilih
+        thumbAi.style.display = 'block';
+        thumbAi.style.border = '2px solid #10b981';
+        thumbOrig.style.border = '1px solid #cbd5e1';
+
+        // 3. Ubah status tombol & tampilkan notice
+        btnApply.innerHTML = '<i class="material-icons" style="font-size:15px; vertical-align:middle;">check</i> GAMBAR AI SUDAH DIGUNAKAN';
+        btnApply.className = 'btn btn-success waves-effect disabled';
+        btnApply.disabled = true;
+        notice.style.display = 'block';
+    }
+
+    function resetMockupState() {
+        if (timerInterval) clearInterval(timerInterval);
+        document.getElementById('glabsProgressBox').style.display = 'none';
+        document.getElementById('glabsResultBox').style.display = 'none';
+        document.getElementById('glabsAppliedNotice').style.display = 'none';
+        document.getElementById('thumbAi').style.display = 'none';
+        document.getElementById('thumbOriginal').style.border = '2px solid #6366f1';
+        document.getElementById('phoneHeroImage').src = 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=500&q=80';
+        
+        const btn = document.getElementById('btnGenerateGlabs');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="material-icons" style="font-size:15px; vertical-align:middle;">bolt</i> GENERATE GAMBAR SEKARANG';
+        
+        const btnApply = document.getElementById('btnApplyImage');
+        btnApply.innerHTML = '<i class="material-icons" style="font-size:15px; vertical-align:middle;">star</i> GUNAKAN GAMBAR INI UNTUK RESEP';
+        btnApply.className = 'btn btn-success waves-effect';
+        btnApply.disabled = false;
+    }
+</script>
+
+</body>
+</html>

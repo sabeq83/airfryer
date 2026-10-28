@@ -1,0 +1,11 @@
+{
+  "name": "airfry-studio-v2",
+  "version": "2.0.0",
+  "description": "AirFry Studio V2 Webadmin & AI Video Engine",
+  "private": true,
+  "scripts": {
+    "release": "node scripts/release.js",
+    "release-non-interactive": "node scripts/release.js --non-interactive",
+    "deploy:macmini": "rsync -avz --exclude='upload/' --exclude='.DS_Store' --exclude='node_modules/' . macmini:/Users/masbenu/airfry_studio_v2/app/"
+  }
+}

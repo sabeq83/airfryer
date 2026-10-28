@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CapCut-Style Motion Graphics Preset Studio — ProteinPrep</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Google Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --pp-navy: #0F172A;
+            --pp-navy-light: #1E293B;
+            --pp-emerald: #10B981;
+            --pp-emerald-dark: #059669;
+            --pp-emerald-light: #D1FAE5;
+            --pp-amber: #F59E0B;
+            --pp-cyan: #06B6D4;
+            --pp-slate-muted: #64748B;
+            --pp-border: #E2E8F0;
+            --pp-bg-light: #F8FAFC;
+            --pp-card-bg: #FFFFFF;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+        }
+
+        body {
+            background: #0B0F19;
+            color: #F1F5F9;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Top Navigation Header */
+        header {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 14px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title .brand-badge {
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+        }
+
+        .header-title h1 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #FFFFFF;
+        }
+
+        .header-title p {
+            font-size: 12px;
+            color: #94A3B8;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #F8FAFC;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            transition: all 0.2s ease;
+        }
+
+        .btn-nav:hover {
+            background: rgba(255, 255, 255, 0.16);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .btn-nav-primary {
+            background: #10B981;
+            border-color: #059669;
+            color: #FFFFFF;
+            font-weight: 700;
+        }
+
+        .btn-nav-primary:hover {
+            background: #059669;
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4);
+        }
+
+        /* Main Workspace Container */
+        .workspace {
+            display: grid;
+            grid-template-columns: 460px 1fr;
+            gap: 28px;
+            padding: 28px;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+        }
+
+        @media (max-width: 1080px) {
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Left Column: Phone Simulator */
+        .preview-pane {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: sticky;
+            top: 90px;
+            height: calc(100vh - 120px);
+            justify-content: flex-start;
+        }
+
+        .phone-frame {
+            width: 380px;
+            height: 675px; /* 9:16 aspect ratio */
+            background: #000;
+            border-radius: 44px;
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8),
+                        0 0 0 10px #1E293B,
+                        0 0 0 12px #334155;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+        }
+
+        /* Dynamic Island / Notch */
+        .phone-island {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 24px;
+            background: #000;
+            border-radius: 16px;
+            z-index: 30;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 8px;
+        }
+
+        .phone-island .camera {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #0F172A;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        /* Video Layer */
+        .video-canvas-wrap {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #020617;
+        }
+
+        .video-canvas-wrap video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-fallback-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 30%, #334155 0%, #0F172A 70%, #020617 100%);
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* TikTok / Reels UI Overlay Simulation */
+        .social-ui-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 40px 16px 20px 16px;
+            opacity: 0.6;
+            transition: opacity 0.2s ease;
+        }
+
+        .social-ui-overlay.hidden {
+            display: none;
+        }
+
+        .social-top-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .social-right-rail {
+            align-self: flex-end;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 90px;
+        }
+
+        .social-action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        .social-action-btn i {
+            font-size: 26px;
+        }
+
+        .social-action-btn span {
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        .social-bottom-caption {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            padding-right: 50px;
+        }
+
+        .social-bottom-caption .username {
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .social-bottom-caption .desc {
+            font-size: 11px;
+            opacity: 0.9;
+            line-height: 1.3;
+        }
+
+        /* Safe Zone Guideline Markers */
+        .safe-zone-box {
+            position: absolute;
+            inset: 12% 6% 18% 6%;
+            border: 1px dashed rgba(16, 185, 129, 0.6);
+            border-radius: 8px;
+            pointer-events: none;
+            z-index: 15;
+            display: none;
+        }
+
+        .safe-zone-box::after {
+            content: "SAFE ZONE (AREA BEBAS KONTEN)";
+            position: absolute;
+            top: 4px;
+            right: 6px;
+            font-size: 8px;
+            font-weight: 800;
+            color: #10B981;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* ===================================================
+           CAPCUT-STYLE MOTION GRAPHICS OVERLAY BADGE
+           =================================================== */
+        .motion-overlay-container {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 25;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: auto;
+            width: 86%; /* Balanced CapCut width: ~86% of frame */
+        }
+
+        /* Position variations */
+        .pos-bottom {
+            bottom: 120px; /* Safe above TikTok captions */
+        }
+
+        .pos-center {
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .pos-top {
+            top: 60px;
+        }
+
+        /* The actual Badge Card */
+        .motion-badge {
+            width: 100%;
+            border-radius: 16px;
+            padding: 14px 18px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Top Header inside Badge */
+        .badge-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .step-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .brand-meta {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            opacity: 0.75;
+        }
+
+        /* Main Instruction Text */
+        .badge-content {
+            font-size: 15px;
+            font-weight: 700;
+            line-height: 1.35;
+            word-wrap: break-word;
+            min-height: 40px;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .typewriter-text {
+            display: inline;
+        }
+
+        .typewriter-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background: currentColor;
+            vertical-align: -1px;
+            margin-left: 2px;
+            animation: blink 0.8s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* ===================================================
+           PRESET THEMES (CSS STYLING)
+           =================================================== */
+
+        /* 1. Dark Glass & Emerald (Default CapCut Pro) */
+        .theme-dark-glass {
+            background: rgba(15, 23, 42, 0.78);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #FFFFFF;
+        }
+        .theme-dark-glass .step-pill {
+            background: #10B981;
+            color: #FFFFFF;
+        }
+        .theme-dark-glass .brand-meta {
+            color: #A7F3D0;
+        }
+
+        /* 2. Minimalist White Frosted (TikTok Aesthetic) */
+        .theme-minimal-white {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            color: #0F172A;
+            box-shadow: 0 14px 35px rgba(0, 0, 0, 0.25);
+        }
+        .theme-minimal-white .step-pill {
+            background: #0F172A;
+            color: #FFFFFF;
+        }
+        .theme-minimal-white .brand-meta {
+            color: #64748B;
+        }
+
+        /* 3. Warm Amber Chef (Golden Sizzle / Gourmet) */
+        .theme-amber {
+            background: rgba(26, 16, 8, 0.82);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: #FFFBEB;
+        }
+        .theme-amber .step-pill {
+            background: #F59E0B;
+            color: #29170A;
+        }
+        .theme-amber .brand-meta {
+            color: #FDE68A;
+        }
+
+        /* 4. Floating Dynamic Pill (Ultra-Compact Subtitle) */
+        .theme-floating-pill {
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            color: #FFFFFF;
+            border-radius: 28px;
+            padding: 8px 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .theme-floating-pill .badge-header {
+            margin-bottom: 0;
+            flex-shrink: 0;
+        }
+        .theme-floating-pill .step-pill {
+            background: #10B981;
+            color: #FFFFFF;
+            font-size: 10px;
+            padding: 2px 8px;
+        }
+        .theme-floating-pill .brand-meta {
+            display: none;
+        }
+        .theme-floating-pill .badge-content {
+            font-size: 13px;
+            min-height: auto;
+            line-height: 1.25;
+        }
+
+        /* 5. Cyber Neon Accent (Modern Shorts Glow) */
+        .theme-neon {
+            background: rgba(10, 15, 30, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1.5px solid #06B6D4;
+            color: #FFFFFF;
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.25), 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        .theme-neon .step-pill {
+            background: linear-gradient(135deg, #06B6D4 0%, #10B981 100%);
+            color: #000;
+            font-weight: 800;
+        }
+        .theme-neon .brand-meta {
+            color: #67E8F9;
+        }
+
+        /* Phone Controls Strip below frame */
+        .preview-controls-strip {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 14px;
+            background: #1E293B;
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .btn-ctrl-icon {
+            background: rgba(255, 255, 255, 0.1);
+            color: #F8FAFC;
+            border: none;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-ctrl-icon:hover {
+            background: #10B981;
+            color: #FFF;
+        }
+
+        /* Right Column: Customizer Inspector */
+        .inspector-pane {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .config-card {
+            background: #1E293B;
+            border-radius: 16px;
+            padding: 20px 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .config-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .config-card-header h2 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #F8FAFC;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .config-card-header h2 i {
+            color: #10B981;
+            font-size: 18px;
+        }
+
+        .badge-pill-status {
+            font-size: 11px;
+            font-weight: 700;
+            background: rgba(16, 185, 129, 0.15);
+            color: #34D399;
+            padding: 3px 10px;
+            border-radius: 12px;
+        }
+
+        /* Preset Gallery Grid */
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .preset-item {
+            background: #0F172A;
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        .preset-item:hover {
+            border-color: rgba(16, 185, 129, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .preset-item.active {
+            border-color: #10B981;
+            background: #0F172A;
+            box-shadow: 0 0 0 1px #10B981, 0 8px 20px rgba(16, 185, 129, 0.2);
+        }
+
+        .preset-preview-thumb {
+            height: 60px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .preset-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: #F8FAFC;
+            margin-bottom: 2px;
+        }
+
+        .preset-desc {
+            font-size: 10px;
+            color: #94A3B8;
+            line-height: 1.3;
+        }
+
+        /* Form Controls */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #CBD5E1;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .form-label span.val-hint {
+            color: #10B981;
+            font-weight: 700;
+        }
+
+        select.form-select, input.form-input, textarea.form-textarea {
+            background: #0F172A;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #F8FAFC;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            outline: none;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        select.form-select:focus, input.form-input:focus, textarea.form-textarea:focus {
+            border-color: #10B981;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #0F172A;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #10B981;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+            border: 2px solid #FFF;
+        }
+
+        /* Quick sample chips */
+        .quick-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .chip-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94A3B8;
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .chip-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #FFF;
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        /* Dimension Comparison Matrix */
+        .dimension-box {
+            background: #0F172A;
+            border-radius: 12px;
+            padding: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .dimension-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .dim-stat {
+            background: rgba(255, 255, 255, 0.04);
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+
+        .dim-stat strong {
+            display: block;
+            color: #34D399;
+            font-size: 14px;
+        }
+
+        .dim-stat span {
+            color: #94A3B8;
+            font-size: 11px;
+        }
+
+        /* Call to action */
+        .btn-apply-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            color: #FFF;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 18px rgba(16, 185, 129, 0.35);
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .btn-apply-action:hover {
+            box-shadow: 0 6px 24px rgba(16, 185, 129, 0.5);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="header-title">
+            <span class="brand-badge">CAPCUT STUDIO</span>
+            <div>
+                <h1>Motion Graphics Preset Preview</h1>
+                <p>Simulasi Interaktif Overlay Teks Animasi Typing Sebelum Dibakar via FFmpeg</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button type="button" class="btn-nav" onclick="toggleSocialOverlay()" id="btnToggleSocial">
+                <i class="material-icons" style="font-size:16px;">layers</i>
+                <span>Toggle Safe Zone &amp; UI</span>
+            </button>
+            <a href="../video-generator.php" class="btn-nav btn-nav-primary">
+                <i class="material-icons" style="font-size:16px;">arrow_back</i>
+                <span>Kembali ke Video Generator</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Workspace -->
+    <main class="workspace">
+
+        <!-- Left: Phone Simulator -->
+        <section class="preview-pane">
+            <div class="phone-frame">
+                <!-- Island / Notch -->
+                <div class="phone-island">
+                    <div class="camera"></div>
+                </div>
+
+                <!-- Video / Culinary Background -->
+                <div class="video-canvas-wrap">
+                    <video id="previewVideoPlayer" autoplay loop muted playsinline src="../upload/ai_video_clips/clip_p13_s7_1793176693.mp4">
+                    </video>
+                    <div id="videoFallbackBg" class="video-fallback-bg">
+                        <span style="font-size:13px; color:#94A3B8;">Memuat video adegan...</span>
+                    </div>
+                </div>
+
+                <!-- Safe Zone Line Marker -->
+                <div id="safeZoneMarker" class="safe-zone-box"></div>
+
+                <!-- TikTok / Reels Overlay UI -->
+                <div id="socialOverlay" class="social-ui-overlay">
+                    <div class="social-top-row">
+                        <span>Mengikuti</span>
+                        <span style="border-bottom:2px solid #FFF; padding-bottom:2px;">Untuk Anda</span>
+                        <i class="material-icons" style="font-size:18px;">search</i>
+                    </div>
+                    <div class="social-right-rail">
+                        <div class="social-action-btn">
+                            <i class="material-icons" style="color:#EF4444;">favorite</i>
+                            <span>24.8K</span>
+                        </div>
+                        <div class="social-action-btn">
+                            <i class="material-icons">chat_bubble</i>
+                            <span>482</span>
+                        </div>
+                        <div class="social-action-btn">
+                            <i class="material-icons">bookmark</i>
+                            <span>1.2K</span>
+                        </div>
+                        <div class="social-action-btn">
+                            <i class="material-icons">share</i>
+                            <span>Share</span>
+                        </div>
+                    </div>
+                    <div class="social-bottom-caption">
+                        <div class="username">@proteinprep.kitchen</div>
+                        <div class="desc">Resep Air Fryer Salmon Crispy &amp; Potato Salad 🥗 #airfryer #proteinprep #healthyeating</div>
+                    </div>
+                </div>
+
+                <!-- THE MOTION OVERLAY BADGE (Interactive CapCut Element) -->
+                <div id="motionOverlayContainer" class="motion-overlay-container pos-bottom">
+                    <div id="motionBadge" class="motion-badge theme-dark-glass">
+                        <div class="badge-header">
+                            <div id="previewStepPill" class="step-pill">
+                                <span id="previewStepLabel">STEP 7</span>
+                            </div>
+                            <div class="brand-meta" id="previewBrandMeta">ProteinPrep Studio</div>
+                        </div>
+                        <div class="badge-content" id="previewBadgeContent">
+                            <span id="previewTypewriterText" class="typewriter-text"></span><span id="previewCursor" class="typewriter-cursor"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls below phone -->
+            <div class="preview-controls-strip" style="flex-wrap: wrap; gap: 8px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <button type="button" class="btn-ctrl-icon" onclick="replayTypingAnimation()" title="Ulangi Animasi Ketik">
+                        <i class="material-icons" style="font-size:18px;">replay</i>
+                    </button>
+                    <button type="button" class="btn-ctrl-icon" onclick="togglePlayVideo()" id="btnPlayPauseVideo" title="Play/Pause Video Background">
+                        <i class="material-icons" style="font-size:18px;">pause</i>
+                    </button>
+                </div>
+                <div style="flex:1; min-width:180px;">
+                    <select id="selPreviewClip" class="form-select" onchange="switchPreviewClip(this.value)" style="height:32px; font-size:11px; padding:4px 8px;">
+                        <option value="../upload/ai_video_clips/clip_p13_s7_1793176693.mp4" selected>★ Klip Task d1180c7b (Scene 7: Serve salmon)</option>
+                        <option value="../upload/ai_video_clips/clip_p13_s4_1793176660.mp4">Klip Task 94e02c27 (Scene 4: Air fry salmon)</option>
+                        <option value="../upload/ai_video_clips/clip_p13_s2_1793176632.mp4">Klip Task 9c10e23f (Scene 2: Whisk honey mustard)</option>
+                        <option value="../upload/ai_video_clips/clip_p13_s1_1793176658.mp4">Klip Task 77220949 (Scene 1: Fill pot with water)</option>
+                        <option value="../upload/video/demo_task_d1180c7b_darkglass.mp4">▶ Hasil Render FFmpeg Dark Glass (Task d1180c7b)</option>
+                        <option value="../upload/video/demo_task_d1180c7b_white.mp4">▶ Hasil Render FFmpeg Minimal White (Task d1180c7b)</option>
+                    </select>
+                </div>
+                <div style="font-size:10px; color:#94A3B8; display:flex; align-items:center; gap:4px; width:100%; justify-content:space-between; margin-top:2px;">
+                    <span style="color:#34D399; font-weight:700;"><i class="material-icons" style="font-size:11px; vertical-align:middle;">videocam</i> 720&times;1280 Klip AI Siap</span>
+                    <a href="../upload/video/demo_task_d1180c7b_darkglass.mp4" target="_blank" style="color:#38BDF8; text-decoration:none;">Buka Video MP4 Dirender &rarr;</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Right: Inspector & Preset Controls -->
+        <section class="inspector-pane">
+
+            <!-- Card 1: Preset Themes Gallery -->
+            <div class="config-card">
+                <div class="config-card-header">
+                    <h2><i class="material-icons">style</i> 1. Pilihan Preset Gaya Motion Graphics</h2>
+                    <span class="badge-pill-status">5 Preset CapCut</span>
+                </div>
+                
+                <div class="preset-grid">
+                    <!-- Preset 1: Dark Glass & Emerald -->
+                    <div class="preset-item active" onclick="selectPreset('theme-dark-glass', this)">
+                        <div class="preset-preview-thumb" style="background:#0F172A; border:1px solid rgba(255,255,255,0.15); color:#FFF;">
+                            <span style="background:#10B981; color:#FFF; padding:2px 6px; border-radius:10px; font-size:9px; margin-right:4px;">STEP 1</span>
+                            <span>Dark Glass</span>
+                        </div>
+                        <div class="preset-title">Dark Glass (Default)</div>
+                        <div class="preset-desc">Glassmorphism gelap, kapsul emerald, teks putih kontras tinggi.</div>
+                    </div>
+
+                    <!-- Preset 2: Minimalist White Frosted -->
+                    <div class="preset-item" onclick="selectPreset('theme-minimal-white', this)">
+                        <div class="preset-preview-thumb" style="background:#FFFFFF; border:1px solid #CBD5E1; color:#0F172A;">
+                            <span style="background:#0F172A; color:#FFF; padding:2px 6px; border-radius:10px; font-size:9px; margin-right:4px;">STEP 1</span>
+                            <span>Clean White</span>
+                        </div>
+                        <div class="preset-title">Minimalist White</div>
+                        <div class="preset-desc">Frosted white glass elegan ala TikTok, sangat jelas di video gelap.</div>
+                    </div>
+
+                    <!-- Preset 3: Warm Amber Gourmet -->
+                    <div class="preset-item" onclick="selectPreset('theme-amber', this)">
+                        <div class="preset-preview-thumb" style="background:#1A1008; border:1px solid rgba(245,158,11,0.4); color:#FFFBEB;">
+                            <span style="background:#F59E0B; color:#29170A; padding:2px 6px; border-radius:10px; font-size:9px; margin-right:4px;">STEP 1</span>
+                            <span>Warm Amber</span>
+                        </div>
+                        <div class="preset-title">Warm Amber Chef</div>
+                        <div class="preset-desc">Nuansa gourmet hangat untuk memanggang, roasting, &amp; browning.</div>
+                    </div>
+
+                    <!-- Preset 4: Floating Slim Pill -->
+                    <div class="preset-item" onclick="selectPreset('theme-floating-pill', this)">
+                        <div class="preset-preview-thumb" style="background:#0F172A; border-radius:20px; border:1px solid rgba(255,255,255,0.2); color:#FFF;">
+                            <span style="background:#10B981; color:#FFF; padding:2px 6px; border-radius:10px; font-size:9px; margin-right:4px;">S1</span>
+                            <span>Slim Pill</span>
+                        </div>
+                        <div class="preset-title">Floating Slim Pill</div>
+                        <div class="preset-desc">Kompak &amp; ramping, tidak menutupi aksi memasak sama sekali.</div>
+                    </div>
+
+                    <!-- Preset 5: Cyber Neon Accent -->
+                    <div class="preset-item" onclick="selectPreset('theme-neon', this)">
+                        <div class="preset-preview-thumb" style="background:#0A0F1E; border:1px solid #06B6D4; color:#FFF; box-shadow:0 0 10px rgba(6,182,212,0.3);">
+                            <span style="background:#06B6D4; color:#000; padding:2px 6px; border-radius:10px; font-size:9px; margin-right:4px;">S1</span>
+                            <span>Neon Glow</span>
+                        </div>
+                        <div class="preset-title">Cyber Neon Glow</div>
+                        <div class="preset-desc">Aksen border neon terang untuk visual energik Shorts &amp; Reels.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: Ukuran Box & Posisi di Layar -->
+            <div class="config-card">
+                <div class="config-card-header">
+                    <h2><i class="material-icons">straighten</i> 2. Proporsi Ukuran Background &amp; Posisi Layar</h2>
+                    <span class="badge-pill-status">Solusi Masalah Text Terpotong</span>
+                </div>
+
+                <div class="form-row">
+                    <!-- Badge Width Sizing -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span>Lebar Badge Overlay:</span>
+                            <span class="val-hint" id="badgeWidthVal">86% (620px pada 720p)</span>
+                        </label>
+                        <select id="selBadgeWidth" class="form-select" onchange="updateBadgeWidth(this.value)">
+                            <option value="76%">Kompak / Ramping (76% — 545px)</option>
+                            <option value="86%" selected>Ideal CapCut (86% — 620px) — Rekomendasi</option>
+                            <option value="92%">Lebar Penuh (92% — 662px)</option>
+                        </select>
+                        <span style="font-size:11px; color:#94A3B8; margin-top:2px;">
+                            <i class="material-icons" style="font-size:12px; vertical-align:middle; color:#10B981;">check_circle</i>
+                            Menghindari teks keluar batas layar kiri (sebelumnya hardcoded 960px pada video 720px).
+                        </span>
+                    </div>
+
+                    <!-- Screen Position -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span>Posisi Vertikal di Layar:</span>
+                            <span class="val-hint" id="badgePosVal">Bawah (Safe Zone)</span>
+                        </label>
+                        <select id="selBadgePosition" class="form-select" onchange="updateBadgePosition(this.value)">
+                            <option value="pos-bottom" selected>Bawah Layar (Bottom Safe Zone — 120px)</option>
+                            <option value="pos-center">Tengah Layar (Center Focus)</option>
+                            <option value="pos-top">Atas Layar (Top Banner — 60px)</option>
+                        </select>
+                        <span style="font-size:11px; color:#94A3B8; margin-top:2px;">
+                            Posisi bawah berada tepat di atas safe area caption TikTok &amp; Reels.
+                        </span>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <!-- Padding / Height -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span>Ketebalan / Padding Box:</span>
+                            <span class="val-hint" id="badgePaddingVal">Compact (12px / 16px)</span>
+                        </label>
+                        <select id="selBadgePadding" class="form-select" onchange="updateBadgePadding(this.value)">
+                            <option value="slim">Slim Minimalis (Padding 8px 14px)</option>
+                            <option value="compact" selected>Compact Balanced (Padding 12px 16px) — Rekomendasi</option>
+                            <option value="spacious">Spacious (Padding 18px 22px)</option>
+                        </select>
+                    </div>
+
+                    <!-- Typography Scale -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span>Ukuran Font Teks Instruksi:</span>
+                            <span class="val-hint" id="fontSizeVal">15px (20pt pada HD)</span>
+                        </label>
+                        <input type="range" id="rngFontSize" min="12" max="20" value="15" oninput="updateFontSize(this.value)">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: Live Text Input & Typing Speed -->
+            <div class="config-card">
+                <div class="config-card-header">
+                    <h2><i class="material-icons">keyboard</i> 3. Simulasi Teks Instruksi &amp; Efek Animasi</h2>
+                    <span class="badge-pill-status">Real-time Typewriter</span>
+                </div>
+
+                <div class="form-row" style="grid-template-columns: 1fr 1fr 1fr;">
+                    <div class="form-group">
+                        <label class="form-label">Awalan Langkah:</label>
+                        <select id="selStepPrefix" class="form-select" onchange="updateStepPrefix(this.value)">
+                            <option value="STEP 7" selected>STEP 7 (Task d1180c7b)</option>
+                            <option value="STEP 1">STEP 1</option>
+                            <option value="LANGKAH 1">LANGKAH 1</option>
+                            <option value="STEP 01">STEP 01</option>
+                            <option value="TAHAP 1">TAHAP 1</option>
+                            <option value="PREP">PREP</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nama Brand / Channel:</label>
+                        <input type="text" id="txtBrandMeta" class="form-input" value="ProteinPrep Studio" placeholder="e.g. @dapur.anda / kosongkan" oninput="updateBrandMeta(this.value)">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span>Kecepatan Ketik:</span>
+                            <span class="val-hint" id="typingSpeedVal">20 FPS</span>
+                        </label>
+                        <input type="range" id="rngTypingSpeed" min="10" max="35" value="20" oninput="updateTypingSpeed(this.value)" style="margin-top:10px;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Teks Instruksi Masak (Ketik untuk Live Preview):</label>
+                    <textarea id="txtSampleInstruction" class="form-textarea" rows="2" oninput="handleTextInput(this.value)">Serve salmon with warm potato salad.</textarea>
+                    
+                    <!-- Quick sample chips -->
+                    <div class="quick-chips">
+                        <button type="button" class="chip-btn" style="border-color:#10B981; color:#34D399;" onclick="setSampleText('Serve salmon with warm potato salad.')">★ Task d1180c7b: Serve salmon...</button>
+                        <button type="button" class="chip-btn" onclick="setSampleText('Isi panci besar dengan air di atas kompor.')">Sample 1: Isi panci...</button>
+                        <button type="button" class="chip-btn" onclick="setSampleText('Aduk madu dan mustard dalam mangkuk kaca dengan whisk.')">Sample 2: Aduk saus...</button>
+                        <button type="button" class="chip-btn" onclick="setSampleText('Tata salmon mentah di keranjang air fryer dan oleskan glasir.')">Sample 3: Tata salmon...</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4: FFmpeg Sync Matrix & Terapkan ke Backend -->
+            <div class="config-card" style="border-color: rgba(16, 185, 129, 0.4);">
+                <div class="config-card-header">
+                    <h2><i class="material-icons" style="color:#10B981;">sync</i> 4. Dimensi Matematika FFmpeg &amp; Sinkronisasi</h2>
+                    <span class="badge-pill-status" style="background:#10B981; color:#000;">Ready to Sync</span>
+                </div>
+
+                <div class="dimension-box">
+                    <div style="color:#CBD5E1; font-weight:600; margin-bottom:4px;">Perhitungan Otomatis Resolusi Video (Dynamic Responsive):</div>
+                    <div class="dimension-grid">
+                        <div class="dim-stat">
+                            <span id="dim720Label">Pada Video 720&times;1280:</span>
+                            <strong id="dim720W">Badge W: 620px (Tinggi 135px)</strong>
+                            <span id="dim720Pos">Offset X: 50px | Offset Y: 1100px</span>
+                        </div>
+                        <div class="dim-stat">
+                            <span id="dim1080Label">Pada Video 1080&times;1920:</span>
+                            <strong id="dim1080W">Badge W: 930px (Tinggi 190px)</strong>
+                            <span id="dim1080Pos">Offset X: 75px | Offset Y: 1650px</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top:16px;">
+                    <button type="button" class="btn-apply-action" onclick="copyConfigToClipboard()">
+                        <i class="material-icons">content_copy</i>
+                        <span>Salin Konfigurasi Desain Ini untuk Disinkronkan ke FFmpeg</span>
+                    </button>
+                    <div id="copyToast" style="display:none; text-align:center; color:#34D399; font-size:12px; margin-top:8px; font-weight:600;">
+                        ✓ Konfigurasi berhasil disalin ke clipboard!
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- JavaScript Interactive Logic -->
+    <script>
+        // State
+        let currentTheme = 'theme-dark-glass';
+        let currentText = 'Serve salmon with warm potato salad.';
+        let currentStep = 'STEP 7';
+        let typingInterval = null;
+        let typingSpeedFps = 20;
+        let isSocialOverlayVisible = true;
+
+        // Elements
+        const motionBadge = document.getElementById('motionBadge');
+        const motionContainer = document.getElementById('motionOverlayContainer');
+        const previewTypewriterText = document.getElementById('previewTypewriterText');
+        const previewStepLabel = document.getElementById('previewStepLabel');
+        const socialOverlay = document.getElementById('socialOverlay');
+        const safeZoneMarker = document.getElementById('safeZoneMarker');
+        const previewVideo = document.getElementById('previewVideoPlayer');
+        const videoFallback = document.getElementById('videoFallbackBg');
+
+        // Handle video playback errors smoothly
+        if (previewVideo) {
+            previewVideo.addEventListener('error', function() {
+                previewVideo.style.display = 'none';
+                videoFallback.style.display = 'flex';
+            });
+        }
+
+        // Toggle Social Overlay & Safe Zone
+        function toggleSocialOverlay() {
+            isSocialOverlayVisible = !isSocialOverlayVisible;
+            if (isSocialOverlayVisible) {
+                socialOverlay.classList.remove('hidden');
+                safeZoneMarker.style.display = 'none';
+                document.getElementById('btnToggleSocial').innerHTML = '<i class="material-icons" style="font-size:16px;">layers</i><span>Hide UI</span>';
+            } else {
+                socialOverlay.classList.add('hidden');
+                safeZoneMarker.style.display = 'block';
+                document.getElementById('btnToggleSocial').innerHTML = '<i class="material-icons" style="font-size:16px;">layers</i><span>Show UI</span>';
+            }
+        }
+
+        // Play/Pause Video
+        function togglePlayVideo() {
+            const btn = document.getElementById('btnPlayPauseVideo');
+            if (previewVideo.paused) {
+                previewVideo.play();
+                btn.innerHTML = '<i class="material-icons" style="font-size:18px;">pause</i>';
+            } else {
+                previewVideo.pause();
+                btn.innerHTML = '<i class="material-icons" style="font-size:18px;">play_arrow</i>';
+            }
+        }
+
+        // Switch Preview Clip dynamically
+        function switchPreviewClip(clipUrl) {
+            if (!previewVideo) return;
+            const isRenderedVideo = clipUrl.indexOf('demo_task_d1180c7b') !== -1;
+            
+            // If viewing pre-rendered FFmpeg video, hide live overlay badge to avoid doubling
+            if (isRenderedVideo) {
+                motionContainer.style.opacity = '0';
+            } else {
+                motionContainer.style.opacity = '1';
+            }
+
+            previewVideo.src = clipUrl;
+            previewVideo.load();
+            previewVideo.play().catch(() => {});
+
+            // Auto adapt sample text if switching to task d1180c7b
+            if (clipUrl.indexOf('clip_p13_s7') !== -1) {
+                updateStepPrefix('STEP 7');
+                const sel = document.getElementById('selStepPrefix');
+                if (sel) sel.value = 'STEP 7';
+                setSampleText('Serve salmon with warm potato salad.');
+            } else if (clipUrl.indexOf('clip_p13_s4') !== -1) {
+                updateStepPrefix('STEP 4');
+                const sel = document.getElementById('selStepPrefix');
+                if (sel) sel.value = 'STEP 4';
+                setSampleText('Place salmon, glaze, air fry.');
+            } else if (clipUrl.indexOf('clip_p13_s2') !== -1) {
+                updateStepPrefix('STEP 2');
+                const sel = document.getElementById('selStepPrefix');
+                if (sel) sel.value = 'STEP 2';
+                setSampleText('Whisk honey, mustard for glaze.');
+            } else if (clipUrl.indexOf('clip_p13_s1') !== -1) {
+                updateStepPrefix('STEP 1');
+                const sel = document.getElementById('selStepPrefix');
+                if (sel) sel.value = 'STEP 1';
+                setSampleText('Fill pot with water, preheat air fryer.');
+            }
+        }
+
+        // Select Preset
+        function selectPreset(themeClass, el) {
+            document.querySelectorAll('.preset-item').forEach(p => p.classList.remove('active'));
+            if (el) el.classList.add('active');
+
+            motionBadge.className = 'motion-badge ' + themeClass;
+            currentTheme = themeClass;
+
+            updateDimensionDisplay();
+            replayTypingAnimation();
+        }
+
+        // Update Badge Width
+        function updateBadgeWidth(val) {
+            motionContainer.style.width = val;
+            const pct = parseInt(val, 10);
+            const w720 = Math.round(720 * (pct / 100));
+            document.getElementById('badgeWidthVal').textContent = `${val} (${w720}px pada 720p)`;
+            updateDimensionDisplay();
+        }
+
+        // Update Position
+        function updateBadgePosition(posClass) {
+            motionContainer.className = 'motion-overlay-container ' + posClass;
+            const labels = {
+                'pos-bottom': 'Bawah (Safe Zone 120px)',
+                'pos-center': 'Tengah Layar',
+                'pos-top': 'Atas Layar (Top 60px)'
+            };
+            document.getElementById('badgePosVal').textContent = labels[posClass] || posClass;
+            updateDimensionDisplay();
+        }
+
+        // Update Padding
+        function updateBadgePadding(style) {
+            if (style === 'slim') {
+                motionBadge.style.padding = '8px 14px';
+                document.getElementById('badgePaddingVal').textContent = 'Slim (8px / 14px)';
+            } else if (style === 'compact') {
+                motionBadge.style.padding = '12px 16px';
+                document.getElementById('badgePaddingVal').textContent = 'Compact (12px / 16px)';
+            } else {
+                motionBadge.style.padding = '18px 22px';
+                document.getElementById('badgePaddingVal').textContent = 'Spacious (18px / 22px)';
+            }
+            updateDimensionDisplay();
+        }
+
+        // Update Font Size
+        function updateFontSize(val) {
+            const content = document.getElementById('previewBadgeContent');
+            content.style.fontSize = val + 'px';
+            const hdEquivalent = Math.round(val * 1.35);
+            document.getElementById('fontSizeVal').textContent = `${val}px (${hdEquivalent}pt pada HD)`;
+        }
+
+        // Update Step Prefix
+        function updateStepPrefix(val) {
+            currentStep = val;
+            previewStepLabel.textContent = val;
+        }
+
+        // Update Brand / Channel Meta Text
+        function updateBrandMeta(val) {
+            const el = document.getElementById('previewBrandMeta');
+            if (el) {
+                const trimmed = (val || '').trim();
+                el.textContent = trimmed;
+                el.style.display = (trimmed === '') ? 'none' : 'block';
+            }
+        }
+
+        // Update Typing Speed
+        function updateTypingSpeed(val) {
+            typingSpeedFps = parseInt(val, 10);
+            document.getElementById('typingSpeedVal').textContent = `${typingSpeedFps} FPS`;
+            replayTypingAnimation();
+        }
+
+        // Handle Text Input
+        function handleTextInput(val) {
+            currentText = val;
+            replayTypingAnimation();
+        }
+
+        function setSampleText(txt) {
+            document.getElementById('txtSampleInstruction').value = txt;
+            handleTextInput(txt);
+        }
+
+        // Typewriter Animation Engine
+        function replayTypingAnimation() {
+            if (typingInterval) {
+                clearInterval(typingInterval);
+            }
+
+            previewTypewriterText.textContent = '';
+            const chars = Array.from(currentText);
+            let charIndex = 0;
+            const delayMs = Math.round(1000 / typingSpeedFps);
+
+            typingInterval = setInterval(() => {
+                if (charIndex < chars.length) {
+                    previewTypewriterText.textContent += chars[charIndex];
+                    charIndex++;
+                } else {
+                    clearInterval(typingInterval);
+                }
+            }, delayMs);
+        }
+
+        // Update Live Dimensions
+        function updateDimensionDisplay() {
+            const widthPct = parseInt(document.getElementById('selBadgeWidth').value, 10) / 100;
+            const w720 = Math.round(720 * widthPct);
+            const posX720 = Math.round((720 - w720) / 2);
+            const w1080 = Math.round(1080 * widthPct);
+            const posX1080 = Math.round((1080 - w1080) / 2);
+
+            document.getElementById('dim720W').textContent = `Badge W: ${w720}px (Lebar Video 720px)`;
+            document.getElementById('dim720Pos').textContent = `Offset X: ${posX720}px (Centered) | Margin: ${posX720}px`;
+
+            document.getElementById('dim1080W').textContent = `Badge W: ${w1080}px (Lebar Video 1080px)`;
+            document.getElementById('dim1080Pos').textContent = `Offset X: ${posX1080}px (Centered) | Margin: ${posX1080}px`;
+        }
+
+        // Copy Config for FFmpeg
+        function copyConfigToClipboard() {
+            const widthPct = parseInt(document.getElementById('selBadgeWidth').value, 10) / 100;
+            const config = {
+                preset_theme: currentTheme.replace('theme-', ''),
+                width_ratio: widthPct,
+                badge_w_720p: Math.round(720 * widthPct),
+                badge_w_1080p: Math.round(1080 * widthPct),
+                badge_padding: document.getElementById('selBadgePadding').value,
+                position: document.getElementById('selBadgePosition').value.replace('pos-', ''),
+                step_prefix: currentStep,
+                fps: typingSpeedFps
+            };
+
+            const jsonStr = JSON.stringify(config, null, 2);
+            navigator.clipboard.writeText(jsonStr).then(() => {
+                const toast = document.getElementById('copyToast');
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 3000);
+            });
+        }
+
+        // Initial setup
+        window.addEventListener('DOMContentLoaded', () => {
+            replayTypingAnimation();
+            updateDimensionDisplay();
+        });
+    </script>
+</body>
+</html>

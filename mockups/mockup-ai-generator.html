@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <title>AI Generator Hub - Mockup Interaktif | Airfry Eats</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,600,700&subset=latin" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Core Css -->
+    <link href="assets/plugins/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="assets/css/waves.css" rel="stylesheet" />
+    <link href="assets/css/animate.css" rel="stylesheet" />
+    <link href="assets/css/theme.css" rel="stylesheet" />
+    <link href="assets/css/styles.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --ai-primary: #6366f1;
+            --ai-primary-hover: #4f46e5;
+            --ai-secondary: #ec4899;
+            --ai-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+            --ai-gradient-gold: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --ai-gradient-subtle: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.08) 100%);
+            --card-border: #e2e8f0;
+            --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06);
+            --card-hover-shadow: 0 14px 30px -5px rgba(99, 102, 241, 0.18);
+        }
+
+        body.poppins {
+            font-family: 'Poppins', 'Roboto', sans-serif;
+            background-color: #f1f5f9;
+        }
+
+        /* Top Bar & Branding */
+        .navbar {
+            background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 60%, #3b82f6 100%) !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .ai-brand-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--ai-gradient);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-left: 8px;
+            box-shadow: 0 2px 8px rgba(168, 85, 247, 0.4);
+        }
+
+        /* Breadcrumb banner */
+        .page-banner {
+            background: white;
+            border-radius: 12px;
+            padding: 24px 28px;
+            margin-bottom: 25px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            border-left: 5px solid #6366f1;
+        }
+        .page-banner h2 {
+            margin: 0 0 6px 0;
+            font-size: 22px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .page-banner p {
+            margin: 0;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        /* ================= HUB CARDS SELECTION ================= */
+        .generator-hub-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+        .hub-card {
+            background: white;
+            border-radius: 16px;
+            border: 2px solid #e2e8f0;
+            padding: 28px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: var(--card-shadow);
+        }
+        .hub-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--card-hover-shadow);
+        }
+        .hub-card.active-card {
+            border-color: #818cf8;
+            background: linear-gradient(180deg, #ffffff 0%, #faf5ff 100%);
+        }
+        .hub-card.disabled-card {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+            opacity: 0.92;
+        }
+        .hub-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 18px;
+        }
+        .hub-icon-wrapper {
+            width: 58px;
+            height: 58px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+        }
+        .hub-icon-wrapper.image-icon {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            color: white;
+        }
+        .hub-icon-wrapper.video-icon {
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            color: #cbd5e1;
+        }
+        .hub-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .hub-badge.ready {
+            background: #dcfce7;
+            color: #15803d;
+            border: 1px solid #86efac;
+        }
+        .hub-badge.dev {
+            background: #fef3c7;
+            color: #b45309;
+            border: 1px solid #fcd34d;
+        }
+        .hub-card h3 {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .hub-card p {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+        .hub-feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 24px 0;
+        }
+        .hub-feature-list li {
+            font-size: 12px;
+            color: #334155;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .hub-feature-list li i {
+            font-size: 16px;
+        }
+        .hub-feature-list li.check i { color: #10b981; }
+        .hub-feature-list li.pending i { color: #f59e0b; }
+
+        .btn-hub-action {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-hub-primary {
+            background: var(--ai-gradient);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+        }
+        .btn-hub-primary:hover {
+            box-shadow: 0 6px 18px rgba(99, 102, 241, 0.5);
+            color: white;
+            transform: translateY(-1px);
+        }
+        .btn-hub-disabled {
+            background: #e2e8f0;
+            color: #64748b;
+            cursor: pointer;
+        }
+        .btn-hub-disabled:hover {
+            background: #cbd5e1;
+            color: #334155;
+        }
+
+        /* ================= TABS NAVIGATION ================= */
+        .nav-tabs.ai-tabs {
+            border-bottom: 2px solid #e2e8f0;
+            margin-bottom: 0;
+            background: white;
+            border-radius: 12px 12px 0 0;
+            padding: 8px 16px 0 16px;
+        }
+        .nav-tabs.ai-tabs > li > a {
+            border: none !important;
+            color: #64748b;
+            font-weight: 600;
+            font-size: 13px;
+            padding: 12px 20px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .nav-tabs.ai-tabs > li.active > a {
+            color: var(--ai-primary) !important;
+            background: rgba(99, 102, 241, 0.08) !important;
+            border-bottom: 3px solid var(--ai-primary) !important;
+        }
+        .tab-card {
+            background: white;
+            border-radius: 0 0 12px 12px;
+            box-shadow: var(--card-shadow);
+            padding: 30px;
+            margin-bottom: 50px;
+        }
+
+        /* ================= WATERFALL VISUALIZER ================= */
+        .waterfall-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+        .waterfall-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .waterfall-node {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px 16px;
+            transition: all 0.2s;
+        }
+        .waterfall-node.primary {
+            border-left: 4px solid #6366f1;
+            background: #f5f3ff;
+        }
+        .waterfall-node.fallback {
+            border-left: 4px solid #f59e0b;
+        }
+        .waterfall-node.last {
+            border-left: 4px solid #64748b;
+        }
+        .waterfall-step-badge {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 700;
+            margin-right: 12px;
+        }
+        .waterfall-step-badge.primary-badge {
+            background: #6366f1;
+            color: white;
+        }
+        .waterfall-step-badge.fallback-badge {
+            background: #f59e0b;
+            color: white;
+        }
+        .waterfall-connector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 0;
+        }
+        .waterfall-connector i {
+            font-size: 16px;
+            margin-right: 4px;
+        }
+
+        /* ================= API KEY POOL TABLE ================= */
+        .key-pool-table th {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #64748b;
+            border-bottom: 2px solid #e2e8f0 !important;
+        }
+        .key-pool-table td {
+            vertical-align: middle !important;
+            font-size: 12px;
+        }
+        .key-tag {
+            font-family: monospace;
+            background: #f1f5f9;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #0f172a;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Image Generator Stepper */
+        .step-stepper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 35px;
+            position: relative;
+            padding: 0 10px;
+        }
+        .step-stepper::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 40px;
+            right: 40px;
+            height: 3px;
+            background: #e2e8f0;
+            z-index: 1;
+        }
+        .stepper-item {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: pointer;
+        }
+        .stepper-circle {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: white;
+            border: 3px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 15px;
+            color: #64748b;
+            transition: all 0.3s;
+        }
+        .stepper-item.active .stepper-circle {
+            border-color: #6366f1;
+            background: #6366f1;
+            color: white;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+        }
+        .stepper-item.completed .stepper-circle {
+            border-color: #10b981;
+            background: #10b981;
+            color: white;
+        }
+        .stepper-title {
+            margin-top: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #64748b;
+        }
+        .stepper-item.active .stepper-title {
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        /* Preset Cards */
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+        .preset-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 12px 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+        .preset-card:hover {
+            border-color: #818cf8;
+            transform: translateY(-2px);
+        }
+        .preset-card.selected {
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.05);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+        }
+        .preset-card h5 {
+            margin: 0 0 4px 0;
+            font-size: 13px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        .preset-card small {
+            color: #64748b;
+            font-size: 11px;
+            line-height: 1.4;
+            display: block;
+        }
+
+        .btn-ai-count {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            font-weight: 600;
+            font-size: 12px;
+            padding: 8px 10px;
+            transition: all 0.2s ease;
+        }
+        .btn-ai-count:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+        .btn-ai-count.active {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%) !important;
+            color: #ffffff !important;
+            border-color: #6366f1 !important;
+            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.35);
+        }
+
+        /* Toast */
+        #ai-toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #1e293b;
+            color: white;
+            padding: 14px 22px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+            z-index: 99999;
+        }
+    </style>
+</head>
+
+<body class="theme-blue poppins">
+    <!-- Top Bar -->
+    <nav class="navbar">
+        <div class="container-fluid">
+            <div class="navbar-header" style="display:flex; align-items:center;">
+                <a href="javascript:void(0);" class="bars" style="margin-right:15px; color:white;"></a>
+                <a class="navbar-brand" href="dashboard.php" style="display:flex; align-items:center; font-weight:700;">
+                    AIRFRY EATS <span class="ai-brand-badge"><i class="material-icons" style="font-size:13px;">auto_awesome</i> AI STUDIO</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar Menu Mockup -->
+    <section>
+        <aside id="leftsidebar" class="sidebar" style="width:260px;">
+            <div class="menu">
+                <ul class="list">
+                    <li class="header">NAVIGASI UTAMA</li>
+                    <li>
+                        <a href="dashboard.php">
+                            <i class="material-icons">dashboard</i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="category.php">
+                            <i class="material-icons">category</i>
+                            <span>Kategori Resep</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="recipes.php">
+                            <i class="material-icons">restaurant_menu</i>
+                            <span>Kelola Resep</span>
+                        </a>
+                    </li>
+                    
+                    <!-- NEW ACCORDION / EXPANDED AI GENERATOR MENU -->
+                    <li class="active">
+                        <a href="javascript:void(0);" class="menu-toggle" style="background:#f8fafc; font-weight:700; color:#4338ca;">
+                            <i class="material-icons" style="color:#6366f1;">auto_awesome</i>
+                            <span>AI Generator</span>
+                        </a>
+                        <ul class="ml-menu" style="display:block;">
+                            <li class="active">
+                                <a href="javascript:void(0);" onclick="scrollToHubSection('image')" style="color:#6366f1; font-weight:600;">
+                                    <i class="material-icons" style="font-size:16px;">image</i>
+                                    <span>Image Generator</span>
+                                </a>
+                            </li>
+                            <li style="opacity:0.65;">
+                                <a href="javascript:void(0);" onclick="openVideoDevModal()">
+                                    <i class="material-icons" style="font-size:16px;">videocam</i>
+                                    <span>Video Generator</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <li>
+                        <a href="settings.php">
+                            <i class="material-icons">settings</i>
+                            <span>Pengaturan Umum</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+    </section>
+
+    <!-- Main Content Area -->
+    <section class="content" style="margin-left:260px; padding:95px 25px 50px 25px;">
+        <div class="container-fluid">
+
+            <!-- Banner Header -->
+            <div class="page-banner">
+                <div>
+                    <h2>
+                        <i class="material-icons" style="color:#6366f1; font-size:28px;">auto_awesome</i>
+                        AI Generator Hub
+                    </h2>
+                    <p>Studio Kreativitas Multimedia bertenaga AI untuk memproduksi aset fotografi & video promosi aplikasi <strong>Airfry Eats</strong>.</p>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn btn-default" onclick="switchActiveTab('tab-settings')" style="display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; border-radius:6px;">
+                        <i class="material-icons" style="font-size:16px; color:#6366f1;">dns</i> Pool API & Waterfall
+                    </button>
+                    <button class="btn btn-default" onclick="switchActiveTab('tab-history')" style="display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:600; border-radius:6px;">
+                        <i class="material-icons" style="font-size:16px;">history</i> Riwayat
+                    </button>
+                </div>
+            </div>
+
+            <!-- ==================================================================== -->
+            <!-- 1. HUB CARD SELECTION: IMAGE GENERATOR & VIDEO GENERATOR -->
+            <!-- ==================================================================== -->
+            <div style="margin-bottom:15px;">
+                <h4 style="margin:0 0 6px 0; font-size:15px; font-weight:700; color:#1e293b; text-transform:uppercase; letter-spacing:0.5px;">
+                    <i class="material-icons" style="font-size:18px; vertical-align:middle; color:#6366f1;">apps</i>
+                    PILIH MODUL GENERATOR:
+                </h4>
+                <p style="margin:0; font-size:13px; color:#64748b;">Pilih jenis media yang ingin Anda rancang untuk meningkatkan daya tarik resep.</p>
+            </div>
+
+            <div class="generator-hub-grid">
+                <!-- CARD 1: IMAGE GENERATOR (ACTIVE) -->
+                <div class="hub-card active-card" id="card-image-gen" onclick="toggleImageStudio()" style="cursor:pointer;">
+                    <div>
+                        <div class="hub-card-header">
+                            <div class="hub-icon-wrapper image-icon">
+                                <i class="material-icons" style="font-size:32px;">photo_camera</i>
+                            </div>
+                            <span class="hub-badge ready">
+                                <i class="material-icons" style="font-size:12px; vertical-align:middle;">check_circle</i> Siap Digunakan
+                            </span>
+                        </div>
+                        <h3>AI Recipe Image Generator</h3>
+                        <p>Hasilkan fotografi makanan fotorealistis dengan resolusi tinggi. Otak prompt membaca resep dengan <strong>Gemini Flash</strong> lalu dirender cepat oleh <strong>G-Labs Webhook</strong>.</p>
+                        
+                        <ul class="hub-feature-list">
+                            <li class="check"><i class="material-icons">check</i> Perumusan Prompt Otomatis berbasis Bahan Resep</li>
+                            <li class="check"><i class="material-icons">check</i> 4 Preset Estetika (Rustic, Fine Dining, Macro, Flatlay)</li>
+                            <li class="check"><i class="material-icons">check</i> Komparasi Side-by-Side dengan Foto Asli Resep</li>
+                            <li class="check"><i class="material-icons">check</i> 1-Click Terapkan ke Resep + 1-Click Revert Backup</li>
+                        </ul>
+                    </div>
+
+                    <button class="btn-hub-action btn-hub-primary" id="btn-mockup-open" onclick="event.stopPropagation(); toggleImageStudio();">
+                        <span id="text-mockup-open">Buka Image Generator Studio</span>
+                        <i class="material-icons" id="icon-mockup-open" style="font-size:18px;">arrow_forward</i>
+                    </button>
+                </div>
+
+                <!-- CARD 2: VIDEO GENERATOR (UNDER DEVELOPMENT) -->
+                <div class="hub-card disabled-card" id="card-video-gen" onclick="openVideoDevModal()" style="cursor:pointer;">
+                    <div>
+                        <div class="hub-card-header">
+                            <div class="hub-icon-wrapper video-icon">
+                                <i class="material-icons" style="font-size:32px;">videocam</i>
+                            </div>
+                            <span class="hub-badge dev">
+                                <i class="material-icons" style="font-size:12px; vertical-align:middle;">lock</i> Under Development
+                            </span>
+                        </div>
+                        <h3>AI Recipe Video Generator</h3>
+                        <p>Generate video b-roll dan teaser resep pendek sinematik berdurasi 5-10 detik untuk platform <strong>TikTok, Reels & YouTube Shorts</strong> menggunakan engine <strong>G-Labs Video (Wan 2.1 / Kling AI)</strong>.</p>
+                        
+                        <ul class="hub-feature-list">
+                            <li class="pending"><i class="material-icons">schedule</i> Animasi Panas Uap & Tekstur Garing Mengembang</li>
+                            <li class="pending"><i class="material-icons">schedule</i> Format Vertikal 9:16 Siap Upload ke Media Sosial</li>
+                            <li class="pending"><i class="material-icons">schedule</i> Integrasi Voiceover Narasi & Sound Effect Memasak</li>
+                            <li class="pending"><i class="material-icons">schedule</i> Auto-render Multi-Clip Step Memasak Air Fryer</li>
+                        </ul>
+                    </div>
+
+                    <button class="btn-hub-action btn-hub-disabled" onclick="event.stopPropagation(); openVideoDevModal();">
+                        <i class="material-icons" style="font-size:18px; color:#f59e0b;">info</i>
+                        <span>Lihat Rencana & Fitur Preview</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ==================================================================== -->
+            <!-- 2. STUDIO TABS: IMAGE GENERATOR | RIWAYAT | PENGATURAN POOL & WATERFALL -->
+            <!-- ==================================================================== -->
+            <div id="studio-section" style="display:none; margin-top:25px;">
+                <!-- Studio Control Bar -->
+                <div style="display:flex; justify-content:space-between; align-items:center; background:white; border:1px solid #e2e8f0; border-radius:12px; padding:14px 20px; margin-bottom:20px; box-shadow:var(--card-shadow); flex-wrap:wrap; gap:12px;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <div style="width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg, #6366f1 0%, #a855f7 100%); display:flex; align-items:center; justify-content:center; color:white; box-shadow:0 4px 10px rgba(99,102,241,0.25);">
+                            <i class="material-icons" style="font-size:22px;">photo_camera</i>
+                        </div>
+                        <div>
+                            <h4 style="margin:0 0 2px 0; font-size:15px; font-weight:700; color:#1e293b;">
+                                AI Recipe Image Studio
+                                <span class="label label-success" style="font-size:10px; border-radius:4px; vertical-align:middle; margin-left:6px;">AKTIF</span>
+                            </h4>
+                            <div style="font-size:11px; color:#64748b;">Pilih tab di bawah untuk merancang foto resep, eksplorasi prompt bebas, riwayat galeri, atau kelola pool API.</div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-default" onclick="toggleImageStudio()" style="border-radius:6px; font-size:12px; font-weight:600; display:inline-flex; align-items:center; gap:5px; background:#f8fafc;">
+                        <i class="material-icons" style="font-size:16px; color:#64748b;">expand_less</i> Sembunyikan Studio / Kembali ke Pilihan
+                    </button>
+                </div>
+
+                <ul class="nav nav-tabs ai-tabs" role="tablist">
+                    <li role="presentation" class="active" id="tab-nav-image">
+                        <a href="javascript:void(0);" onclick="switchActiveTab('tab-image')">
+                            <i class="material-icons">restaurant_menu</i> 1. Studio Image Generator
+                        </a>
+                    </li>
+                    <li role="presentation" id="tab-nav-custom">
+                        <a href="javascript:void(0);" onclick="switchActiveTab('tab-custom')">
+                            <i class="material-icons">palette</i> 2. Custom T2I Studio
+                        </a>
+                    </li>
+                    <li role="presentation" id="tab-nav-history">
+                        <a href="javascript:void(0);" onclick="switchActiveTab('tab-history')">
+                            <i class="material-icons">history</i> 3. Riwayat Foto & Backup
+                        </a>
+                    </li>
+                    <li role="presentation" id="tab-nav-settings">
+                        <a href="javascript:void(0);" onclick="switchActiveTab('tab-settings')">
+                            <i class="material-icons">dns</i> 4. Pool API & Waterfall
+                            <span class="badge" style="background:#10b981; font-size:10px;">3 Kunci</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="tab-card">
+                    
+                    <!-- TAB 1: STUDIO IMAGE GENERATOR (1 KOLOM) -->
+                    <div id="tab-image" class="tab-pane active">
+                        <!-- Stepper -->
+                        <div class="step-stepper">
+                            <div class="stepper-item active" id="stepper-1" onclick="jumpToStep(1)">
+                                <div class="stepper-circle">1</div>
+                                <div class="stepper-title">Pilih Resep & Gaya</div>
+                            </div>
+                            <div class="stepper-item" id="stepper-2">
+                                <div class="stepper-circle">2</div>
+                                <div class="stepper-title">Review Prompt Gemini</div>
+                            </div>
+                            <div class="stepper-item" id="stepper-3">
+                                <div class="stepper-circle">3</div>
+                                <div class="stepper-title">Render G-Labs & Terapkan</div>
+                            </div>
+                        </div>
+
+                        <!-- Step 1 Content (1 Kolom) -->
+                        <div id="step-section-1">
+                            <!-- 1.1 Pilih Resep -->
+                            <div class="form-group" style="margin-bottom:20px;">
+                                <label style="font-weight:700; color:#1e293b; font-size:13px; display:block; margin-bottom:8px;">
+                                    <i class="material-icons" style="font-size:16px; vertical-align:middle; color:#6366f1;">restaurant_menu</i>
+                                    PILIH RESEP DARI DATABASE:
+                                </label>
+                                <select class="form-control" id="select-recipe" style="border-radius:8px; height:45px; font-size:13px; font-weight:600; border:2px solid #cbd5e1;">
+                                    <option value="1">Crispy Air Fryer Buffalo Chicken Wings (Category: Chicken)</option>
+                                    <option value="2">Glazed Atlantic Salmon with Asparagus (Category: Seafood)</option>
+                                    <option value="3">Authentic Javanese Fried Rice (Category: Rice & Main)</option>
+                                </select>
+                            </div>
+
+                            <!-- Recipe Preview Card (Full Width) -->
+                            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:18px; display:flex; gap:18px; align-items:center; margin-bottom:25px;">
+                                <img src="upload/ai_demo_wings.jpg" style="width:90px; height:90px; border-radius:10px; object-fit:cover; border:2px solid white; box-shadow:0 4px 10px rgba(0,0,0,0.1);" />
+                                <div>
+                                    <span class="label label-primary" style="border-radius:4px; font-size:10px;">Chicken & Poultry</span>
+                                    <h4 style="margin:6px 0 4px 0; font-size:15px; font-weight:700; color:#1e293b;">Crispy Air Fryer Buffalo Chicken Wings</h4>
+                                    <p style="margin:0; font-size:12px; color:#64748b;">Sayap ayam goreng renyah sempurna dengan bumbu pedas buffalo glaze, disajikan dengan saus ranch.</p>
+                                </div>
+                            </div>
+
+                            <!-- Style Presets (Full Width) -->
+                            <div style="margin-bottom:25px;">
+                                <label style="font-weight:700; color:#1e293b; font-size:13px; display:block; margin-bottom:8px;">
+                                    <i class="material-icons" style="font-size:16px; vertical-align:middle; color:#6366f1;">photo_filter</i>
+                                    PILIH PRESET GAYA FOTOGRAFI:
+                                </label>
+                                <div class="preset-grid">
+                                    <div class="preset-card selected" onclick="selectPreset(this, 'Rustic Kitchen Table')">
+                                        <h5>Rustic Kitchen Table</h5>
+                                        <small>Alas kayu gelap, bumbu tersebar alami, cahaya jendela hangat.</small>
+                                    </div>
+                                    <div class="preset-card" onclick="selectPreset(this, 'Modern Fine Dining')">
+                                        <h5>Modern Fine Dining</h5>
+                                        <small>Piring keramik slate abu-abu, garnish microgreens, rim lighting.</small>
+                                    </div>
+                                    <div class="preset-card" onclick="selectPreset(this, 'Crispy Macro Close-Up')">
+                                        <h5>Crispy Macro Close-Up</h5>
+                                        <small>Fokus tekstur garing renyah, uap hangat mengepul lembut.</small>
+                                    </div>
+                                    <div class="preset-card" onclick="selectPreset(this, 'Top-Down Flatlay')">
+                                        <h5>Top-Down Flatlay</h5>
+                                        <small>Foto simetris dari atas meja marmer putih ala majalah kuliner.</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Parameter Generator (1 Kolom Full Width Card) -->
+                            <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:22px; margin-bottom:25px;">
+                                <h4 style="margin:0 0 16px 0; font-size:14px; font-weight:700; color:#1e293b;">
+                                    <i class="material-icons" style="font-size:16px; vertical-align:middle; color:#6366f1;">tune</i>
+                                    PARAMETER GENERATOR & FORMAT GAMBAR
+                                </h4>
+
+                                <!-- Strict Count Picker -->
+                                <div class="form-group" style="margin-bottom:18px;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                        <label style="font-size:12px; font-weight:600; color:#475569; margin:0;">Jumlah Prompt yang Dibuat:</label>
+                                        <span id="badge-count-info" class="badge" style="background:#ede9fe; color:#6d28d9; font-size:11px; font-weight:700;">1 Variasi Prompt</span>
+                                    </div>
+                                    <div class="btn-group btn-group-justified" role="group">
+                                        <div class="btn-group"><button type="button" class="btn btn-ai-count active" onclick="selectCount(1, this)">1 Variasi</button></div>
+                                        <div class="btn-group"><button type="button" class="btn btn-ai-count" onclick="selectCount(2, this)">2 Variasi</button></div>
+                                        <div class="btn-group"><button type="button" class="btn btn-ai-count" onclick="selectCount(3, this)">3 Variasi</button></div>
+                                        <div class="btn-group"><button type="button" class="btn btn-ai-count" onclick="selectCount(4, this)">4 Variasi</button></div>
+                                    </div>
+                                    <small style="color:#64748b; font-size:11px; margin-top:4px; display:block;">Pilih berapa konsep prompt T2I yang ingin dirancang oleh Gemini.</small>
+                                </div>
+
+                                <!-- Aspect Ratio -->
+                                <div class="form-group" style="margin-bottom:18px;">
+                                    <label style="font-size:12px; font-weight:600; color:#475569;">Aspek Rasio Gambar:</label>
+                                    <select class="form-control" style="font-size:12px; border-radius:6px; height:40px;">
+                                        <option value="1:1" selected>1:1 Square (1024x1024) - Standar Aplikasi Mobile</option>
+                                        <option value="4:3">4:3 Landscape (Tradisional)</option>
+                                        <option value="16:9">16:9 Wide (Banner Resep)</option>
+                                    </select>
+                                    <small style="color:#64748b; font-size:11px; margin-top:4px; display:block;">Format proporsi foto yang akan diproduksi oleh G-Labs.</small>
+                                </div>
+
+                                <!-- Resilient Engine Info -->
+                                <div style="background:white; border:1px solid #e2e8f0; border-radius:8px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                        <i class="material-icons" style="color:#6366f1; font-size:18px;">bolt</i>
+                                        <span style="font-size:12px; font-weight:600; color:#334155;">Mesin Aktif:</span>
+                                    </div>
+                                    <div style="display:flex; gap:15px; flex-wrap:wrap;">
+                                        <span style="font-size:12px; color:#475569;">Prompt Brain: <strong class="label label-info" style="border-radius:4px;">gemini-3.7-flash</strong></span>
+                                        <span style="font-size:12px; color:#475569;">API Pool: <strong class="label label-success" style="border-radius:4px;">3 Kunci Aktif</strong></span>
+                                        <span style="font-size:12px; color:#475569;">Image Generator: <strong class="label" style="background:#8b5cf6; color:white; border-radius:4px;">G-Labs (nano_banana_2)</strong></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Button (1 Kolom Full Width) -->
+                            <button id="btn-start-prompt" type="button" class="btn btn-hub-action btn-hub-primary" style="width:100%; justify-content:center; font-size:15px; padding:14px; font-weight:700; border-radius:10px;" onclick="simulateGeneratePrompt()">
+                                <i class="material-icons">psychology</i>
+                                <span>Langkah 1: Rancang Prompt T2I dengan Gemini Flash</span>
+                            </button>
+                        </div>
+
+                        <!-- Step 2 Content -->
+                        <div id="step-section-2" style="display:none;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                                <div>
+                                    <h3 style="margin:0 0 4px 0; font-size:17px; font-weight:700; color:#1e293b;">
+                                        <i class="material-icons" style="color:#6366f1; vertical-align:middle;">rate_review</i>
+                                        Review Prompt Text-to-Image (T2I)
+                                    </h3>
+                                    <p style="margin:0; font-size:12px; color:#64748b;">Gemini merumuskan prompt fotorealistik. Anda dapat menyesuaikan teks sebelum dikirim ke G-Labs.</p>
+                                </div>
+                                <div style="display:flex; gap:10px;">
+                                    <button class="btn btn-default" onclick="jumpToStep(1)" style="font-size:12px; border-radius:6px;">
+                                        <i class="material-icons" style="font-size:15px; vertical-align:middle;">arrow_back</i> Kembali
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="prompt-cards-container">
+                                <!-- Rendered dynamically based on selected count -->
+                            </div>
+
+                            <div style="background:#f1f5f9; border-radius:12px; padding:20px; display:flex; justify-content:space-between; align-items:center; margin-top:25px;">
+                                <div>
+                                    <h4 style="margin:0 0 4px 0; font-size:14px; font-weight:700; color:#1e293b;">Siap Render ke Gambar Fotorealistis?</h4>
+                                    <p style="margin:0; font-size:12px; color:#64748b;">G-Labs Webhook akan memproses prompt di atas menjadi foto resolusi 1024x1024.</p>
+                                </div>
+                                <button class="btn btn-hub-action btn-hub-primary" style="width:auto; padding:10px 24px;" onclick="simulateRenderImages()">
+                                    <i class="material-icons">camera</i> Kirim ke G-Labs Webhook
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 3 Content -->
+                        <div id="step-section-3" style="display:none;">
+                            <div style="text-align:center; padding:30px 10px;">
+                                <div style="display:inline-flex; width:64px; height:64px; border-radius:50%; background:#dcfce7; color:#15803d; align-items:center; justify-content:center; margin-bottom:15px;">
+                                    <i class="material-icons" style="font-size:36px;">check</i>
+                                </div>
+                                <h3 style="margin:0 0 6px 0; font-size:18px; font-weight:700; color:#1e293b;">Render Gambar Berhasil Diselesaikan!</h3>
+                                <p style="margin:0 auto 25px auto; max-width:550px; font-size:13px; color:#64748b;">Bandingkan hasil foto AI dengan foto resep saat ini. Klik <strong>"Terapkan ke Resep"</strong> untuk mengganti foto aplikasi secara permanen.</p>
+
+                                <div class="row" style="max-width:800px; margin:0 auto 30px auto;">
+                                    <div class="col-sm-6">
+                                        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:14px; text-align:left;">
+                                            <span class="label label-default" style="font-size:10px;">FOTO RESEP SEBELUMNYA</span>
+                                            <h5 style="margin:8px 0; font-size:13px; font-weight:700;">Foto Asli Aplikasi</h5>
+                                            <img src="upload/ai_demo_wings.jpg" style="width:100%; height:220px; object-fit:cover; border-radius:8px;" />
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div style="background:#f5f3ff; border:2px solid #818cf8; border-radius:12px; padding:14px; text-align:left;">
+                                            <span class="label label-primary" style="font-size:10px;">HASIL RENDER G-LABS AI</span>
+                                            <h5 style="margin:8px 0; font-size:13px; font-weight:700; color:#4338ca;">Foto Baru Siap Diterapkan</h5>
+                                            <img src="upload/ai_demo_wings.jpg" style="width:100%; height:220px; object-fit:cover; border-radius:8px;" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="display:flex; justify-content:center; gap:12px;">
+                                    <button class="btn btn-default" onclick="jumpToStep(1)" style="border-radius:8px; font-size:13px; font-weight:600; padding:10px 20px;">
+                                        <i class="material-icons" style="font-size:16px; vertical-align:middle;">close</i> Tolak / Batal
+                                    </button>
+                                    <button class="btn btn-success" onclick="applyRecipeImage()" style="background:#10b981; border:none; border-radius:8px; font-size:13px; font-weight:700; padding:10px 24px;">
+                                        <i class="material-icons" style="font-size:16px; vertical-align:middle;">check_circle</i> Terapkan ke Resep
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- TAB 2: CUSTOM T2I STUDIO (1 KOLOM) -->
+                    <div id="tab-custom" class="tab-pane" style="display:none;">
+                        <div style="margin-bottom:20px;">
+                            <h3 style="margin:0 0 6px 0; font-size:18px; font-weight:700; color:#1e293b;">
+                                <i class="material-icons" style="color:#a855f7; vertical-align:middle;">palette</i>
+                                Custom Text-to-Image Studio
+                            </h3>
+                            <p style="margin:0; font-size:13px; color:#64748b;">Ketik prompt makanan bebas tanpa harus memilih resep database. Cocok untuk gambar banner kategori, promosi musiman, atau eksplorasi ide kuliner.</p>
+                        </div>
+
+                        <!-- Tips Prompt Makanan Callout (Full Width) -->
+                        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-left:4px solid #a855f7; border-radius:8px; padding:14px 18px; margin-bottom:22px;">
+                            <h5 style="margin:0 0 6px 0; font-size:13px; font-weight:700; color:#1e293b;">
+                                <i class="material-icons" style="font-size:16px; vertical-align:middle; color:#a855f7;">lightbulb</i>
+                                Tips Perumusan Prompt Makanan Fotorealistis:
+                            </h5>
+                            <div style="font-size:12px; color:#64748b; line-height:1.6;">
+                                • <strong>Tekstur & Keadaan:</strong> <i>"crispy blistered golden skin, steaming hot vapor, glistening honey glaze"</i><br>
+                                • <strong>Pencahayaan & Suasana:</strong> <i>"warm afternoon window sunlight, rim lighting, atmospheric depth"</i><br>
+                                • <strong>Alas & Perlengkapan:</strong> <i>"dark matte ceramic plate on rustic reclaimed wood, scattered herbs"</i><br>
+                                • <strong>Kamera & Lensa:</strong> <i>"85mm macro lens, shallow depth of field, photorealistic 8k food photography"</i>
+                            </div>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom:15px;">
+                            <label style="font-weight:700; font-size:13px; color:#1e293b;">Tulis Prompt Lengkap (Bahasa Inggris disarankan):</label>
+                            <textarea class="form-control" rows="5" id="custom-prompt-input" style="border-radius:8px; font-size:13px; padding:14px; line-height:1.5;" placeholder="Contoh: Modern air fryer appliance sitting on an elegant kitchen marble island, filled with golden crispy hand-cut french fries, soft natural morning sunlight shining through window, cinematic depth of field, 8k resolution...">Air fryer crispy chicken tenders served on rustic slate plate, golden breadcrumbs, natural sunlight from kitchen window, steam vapor, microgreens garnish, 8k food photography.</textarea>
+                        </div>
+
+                        <div style="display:flex; gap:8px; margin-bottom:22px; flex-wrap:wrap; align-items:center;">
+                            <span style="font-size:12px; font-weight:600; color:#64748b;">Contoh Cepat:</span>
+                            <button type="button" class="btn btn-xs btn-default" onclick="showToast('Prompt 1 dipilih')">🍟 Airfryer French Fries</button>
+                            <button type="button" class="btn btn-xs btn-default" onclick="showToast('Prompt 2 dipilih')">🐟 Crispy Salmon Fillet</button>
+                            <button type="button" class="btn btn-xs btn-default" onclick="showToast('Prompt 3 dipilih')">🍫 Lava Cake</button>
+                        </div>
+
+                        <!-- Parameter Box (Desain 1 Kolom) -->
+                        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:20px; margin-bottom:25px;">
+                            <div class="form-group" style="margin-bottom:16px;">
+                                <label style="font-size:12px; font-weight:700; color:#475569;">Aspek Rasio:</label>
+                                <select class="form-control" style="border-radius:6px; font-size:12px; height:40px;">
+                                    <option value="1:1" selected>1:1 Square (Mobile App Feed)</option>
+                                    <option value="16:9">16:9 Landscape (Banner Slider)</option>
+                                    <option value="4:3">4:3 Classic Photo</option>
+                                </select>
+                                <small style="color:#64748b; font-size:11px; margin-top:4px; display:block;">Pilih rasio aspek sesuai media penempatan gambar.</small>
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label style="font-size:12px; font-weight:700; color:#475569;">Model Render G-Labs:</label>
+                                <select class="form-control" style="border-radius:6px; font-size:12px; height:40px;">
+                                    <option value="nano_banana_2" selected>nano_banana_2 (Default Flow - Cepat & Konsisten)</option>
+                                    <option value="nano_banana_pro">nano_banana_pro (Ultra Detail Photorealism)</option>
+                                    <option value="nano_pics">nano_pics (Google Pics via Google Accounts)</option>
+                                </select>
+                                <small style="color:#64748b; font-size:11px; margin-top:4px; display:block;">Model generator yang bertugas merender prompt ke gambar.</small>
+                            </div>
+                        </div>
+
+                        <!-- Action Button (Full Width) -->
+                        <button class="btn btn-hub-action btn-hub-primary" style="width:100%; justify-content:center; font-size:15px; padding:14px; font-weight:700; border-radius:10px;" onclick="showToast('Mengirim task Custom T2I ke G-Labs...')">
+                            <i class="material-icons">auto_awesome</i>
+                            Render Gambar via G-Labs Webhook
+                        </button>
+                    </div>
+
+                    <!-- TAB 3: RIWAYAT -->
+                    <div id="tab-history" class="tab-pane" style="display:none;">
+                        <h4 style="margin:0 0 15px 0; font-size:16px; font-weight:700; color:#1e293b;">Riwayat Generasi Foto & Backup Revert</h4>
+                        <table class="table table-bordered table-striped" style="font-size:12px;">
+                            <thead>
+                                <tr style="background:#f8fafc;">
+                                    <th>ID</th>
+                                    <th>Resep</th>
+                                    <th>Model Digunakan</th>
+                                    <th>Foto Dihasilkan</th>
+                                    <th>Status</th>
+                                    <th>Aksi Revert</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>#3</td>
+                                    <td><strong>Authentic Javanese Fried Rice</strong></td>
+                                    <td><span class="label label-info">gemini-3.7-flash</span></td>
+                                    <td><img src="upload/ai_demo_wings.jpg" style="width:50px; height:50px; border-radius:6px; object-fit:cover;" /></td>
+                                    <td><span class="label label-success">Applied</span></td>
+                                    <td><button class="btn btn-xs btn-default" onclick="showToast('Foto dikembalikan ke versi original!')"><i class="material-icons" style="font-size:13px;">undo</i> Revert</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- TAB 4: POOL API KEY & WATERFALL FALLBACK SETTINGS (1 KOLOM) -->
+                    <div id="tab-settings" class="tab-pane" style="display:none;">
+                        
+                        <!-- SECTION 1: GEMINI API KEY POOL -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #e2e8f0; padding-bottom:10px;">
+                            <div>
+                                <h4 style="margin:0 0 4px 0; font-size:16px; font-weight:700; color:#1e293b;">
+                                    <i class="material-icons" style="color:#6366f1; vertical-align:middle;">vpn_key</i>
+                                    1. Pool API Key Google Gemini (Multi-Key Rotation)
+                                </h4>
+                                <p style="margin:0; font-size:12px; color:#64748b;">Sistem rotasi cerdas otomatis berganti kunci jika terjadi error 429 (Rate Limit / Kuota Harian).</p>
+                            </div>
+                            <div style="display:flex; gap:8px;">
+                                <button class="btn btn-default" onclick="testAllKeys()" style="font-size:12px; border-radius:6px; font-weight:600;">
+                                    <i class="material-icons" style="font-size:15px; vertical-align:middle;">network_check</i> Tes Semua Kunci
+                                </button>
+                                <button class="btn btn-primary" onclick="openAddKeyModal()" style="background:#6366f1; border:none; font-size:12px; border-radius:6px; font-weight:600;">
+                                    <i class="material-icons" style="font-size:15px; vertical-align:middle;">add</i> Tambah Kunci Baru
+                                </button>
+                            </div>
+                        </div>
+
+                        <table class="table table-hover key-pool-table" style="margin-bottom:30px;">
+                            <thead>
+                                <tr>
+                                    <th>Nama Label</th>
+                                    <th>API Key (Masked)</th>
+                                    <th>Batas Harian (RPD)</th>
+                                    <th>Status Saat Ini</th>
+                                    <th>Terakhir Dipakai</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="key-pool-tbody">
+                                <tr>
+                                    <td><strong>Google AI Studio Utama</strong></td>
+                                    <td><span class="key-tag">AIzaSyBw...Q9pZ</span></td>
+                                    <td>1.500 req/hari (Gratis)</td>
+                                    <td><span class="label label-success" style="border-radius:4px;"><i class="material-icons" style="font-size:11px; vertical-align:middle;">check</i> Aktif & Sehat</span></td>
+                                    <td>Hari ini, 14:45</td>
+                                    <td>
+                                        <button class="btn btn-xs btn-default" onclick="showToast('Kunci berhasil divalidasi!')">Tes</button>
+                                        <button class="btn btn-xs btn-danger" onclick="showToast('Kunci dihapus dari pool')">Hapus</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Akun Cadangan #2</strong></td>
+                                    <td><span class="key-tag">AIzaSyDr...8Xm1</span></td>
+                                    <td>1.500 req/hari (Gratis)</td>
+                                    <td><span class="label label-success" style="border-radius:4px;"><i class="material-icons" style="font-size:11px; vertical-align:middle;">check</i> Siap (Standby)</span></td>
+                                    <td>Kemarin, 21:10</td>
+                                    <td>
+                                        <button class="btn btn-xs btn-default" onclick="showToast('Kunci berhasil divalidasi!')">Tes</button>
+                                        <button class="btn btn-xs btn-danger" onclick="showToast('Kunci dihapus dari pool')">Hapus</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Akun Cadangan #3</strong></td>
+                                    <td><span class="key-tag">AIzaSyKk...21Vq</span></td>
+                                    <td>1.500 req/hari (Gratis)</td>
+                                    <td><span class="label label-success" style="border-radius:4px;"><i class="material-icons" style="font-size:11px; vertical-align:middle;">check</i> Siap (Standby)</span></td>
+                                    <td>-</td>
+                                    <td>
+                                        <button class="btn btn-xs btn-default" onclick="showToast('Kunci berhasil divalidasi!')">Tes</button>
+                                        <button class="btn btn-xs btn-danger" onclick="showToast('Kunci dihapus dari pool')">Hapus</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- SECTION 2: WATERFALL FALLBACK ENGINE (1 KOLOM) -->
+                        <div style="border-top:1px solid #e2e8f0; padding-top:25px; margin-top:20px;">
+                            <div style="margin-bottom:18px;">
+                                <h4 style="margin:0 0 6px 0; font-size:16px; font-weight:700; color:#1e293b;">
+                                    <i class="material-icons" style="color:#6366f1; vertical-align:middle;">alt_route</i>
+                                    2. Rantai Eksekusi Berjenjang (Waterfall Fallback & Retry)
+                                </h4>
+                                <p style="margin:0; font-size:12px; color:#64748b;">
+                                    Persis arsitektur <em>ContentFlow-Staging</em>: Jika model mengalami <strong>503 High Demand</strong>, sistem otomatis <strong>retry hingga 2x</strong> lalu turun tingkat (*cascade*) ke model cadangan berikutnya.
+                                </p>
+                            </div>
+
+                            <!-- Primary Model Selector (Full Width) -->
+                            <div class="form-group" style="margin-bottom:16px;">
+                                <label style="font-size:12px; font-weight:700; color:#475569;">PILIH MODEL UTAMA (PRIMARY):</label>
+                                <select class="form-control" id="select-primary-model" onchange="updateWaterfallVisualizer()" style="border-radius:8px; height:44px; font-size:13px; font-weight:600;">
+                                    <option value="gemini-3.7-flash" selected>gemini-3.7-flash (Rekomendasi Utama - Cerdas & Cepat)</option>
+                                    <option value="gemini-3.8-flash">gemini-3.8-flash (Generasi Terkini)</option>
+                                    <option value="gemini-3.6-flash">gemini-3.6-flash (Sangat Stabil & Ringan)</option>
+                                    <option value="gemini-flash-latest">gemini-flash-latest (Auto-update)</option>
+                                </select>
+                                <small style="color:#64748b; font-size:11px; margin-top:4px; display:block;">Model ini akan dieksekusi pertama kali pada setiap pembuatan prompt.</small>
+                            </div>
+
+                            <!-- Mekanisme Ketahanan Box (Full Width) -->
+                            <div style="background:#fffbeb; border:1px solid #fef3c7; border-radius:8px; padding:12px 16px; font-size:12px; color:#92400e; margin-bottom:18px;">
+                                <i class="material-icons" style="font-size:16px; vertical-align:middle; color:#d97706;">security</i>
+                                <strong>Mekanisme Ketahanan 503, 404 & 429:</strong>
+                                <ul style="margin:6px 0 0 16px; padding:0; line-height:1.5;">
+                                    <li><strong>503 High Demand</strong>: Retry 2x (delay 2s & 4s). Jika masih sibuk, lanjut ke model berikutnya.</li>
+                                    <li><strong>404 Deprecated</strong>: Langsung pindah ke model berikutnya tanpa retry.</li>
+                                    <li><strong>429 Rate Limit</strong>: Rotasi otomatis ke API Key berikutnya di Pool.</li>
+                                </ul>
+                            </div>
+
+                            <!-- Live Waterfall Cascade Flow (Full Width Stack) -->
+                            <div class="waterfall-box" style="margin-top:0;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                    <label style="font-size:12px; font-weight:700; color:#1e293b; margin:0;">
+                                        <i class="material-icons" style="font-size:15px; vertical-align:middle; color:#6366f1;">visibility</i>
+                                        LIVE WATERFALL CASCADE FLOW:
+                                    </label>
+                                    <span class="badge" style="background:#ede9fe; color:#6d28d9; font-size:10px;">Simulasi Real-Time</span>
+                                </div>
+
+                                <div class="waterfall-flow" id="waterfall-container">
+                                    <!-- Dynamically generated via updateWaterfallVisualizer() -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SECTION 3: G-LABS WEBHOOK CONFIG (1 KOLOM) -->
+                        <div style="border-top:1px solid #e2e8f0; padding-top:25px; margin-top:30px;">
+                            <h4 style="margin:0 0 15px 0; font-size:16px; font-weight:700; color:#1e293b;">
+                                <i class="material-icons" style="color:#6366f1; vertical-align:middle;">router</i>
+                                3. G-Labs Automation Webhook (Image Generator)
+                            </h4>
+
+                            <!-- Desain 1 Kolom untuk Pengaturan G-Labs -->
+                            <div class="form-group" style="margin-bottom:16px;">
+                                <label style="font-size:12px; font-weight:600; color:#475569;">G-Labs Host / URL:</label>
+                                <input type="text" class="form-control" value="127.0.0.1" placeholder="127.0.0.1 atau IP LAN / Cloudflare Tunnel" style="border-radius:6px; font-size:12px; height:40px;" />
+                                <small style="color:#64748b; font-size:11px; margin-top:4px; display:block;">Gunakan <code>127.0.0.1</code> jika di localhost, atau URL tunnel jika di server publik.</small>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom:16px;">
+                                <label style="font-size:12px; font-weight:600; color:#475569;">Port:</label>
+                                <input type="number" class="form-control" value="8765" placeholder="8765" style="border-radius:6px; font-size:12px; height:40px;" />
+                                <small style="color:#64748b; font-size:11px; margin-top:4px; display:block;">Port default aplikasi G-Labs adalah <code>8765</code>.</small>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom:18px;">
+                                <label style="font-size:12px; font-weight:600; color:#475569;">Model Render G-Labs:</label>
+                                <select class="form-control" style="border-radius:6px; font-size:12px; height:40px;">
+                                    <option selected>nano_banana_2 (Cepat, Stabil & Konsisten)</option>
+                                    <option>nano_banana_pro (Ultra Detail Photorealism)</option>
+                                    <option>nano_pics (Google Pics via Google Accounts)</option>
+                                </select>
+                                <small style="color:#64748b; font-size:11px; margin-top:4px; display:block;">Pilih engine model image renderer yang diinginkan.</small>
+                            </div>
+
+                            <button class="btn btn-primary" onclick="showToast('Pengaturan berhasil disimpan!')" style="background:#6366f1; border:none; padding:12px 28px; font-weight:700; border-radius:8px;">
+                                <i class="material-icons" style="font-size:16px; vertical-align:middle;">save</i> Simpan Pengaturan
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- MODAL: ADD API KEY TO POOL -->
+    <div class="modal fade" id="modalAddKey" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content" style="border-radius:12px; overflow:hidden;">
+                <div class="modal-header" style="background:linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color:white; padding:16px 20px;">
+                    <h4 class="modal-title" style="font-size:16px; font-weight:700;">
+                        <i class="material-icons" style="vertical-align:middle;">add_circle</i> Tambah API Key ke Pool
+                    </h4>
+                </div>
+                <div class="modal-body" style="padding:22px;">
+                    <div class="form-group">
+                        <label style="font-size:12px; font-weight:700; color:#334155;">Nama Label Kunci:</label>
+                        <input type="text" id="new-key-name" class="form-control" placeholder="Contoh: Akun AI Studio #4" style="border-radius:6px; font-size:12px;" />
+                    </div>
+                    <div class="form-group">
+                        <label style="font-size:12px; font-weight:700; color:#334155;">Google Gemini API Key:</label>
+                        <input type="password" id="new-key-val" class="form-control" placeholder="AIzaSy..." style="border-radius:6px; font-size:12px;" />
+                        <small style="color:#64748b; font-size:11px; margin-top:4px; display:block;">Dapatkan kunci gratis di Google AI Studio (1.500 request/hari gratis).</small>
+                    </div>
+                </div>
+                <div class="modal-footer" style="padding:14px 20px; background:#f8fafc;">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius:6px; font-size:12px;">Batal</button>
+                    <button type="button" class="btn btn-primary" onclick="saveNewKeyToPool()" style="background:#6366f1; border:none; border-radius:6px; font-size:12px; font-weight:700;">
+                        Simpan ke Pool
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: VIDEO GENERATOR UNDER DEVELOPMENT PREVIEW -->
+    <div class="modal fade" id="modalVideoDev" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content" style="border-radius:16px; overflow:hidden;">
+                <div class="modal-header" style="background:linear-gradient(135deg, #1e293b 0%, #334155 100%); color:white; padding:20px 24px;">
+                    <button type="button" class="close" data-dismiss="modal" style="color:white; opacity:0.8;">&times;</button>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <div style="width:42px; height:42px; border-radius:10px; background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); display:flex; align-items:center; justify-content:center; color:white;">
+                            <i class="material-icons" style="font-size:24px;">videocam</i>
+                        </div>
+                        <div>
+                            <h4 class="modal-title" style="font-size:18px; font-weight:700;">AI Recipe Video Generator</h4>
+                            <p style="margin:0; font-size:12px; color:#cbd5e1;">Rencana Roadmap & Cuplikan Fitur Masa Depan Airfry Eats</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-body" style="padding:26px;">
+                    <div class="row">
+                        <div class="col-md-7">
+                            <h5 style="margin:0 0 10px 0; font-size:15px; font-weight:700; color:#1e293b;">
+                                🎬 Apa itu AI Video Generator?
+                            </h5>
+                            <p style="font-size:13px; color:#64748b; line-height:1.6;">
+                                Fitur ini akan memanfaatkan kemampuan Text-to-Video dari <strong>G-Labs Video Automation (Wan 2.1 / Kling AI / Luma)</strong> untuk mengubah instruksi memasak resep air fryer menjadi klip visual b-roll sinematik berdurasi 5 - 10 detik.
+                            </p>
+
+                            <h5 style="margin:20px 0 10px 0; font-size:14px; font-weight:700; color:#1e293b;">
+                                🚀 Fitur Unggulan yang Sedang Disiapkan:
+                            </h5>
+                            <ul style="font-size:12px; color:#475569; padding-left:18px; line-height:1.8;">
+                                <li><strong>Format Vertikal 9:16</strong>: Siap langsung diunggah sebagai konten media sosial (TikTok, Instagram Reels, YouTube Shorts).</li>
+                                <li><strong>Dynamic Sizzle & Smoke</strong>: Efek animasi visual minyak mendesis dan kepulan uap hangat pada ayam/daging.</li>
+                                <li><strong>Multi-Shot Sequencer</strong>: Menggabungkan 3 shot singkat (Persiapan Bumbu ➔ Masuk Air Fryer ➔ Penyajian Renyah).</li>
+                                <li><strong>Auto AI Voiceover Narasi</strong>: Integrasi pembacaan resep dalam Bahasa Indonesia.</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-5">
+                            <div style="background:#f8fafc; border:2px dashed #cbd5e1; border-radius:12px; padding:20px; text-align:center;">
+                                <div style="width:70px; height:120px; background:linear-gradient(135deg, #1e293b 0%, #475569 100%); border-radius:10px; margin:0 auto 12px auto; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; box-shadow:0 6px 15px rgba(0,0,0,0.15);">
+                                    <i class="material-icons" style="font-size:28px; color:#f59e0b;">play_circle</i>
+                                    <span style="font-size:9px; font-weight:700; margin-top:4px;">9:16 VERTICAL</span>
+                                </div>
+                                <span class="label label-warning" style="font-size:10px; border-radius:4px;">ESTIMASI RILIS: TAHAP SELANJUTNYA</span>
+                                <p style="font-size:11px; color:#64748b; margin-top:10px; line-height:1.4;">
+                                    Saat ini fokus pada penyempurnaan Image Generator, Pool API Key & Waterfall Fallback.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="background:#f8fafc; padding:14px 24px;">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" style="font-size:12px; border-radius:6px; font-weight:600;">Tutup Preview</button>
+                    <button type="button" class="btn btn-primary" onclick="$('#modalVideoDev').modal('hide'); scrollToHubSection('image');" style="background:#6366f1; border:none; font-size:12px; border-radius:6px; font-weight:700;">
+                        Gunakan Image Generator Sekarang ➔
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="ai-toast">
+        <i class="material-icons" style="color:#10b981;">check_circle</i>
+        <span id="ai-toast-message">Tindakan berhasil diselesaikan.</span>
+    </div>
+
+    <!-- Bootstrap & JQuery JS -->
+    <script src="assets/plugins/jquery/jquery.min.js"></script>
+    <script src="assets/plugins/bootstrap/js/bootstrap.js"></script>
+
+    <script>
+        let currentCount = 1;
+        let selectedPreset = 'Rustic Kitchen Table';
+        let currentStep = 1;
+
+        // Cascade order definition mirroring contentflow-staging
+        const ALL_WATERFALL_MODELS = [
+            'gemini-3.7-flash',
+            'gemini-3.8-flash',
+            'gemini-3.6-flash',
+            'gemini-flash-latest'
+        ];
+
+        $(document).ready(function() {
+            updateWaterfallVisualizer();
+        });
+
+        function showToast(msg) {
+            $('#ai-toast-message').text(msg);
+            $('#ai-toast').css('display', 'flex').hide().fadeIn(200);
+            setTimeout(() => $('#ai-toast').fadeOut(300), 3000);
+        }
+
+        let isStudioOpen = false;
+
+        function toggleImageStudio() {
+            if (isStudioOpen) {
+                isStudioOpen = false;
+                $('#card-image-gen').removeClass('selected-active');
+                $('#text-mockup-open').text('Buka Image Generator Studio');
+                $('#icon-mockup-open').text('arrow_forward');
+                $('#studio-section').slideUp(300);
+                $('html, body').animate({ scrollTop: $(".generator-hub-grid").offset().top - 40 }, 300);
+            } else {
+                isStudioOpen = true;
+                $('#card-image-gen').addClass('selected-active');
+                $('#text-mockup-open').text('Tutup Image Studio');
+                $('#icon-mockup-open').text('expand_less');
+                $('#studio-section').slideDown(350);
+                switchActiveTab('tab-image');
+                $('html, body').animate({ scrollTop: $("#studio-section").offset().top - 20 }, 400);
+                showToast('Studio Image Generator dibuka!');
+            }
+        }
+
+        function scrollToHubSection(type) {
+            if (type === 'image') {
+                if (!isStudioOpen) {
+                    toggleImageStudio();
+                } else {
+                    $('html, body').animate({ scrollTop: $("#studio-section").offset().top - 20 }, 400);
+                }
+            }
+        }
+
+        function openVideoDevModal() {
+            $('#modalVideoDev').modal('show');
+        }
+
+        function switchActiveTab(tabId) {
+            $('.nav-tabs.ai-tabs li').removeClass('active');
+            $('#tab-nav-' + tabId.replace('tab-', '')).addClass('active');
+            $('.tab-pane').removeClass('active').hide();
+            $('#' + tabId).addClass('active').fadeIn(200);
+        }
+
+        function selectCount(cnt, btn) {
+            currentCount = cnt;
+            $('.btn-ai-count').removeClass('active');
+            $(btn).addClass('active');
+            $('#badge-count-info').text(cnt + ' Variasi Prompt');
+            showToast(cnt + ' variasi prompt dipilih.');
+        }
+
+        function selectPreset(el, name) {
+            $('.preset-card').removeClass('selected');
+            $(el).addClass('selected');
+            selectedPreset = name;
+            showToast('Preset dipilih: ' + name);
+        }
+
+        function jumpToStep(num) {
+            currentStep = num;
+            $('#stepper-1, #stepper-2, #stepper-3').removeClass('active completed');
+            $('#step-section-1, #step-section-2, #step-section-3').hide();
+
+            if (num === 1) {
+                $('#stepper-1').addClass('active');
+                $('#step-section-1').fadeIn();
+            } else if (num === 2) {
+                $('#stepper-1').addClass('completed');
+                $('#stepper-2').addClass('active');
+                $('#step-section-2').fadeIn();
+            } else if (num === 3) {
+                $('#stepper-1, #stepper-2').addClass('completed');
+                $('#stepper-3').addClass('active');
+                $('#step-section-3').fadeIn();
+            }
+        }
+
+        function simulateGeneratePrompt() {
+            const btn = $('#btn-start-prompt');
+            const orig = btn.html();
+            btn.html('<i class="material-icons" style="animation:spin 1s infinite linear;">autorenew</i> Merumuskan ' + currentCount + ' prompt via Gemini Waterfall...').prop('disabled', true);
+
+            setTimeout(function() {
+                btn.html(orig).prop('disabled', false);
+                renderMockupPromptCards(currentCount);
+                jumpToStep(2);
+                showToast('✓ ' + currentCount + ' Prompt T2I berhasil dirancang via Gemini 3.7 Flash!');
+            }, 800);
+        }
+
+        function renderMockupPromptCards(count) {
+            const container = $('#prompt-cards-container');
+            container.empty();
+
+            for (let i = 1; i <= count; i++) {
+                const title = i === 1 ? 'Variasi 1: Sudut Hero 45 Derajat (Pilihan Utama)' : ('Variasi ' + i + ': Detail Makro & Tekstur Garing');
+                const angle = i === 1 ? '45-degree hero shot' : 'extreme macro close-up of crispy crust';
+                const promptText = `Award-winning commercial food photography of Crispy Air Fryer Buffalo Chicken Wings, ${angle}, deep golden-brown glistening glaze with fine flecks of cracked black pepper and fresh chopped parsley, steam rising delicately. Set on a dark weathered oak table with dipping bowl of cool ranch sauce, shot with 85mm f/1.8 lens, diffused soft natural window lighting, 8k resolution, ultra-detailed food editorial.`;
+
+                const html = `
+                    <div style="background:white; border:2px solid #e2e8f0; border-radius:12px; padding:18px; margin-bottom:15px; box-shadow:var(--card-shadow);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <div style="font-weight:700; color:#1e293b; font-size:13px; display:flex; align-items:center; gap:6px;">
+                                <i class="material-icons" style="color:#6366f1; font-size:18px;">photo_camera</i>
+                                ${title}
+                                ${i === 1 ? '<span class="badge" style="background:#ede9fe; color:#6d28d9; font-size:10px;">Default</span>' : ''}
+                            </div>
+                            <small style="color:#94a3b8;"><i class="material-icons" style="font-size:12px;">edit</i> Klik untuk sesuaikan</small>
+                        </div>
+                        <textarea class="form-control" rows="3" style="font-size:12px; line-height:1.5; border-radius:8px; border:1px solid #cbd5e1;">${promptText}</textarea>
+                        <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">
+                            <span class="label label-default" style="font-size:10px;">Ratio: 1:1</span>
+                            <span class="label label-default" style="font-size:10px;">Preset: ${selectedPreset}</span>
+                            <span class="label label-info" style="font-size:10px;">Lighting: Soft Window</span>
+                        </div>
+                    </div>
+                `;
+                container.append(html);
+            }
+        }
+
+        function simulateRenderImages() {
+            showToast('Mengirim prompt ke G-Labs Webhook (Port 8765)...');
+            setTimeout(function() {
+                jumpToStep(3);
+                showToast('Gambar berhasil dirender!');
+            }, 900);
+        }
+
+        function applyRecipeImage() {
+            showToast('✓ Foto AI berhasil diterapkan ke resep! Foto lama telah dibackup.');
+            setTimeout(() => jumpToStep(1), 1200);
+        }
+
+        // Waterfall Visualizer Dynamic Logic
+        function updateWaterfallVisualizer() {
+            const primary = $('#select-primary-model').val();
+            const container = $('#waterfall-container');
+            container.empty();
+
+            // Build cascade order starting from chosen primary
+            const cascade = [primary];
+            ALL_WATERFALL_MODELS.forEach(m => {
+                if (!cascade.includes(m)) cascade.push(m);
+            });
+
+            cascade.forEach((modelName, idx) => {
+                const isPrimary = (idx === 0);
+                const isLast = (idx === cascade.length - 1);
+                const badgeClass = isPrimary ? 'primary-badge' : 'fallback-badge';
+                const nodeClass = isPrimary ? 'primary' : (isLast ? 'last' : 'fallback');
+                const roleLabel = isPrimary ? '<span class="label label-primary" style="font-size:10px;">PRIMARY</span>' : `<span class="label label-warning" style="font-size:10px;">FALLBACK #${idx}</span>`;
+                const retryRule = !isLast ? '<small style="color:#64748b; font-size:11px;">Jika 503: Retry 2x (2s, 4s) ➔ Cascade</small>' : '<small style="color:#64748b; font-size:11px;">Pilihan terakhir (Auto-update)</small>';
+
+                const nodeHtml = `
+                    <div class="waterfall-node ${nodeClass}">
+                        <div style="display:flex; align-items:center;">
+                            <span class="waterfall-step-badge ${badgeClass}">${idx + 1}</span>
+                            <div>
+                                <div style="font-size:13px; font-weight:700; color:#1e293b;">
+                                    ${modelName} ${roleLabel}
+                                </div>
+                                ${retryRule}
+                            </div>
+                        </div>
+                        <span class="label label-default" style="font-size:10px; border-radius:4px;">1.500 req/hari</span>
+                    </div>
+                `;
+                container.append(nodeHtml);
+
+                if (!isLast) {
+                    const connectorHtml = `
+                        <div class="waterfall-connector">
+                            <i class="material-icons">arrow_downward</i>
+                            <span>Gagal 503 setelah 2x retry / 404 dead</span>
+                        </div>
+                    `;
+                    container.append(connectorHtml);
+                }
+            });
+        }
+
+        function openAddKeyModal() {
+            $('#modalAddKey').modal('show');
+        }
+
+        function saveNewKeyToPool() {
+            const name = $('#new-key-name').val() || 'Akun Cadangan';
+            const val = $('#new-key-val').val();
+            if (!val) {
+                alert('Masukkan API Key terlebih dahulu.');
+                return;
+            }
+            const masked = val.substring(0, 8) + '...' + val.substring(val.length - 4);
+            const tr = `
+                <tr>
+                    <td><strong>${name}</strong></td>
+                    <td><span class="key-tag">${masked}</span></td>
+                    <td>1.500 req/hari (Gratis)</td>
+                    <td><span class="label label-success" style="border-radius:4px;"><i class="material-icons" style="font-size:11px; vertical-align:middle;">check</i> Siap (Standby)</span></td>
+                    <td>Baru ditambahkan</td>
+                    <td>
+                        <button class="btn btn-xs btn-default" onclick="showToast('Kunci berhasil divalidasi!')">Tes</button>
+                        <button class="btn btn-xs btn-danger" onclick="$(this).closest('tr').remove(); showToast('Kunci dihapus');">Hapus</button>
+                    </td>
+                </tr>
+            `;
+            $('#key-pool-tbody').append(tr);
+            $('#modalAddKey').modal('hide');
+            $('#new-key-name').val('');
+            $('#new-key-val').val('');
+            showToast('✓ Kunci baru berhasil ditambahkan ke Pool!');
+        }
+
+        function testAllKeys() {
+            showToast('Menguji validasi paralel seluruh API Key di pool...');
+            setTimeout(function() {
+                showToast('✓ 3 dari 3 API Key berhasil divalidasi dan berstatus aktif!');
+            }, 900);
+        }
+    </script>
+</body>
+</html>

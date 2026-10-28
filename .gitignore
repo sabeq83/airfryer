@@ -1,0 +1,27 @@
+# OS & IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Media Uploads & Render Cache (Struktur direktori dijaga via .gitkeep)
+upload/*
+!upload/.gitkeep
+!upload/ai_video_frames/.gitkeep
+!upload/ai_video_clips/.gitkeep
+!upload/video/.gitkeep
+
+# Archives & DB dumps
+*.zip
+*.tar.gz
+*.sql
+
+# Node & Logs
+node_modules/
+*.log
+logs/
+scratch/
+tmp/
+
+# Secrets & Server Accounts
+service-account.json
