@@ -1,5 +1,10 @@
 # Changelog
 
+## V2.0.1 — Adopsi Git-Based Atomic Deployment Mac Mini (28/10/2026)
+- Implementasi mesin deploy-macmini.js atomik
+- Setup perintah bootstrap, status dan rollback
+- Pembuatan SOT GIT_BASED_ATOMIC_DEPLOYMENT.md dan update AGENTS.md
+
 ## V2.0.0 — Inisialisasi AirFry Studio V2, Standar Versioning & Repositori GitHub (28/10/2026)
 - Restrukturisasi folder lokal menjadi airfry_studio_v2 dan sinkronisasi penamaan dengan server Mac Mini
 - Setup repositori GitHub resmi https://github.com/sabeq83/airfryer.git (branch main)
