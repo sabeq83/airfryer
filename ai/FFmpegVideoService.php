@@ -447,11 +447,125 @@ class FFmpegVideoService
     }
 
     /**
-     * Stitch multiple video scene clips (.mp4) into a single cohesive video.
+     * Get exact duration of a video clip in seconds using ffprobe.
+     */
+    public function getVideoDuration(string $videoPath): float
+    {
+        $baseDir = dirname(__DIR__);
+        $absPath = (str_starts_with($videoPath, '/') || (strlen($videoPath) > 1 && $videoPath[1] === ':'))
+            ? $videoPath
+            : $baseDir . '/' . ltrim($videoPath, '/');
+
+        if (!file_exists($absPath)) {
+            return 4.0;
+        }
+
+        $ffprobeBin = str_replace('ffmpeg', 'ffprobe', $this->ffmpegBinary);
+        if (!file_exists($ffprobeBin) && !shell_exec("which ffprobe")) {
+            $ffprobeBin = 'ffprobe';
+        }
+
+        $cmd = escapeshellcmd($ffprobeBin) . " -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " . escapeshellarg($absPath) . " 2>&1";
+        $output = @shell_exec($cmd);
+        if ($output !== null && is_numeric(trim($output))) {
+            return (float)trim($output);
+        }
+        return 4.0;
+    }
+
+    /**
+     * Prepare a synchronized narration audio track for all scenes.
+     * Each scene's audio is padded to match the corresponding video clip duration,
+     * ensuring zero audio drift across scenes.
+     */
+    public function prepareSynchronizedNarrationTrack(array $audioScenes, array $videoClipPaths, string $targetDir, array $options = []): ?string
+    {
+        $baseDir = dirname(__DIR__);
+        $tempPaddedClips = [];
+        $hasAnyAudio = false;
+
+        $microDelayMs = (int)($options['micro_delay_ms'] ?? 300); // 0.3s natural delay
+
+        foreach ($videoClipPaths as $idx => $vPath) {
+            $clipDuration = $this->getVideoDuration($vPath);
+            if ($clipDuration <= 0.1) {
+                $clipDuration = (float)($options['clip_duration'] ?? 4.0);
+            }
+
+            $sceneAudioRel = $audioScenes[$idx]['audio_path'] ?? null;
+            $audioAbsPath = null;
+            if (!empty($sceneAudioRel)) {
+                $audioAbsPath = (str_starts_with($sceneAudioRel, '/') || (strlen($sceneAudioRel) > 1 && $sceneAudioRel[1] === ':'))
+                    ? $sceneAudioRel
+                    : $baseDir . '/' . ltrim($sceneAudioRel, '/');
+            }
+
+            $paddedClipFile = $targetDir . '/padded_audio_' . time() . '_' . $idx . '_' . bin2hex(random_bytes(2)) . '.mp3';
+
+            if ($audioAbsPath && file_exists($audioAbsPath) && filesize($audioAbsPath) > 0) {
+                $hasAnyAudio = true;
+                // Add micro-delay at start, then pad silence until $clipDuration
+                $filter = "adelay={$microDelayMs}|{$microDelayMs},apad=whole_dur={$clipDuration}";
+                $cmd = escapeshellcmd($this->ffmpegBinary) . " -y -i " . escapeshellarg($audioAbsPath)
+                    . " -af " . escapeshellarg($filter)
+                    . " -t " . escapeshellarg((string)$clipDuration)
+                    . " -ar 32000 -c:a libmp3lame -b:a 128k " . escapeshellarg($paddedClipFile) . " 2>&1";
+                @exec($cmd);
+            } else {
+                // Generate silent audio of exact clip duration
+                $cmd = escapeshellcmd($this->ffmpegBinary) . " -y -f lavfi -i anullsrc=r=32000:cl=mono"
+                    . " -t " . escapeshellarg((string)$clipDuration)
+                    . " -c:a libmp3lame -b:a 128k " . escapeshellarg($paddedClipFile) . " 2>&1";
+                @exec($cmd);
+            }
+
+            if (file_exists($paddedClipFile) && filesize($paddedClipFile) > 0) {
+                $tempPaddedClips[] = $paddedClipFile;
+            }
+        }
+
+        if (!$hasAnyAudio || empty($tempPaddedClips)) {
+            // Clean up temporary files
+            foreach ($tempPaddedClips as $f) {
+                if (file_exists($f)) @unlink($f);
+            }
+            return null;
+        }
+
+        // Concatenate all padded audio clips
+        $tempAudioConcatFile = $targetDir . '/concat_audio_' . time() . '_' . bin2hex(random_bytes(3)) . '.txt';
+        $concatContent = '';
+        foreach ($tempPaddedClips as $pf) {
+            $safePath = str_replace("'", "'\\''", $pf);
+            $concatContent .= "file '{$safePath}'\n";
+        }
+        @file_put_contents($tempAudioConcatFile, $concatContent);
+
+        $mergedNarrationFile = $targetDir . '/full_narration_' . time() . '_' . bin2hex(random_bytes(3)) . '.mp3';
+        $mergeCmd = escapeshellcmd($this->ffmpegBinary) . " -y -f concat -safe 0 -i " . escapeshellarg($tempAudioConcatFile)
+            . " -c:a copy " . escapeshellarg($mergedNarrationFile) . " 2>&1";
+        @exec($mergeCmd);
+
+        // Cleanup temporary padded clips
+        @unlink($tempAudioConcatFile);
+        foreach ($tempPaddedClips as $pf) {
+            if (file_exists($pf)) @unlink($pf);
+        }
+
+        if (file_exists($mergedNarrationFile) && filesize($mergedNarrationFile) > 0) {
+            return $mergedNarrationFile;
+        }
+
+        return null;
+    }
+
+    /**
+     * Stitch multiple video scene clips (.mp4) into a single cohesive video,
+     * with optional synchronized voiceover narration (MiniMax TTS) and background music (BGM).
      *
      * @param array $clipPaths Array of relative or absolute file paths to .mp4 clips
      * @param string $outputPath Target file path for the final stitched video
-     * @param array $options Additional options (preset, crf, fps, enable_text_overlay, etc.)
+     * @param array $options Additional options (preset, crf, fps, enable_text_overlay, audio_scenes, enable_bgm, etc.)
      * @return array
      */
     public function stitchScenes(array $clipPaths, string $outputPath, array $options = []): array
@@ -484,37 +598,106 @@ class FFmpegVideoService
             @mkdir($targetDir, 0777, true);
         }
 
-        // Temporary concat file
+        // Temporary concat file for videos
         $tempConcatFile = $targetDir . '/concat_' . time() . '_' . bin2hex(random_bytes(4)) . '.txt';
         $fileContent = '';
         foreach ($validClips as $vc) {
-            // Escape single quotes for ffmpeg concat demuxer
             $safePath = str_replace("'", "'\\''", $vc);
             $fileContent .= "file '{$safePath}'\n";
         }
 
         if (@file_put_contents($tempConcatFile, $fileContent) === false) {
-            return ['success' => false, 'error' => 'Gagal membuat file daftar concat sementara.'];
+            return ['success' => false, 'error' => 'Gagal membuat file daftar concat video sementara.'];
         }
 
         $preset = $options['preset'] ?? 'fast';
         $crf = (int)($options['crf'] ?? 22);
 
-        // FFmpeg command to concat with video re-encode for max mobile browser compatibility (H.264/yuv420p + faststart)
-        $cmd = escapeshellcmd($this->ffmpegBinary) . " -y"
-             . " -f concat -safe 0 -i " . escapeshellarg($tempConcatFile)
-             . " -c:v libx264 -preset " . escapeshellarg($preset)
-             . " -crf " . $crf
-             . " -pix_fmt yuv420p"
-             . " -movflags +faststart"
-             . " " . escapeshellarg($targetAbsPath) . " 2>&1";
+        // Prepare synchronized narration audio track if audio scenes are provided
+        $audioScenes = $options['audio_scenes'] ?? [];
+        $mergedNarrationPath = null;
+        if (!empty($audioScenes) && is_array($audioScenes)) {
+            $mergedNarrationPath = $this->prepareSynchronizedNarrationTrack($audioScenes, $validClips, $targetDir, $options);
+        }
 
+        // Check BGM (Background Music)
+        $enableBgm = !empty($options['enable_bgm']);
+        $bgmVolume = (float)($options['bgm_volume'] ?? 0.18);
+        $bgmFilePath = null;
+        if ($enableBgm) {
+            $candidateBgm = [
+                $baseDir . '/assets/audio/upbeat_promo.mp3',
+                $baseDir . '/assets/audio/smooth_commercial.mp3'
+            ];
+            foreach ($candidateBgm as $cand) {
+                if (file_exists($cand) && filesize($cand) > 0) {
+                    $bgmFilePath = $cand;
+                    break;
+                }
+            }
+        }
+
+        // Construct FFmpeg command based on available audio streams
         $output = [];
         $returnVar = 0;
+
+        if ($mergedNarrationPath && $bgmFilePath) {
+            // Case A: Narration Voiceover + Background Music Mix
+            $cmd = escapeshellcmd($this->ffmpegBinary) . " -y"
+                 . " -f concat -safe 0 -i " . escapeshellarg($tempConcatFile)
+                 . " -i " . escapeshellarg($mergedNarrationPath)
+                 . " -stream_loop -1 -i " . escapeshellarg($bgmFilePath)
+                 . " -filter_complex " . escapeshellarg("[1:a]volume=1.0[a_voc];[2:a]volume={$bgmVolume}[a_bgm];[a_voc][a_bgm]amix=inputs=2:duration=first:dropout_transition=2[a_mix]")
+                 . " -map 0:v:0 -map '[a_mix]'"
+                 . " -c:v libx264 -preset " . escapeshellarg($preset)
+                 . " -crf " . $crf
+                 . " -pix_fmt yuv420p"
+                 . " -c:a aac -b:a 192k"
+                 . " -movflags +faststart"
+                 . " " . escapeshellarg($targetAbsPath) . " 2>&1";
+        } elseif ($mergedNarrationPath) {
+            // Case B: Narration Voiceover Only
+            $cmd = escapeshellcmd($this->ffmpegBinary) . " -y"
+                 . " -f concat -safe 0 -i " . escapeshellarg($tempConcatFile)
+                 . " -i " . escapeshellarg($mergedNarrationPath)
+                 . " -map 0:v:0 -map 1:a:0"
+                 . " -c:v libx264 -preset " . escapeshellarg($preset)
+                 . " -crf " . $crf
+                 . " -pix_fmt yuv420p"
+                 . " -c:a aac -b:a 192k"
+                 . " -movflags +faststart"
+                 . " " . escapeshellarg($targetAbsPath) . " 2>&1";
+        } elseif ($bgmFilePath) {
+            // Case C: Background Music Only
+            $cmd = escapeshellcmd($this->ffmpegBinary) . " -y"
+                 . " -f concat -safe 0 -i " . escapeshellarg($tempConcatFile)
+                 . " -stream_loop -1 -i " . escapeshellarg($bgmFilePath)
+                 . " -map 0:v:0 -map 1:a:0"
+                 . " -c:v libx264 -preset " . escapeshellarg($preset)
+                 . " -crf " . $crf
+                 . " -pix_fmt yuv420p"
+                 . " -c:a aac -b:a 192k"
+                 . " -shortest"
+                 . " -movflags +faststart"
+                 . " " . escapeshellarg($targetAbsPath) . " 2>&1";
+        } else {
+            // Case D: Pure Video (Silent)
+            $cmd = escapeshellcmd($this->ffmpegBinary) . " -y"
+                 . " -f concat -safe 0 -i " . escapeshellarg($tempConcatFile)
+                 . " -c:v libx264 -preset " . escapeshellarg($preset)
+                 . " -crf " . $crf
+                 . " -pix_fmt yuv420p"
+                 . " -movflags +faststart"
+                 . " " . escapeshellarg($targetAbsPath) . " 2>&1";
+        }
+
         @exec($cmd, $output, $returnVar);
 
-        // Cleanup temporary concat file
+        // Cleanup temporary files
         @unlink($tempConcatFile);
+        if ($mergedNarrationPath && file_exists($mergedNarrationPath)) {
+            @unlink($mergedNarrationPath);
+        }
 
         if ($returnVar !== 0 || !file_exists($targetAbsPath) || filesize($targetAbsPath) === 0) {
             $errDetail = implode("\n", array_slice($output, -10));
@@ -533,7 +716,7 @@ class FFmpegVideoService
 
         return [
             'success' => true,
-            'message' => 'Seluruh adegan berhasil disatukan menjadi video utuh!',
+            'message' => 'Seluruh adegan berhasil disatukan menjadi video utuh dengan sinkronisasi audio narasi!',
             'output_path' => $outputPath,
             'absolute_path' => $targetAbsPath,
             'file_size' => $finalSize,
@@ -541,4 +724,5 @@ class FFmpegVideoService
         ];
     }
 }
+
 

@@ -71,6 +71,7 @@ require_once('ai/GlabsClient.php');
 require_once('ai/AiVideoService.php');
 require_once('ai/SyncClient.php');
 require_once('ai/R2Client.php');
+require_once('ai/MiniMaxClient.php');
 
 // Ensure all migrations run safely BEFORE services are initialized
 if (!Ai\AiBootstrap::isMigrated($connect)) {
@@ -81,6 +82,7 @@ if (!Ai\AiBootstrap::isMigrated($connect)) {
 }
 
 $videoService = new Ai\AiVideoService($connect);
+$minimaxConfig = \Ai\MiniMaxClient::getConfig($connect);
 
 // CSRF token
 if (empty($_SESSION['csrf_token'])) {
@@ -212,6 +214,45 @@ if (isset($_REQUEST['ajax_action'])) {
                 echo safe_json_encode($res);
                 exit;
 
+            case 'video_generate_scene_tts':
+                $sceneId = (int)($_POST['scene_id'] ?? 0);
+                if ($sceneId <= 0) {
+                    throw new Exception('ID Scene tidak valid.');
+                }
+                $res = $videoService->generateSceneTts($sceneId, $_POST);
+                echo safe_json_encode($res);
+                exit;
+
+            case 'video_generate_project_tts_batch':
+                @set_time_limit(300);
+                @ini_set('max_execution_time', '300');
+                $projectId = (int)($_POST['project_id'] ?? 0);
+                if ($projectId <= 0) {
+                    throw new Exception('ID Proyek tidak valid.');
+                }
+                $res = $videoService->generateProjectTtsBatch($projectId, $_POST);
+                echo safe_json_encode($res);
+                exit;
+
+            case 'video_update_project_tts_settings':
+                $projectId = (int)($_POST['project_id'] ?? 0);
+                if ($projectId <= 0) {
+                    throw new Exception('ID Proyek tidak valid.');
+                }
+                $ok = $videoService->updateProjectTtsSettings($projectId, $_POST);
+                echo safe_json_encode(['success' => $ok]);
+                exit;
+
+            case 'video_update_scene_tts_text':
+                $sceneId = (int)($_POST['scene_id'] ?? 0);
+                $text = trim($_POST['tts_text'] ?? '');
+                if ($sceneId <= 0) {
+                    throw new Exception('ID Scene tidak valid.');
+                }
+                $ok = $videoService->updateSceneTtsText($sceneId, $text);
+                echo safe_json_encode(['success' => $ok]);
+                exit;
+
             case 'video_upload_to_r2':
                 @set_time_limit(300);
                 @ini_set('max_execution_time', '300');
@@ -320,6 +361,14 @@ if ($recentProjectsRes) {
 
 $initialProjectId = (int)($_GET['project_id'] ?? 0);
 $initialStep = (int)($_GET['step'] ?? 1);
+$initialProjectData = null;
+if ($initialProjectId > 0) {
+    try {
+        $initialProjectData = $videoService->getProject($initialProjectId);
+    } catch (\Throwable $e) {
+        $initialProjectData = null;
+    }
+}
 
 include_once('includes/header.php');
 include_once('includes/sidebar.php');
@@ -385,9 +434,9 @@ include_once('includes/sidebar.php');
         </div>
         <?php endif; ?>
 
-        <!-- 4-STEP STEPPER -->
+        <!-- 5-STEP STEPPER -->
         <div class="stepper-nav">
-            <div class="stepper-step active" id="vstep-btn-1" onclick="jumpToVideoStep(1)">
+            <div class="stepper-step <?php echo ($initialStep === 1) ? 'active' : (($initialStep > 1 && $initialProjectData) ? 'done' : ''); ?>" id="vstep-btn-1" onclick="jumpToVideoStep(1)">
                 <div class="stepper-num">1</div>
                 <div>
                     <div class="stepper-label">1. Resep &amp; Dapur</div>
@@ -395,7 +444,7 @@ include_once('includes/sidebar.php');
                 </div>
             </div>
             <div class="stepper-divider"></div>
-            <div class="stepper-step" id="vstep-btn-2" onclick="jumpToVideoStep(2)">
+            <div class="stepper-step <?php echo ($initialStep === 2) ? 'active' : (($initialStep > 2 && $initialProjectData) ? 'done' : ''); ?>" id="vstep-btn-2" onclick="jumpToVideoStep(2)">
                 <div class="stepper-num">2</div>
                 <div>
                     <div class="stepper-label">2. Storyboard &amp; Scene</div>
@@ -403,7 +452,7 @@ include_once('includes/sidebar.php');
                 </div>
             </div>
             <div class="stepper-divider"></div>
-            <div class="stepper-step" id="vstep-btn-3" onclick="jumpToVideoStep(3)">
+            <div class="stepper-step <?php echo ($initialStep === 3) ? 'active' : (($initialStep > 3 && $initialProjectData) ? 'done' : ''); ?>" id="vstep-btn-3" onclick="jumpToVideoStep(3)">
                 <div class="stepper-num">3</div>
                 <div>
                     <div class="stepper-label">3. Render Klip Video</div>
@@ -411,10 +460,18 @@ include_once('includes/sidebar.php');
                 </div>
             </div>
             <div class="stepper-divider"></div>
-            <div class="stepper-step" id="vstep-btn-4" onclick="jumpToVideoStep(4)">
+            <div class="stepper-step <?php echo ($initialStep === 4) ? 'active' : (($initialStep > 4 && $initialProjectData) ? 'done' : ''); ?>" id="vstep-btn-4" onclick="jumpToVideoStep(4)">
                 <div class="stepper-num">4</div>
                 <div>
-                    <div class="stepper-label">4. Video Utuh &amp; Simpan</div>
+                    <div class="stepper-label">4. Narasi Suara AI</div>
+                    <div class="stepper-sub">MiniMax TTS Studio</div>
+                </div>
+            </div>
+            <div class="stepper-divider"></div>
+            <div class="stepper-step <?php echo ($initialStep === 5) ? 'active' : ''; ?>" id="vstep-btn-5" onclick="jumpToVideoStep(5)">
+                <div class="stepper-num">5</div>
+                <div>
+                    <div class="stepper-label">5. Video Utuh &amp; Simpan</div>
                     <div class="stepper-sub">FFmpeg Stitching 9:16</div>
                 </div>
             </div>
@@ -423,7 +480,7 @@ include_once('includes/sidebar.php');
         <div class="tab-card">
 
             <!-- ================= STEP 1: RESEP & PRESET DAPUR ================= -->
-            <div id="vstep-content-1">
+            <div id="vstep-content-1" <?php echo ($initialStep > 1 && $initialProjectData) ? 'style="display:none;"' : ''; ?>>
                 <div class="row clearfix">
                     <div class="col-md-7 col-xs-12">
                         <!-- 1.1 Pilih Resep -->
@@ -676,20 +733,314 @@ include_once('includes/sidebar.php');
                         <i class="material-icons">arrow_back</i> Kembali ke Langkah 2
                     </button>
                     <button type="button" id="btnNextToStep4" class="btn-action-primary" onclick="jumpToVideoStep(4)">
-                        <span>Lanjut ke Langkah 4: Penggabungan FFmpeg &amp; Preview</span>
+                        <span>Lanjut ke Langkah 4: Narasi Suara AI (MiniMax TTS)</span>
                         <i class="material-icons">arrow_forward</i>
                     </button>
                 </div>
             </div>
 
-            <!-- ================= STEP 4: FFMPEG STITCHING & FINAL VIDEO ================= -->
-            <div id="vstep-content-4" class="video-step-section" style="display:none;">
+            <!-- ================= STEP 4: MINI MAX TTS VOICEOVER STUDIO ================= -->
+            <div id="vstep-content-4" class="video-step-section" <?php echo ($initialStep === 4 && $initialProjectData) ? 'style="display:block;"' : 'style="display:none;"'; ?>>
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+                    <div>
+                        <h3 style="font-size:16px; font-weight:700; color:var(--pp-navy); margin-bottom:4px; display:flex; align-items:center; gap:8px;">
+                            <i class="material-icons" style="color:#10B981;">record_voice_over</i>
+                            Langkah 4: Studio Narasi Suara AI (MiniMax TTS)
+                        </h3>
+                        <p style="font-size:13px; color:var(--pp-slate-muted); margin:0;">
+                            Sintesis suara narator profesional yang membaca instruksi resep per adegan. Durasi suara otomatis disinkronkan ke video klip via FFmpeg audio padding.
+                        </p>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <button type="button" class="btn-brand-primary" id="btnBatchGenerateTts" onclick="handleGenerateAllTts()" style="padding:10px 18px; font-weight:700;">
+                            <i class="material-icons" style="font-size:16px;">campaign</i> Generate Semua Narasi TTS
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TTS SETTINGS TOOLBAR CARD -->
+                <div style="background:#0F172A; border-radius:14px; padding:18px 20px; color:#F8FAFC; margin-bottom:20px; border:1px solid #334155;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.1);">
+                        <strong style="font-size:13px; display:flex; align-items:center; gap:6px;">
+                            <i class="material-icons" style="color:#10B981; font-size:18px;">tune</i>
+                            Pengaturan Karakter Suara &amp; Musik Latar Proyek:
+                        </strong>
+                        <span id="ttsEngineBadge" style="font-size:11px; background:rgba(16,185,129,0.2); color:#34D399; font-weight:700; padding:3px 10px; border-radius:12px;">
+                            MiniMax speech-2.8-turbo
+                        </span>
+                    </div>
+
+                    <div class="row clearfix" style="margin-bottom:10px;">
+                        <!-- Language -->
+                        <div class="col-sm-3 col-xs-12">
+                            <label class="form-label" style="font-size:11px; color:#94A3B8; margin-bottom:4px;">Bahasa Narasi:</label>
+                            <?php
+                            $projLang = $initialProjectData['tts_language'] ?? ($minimaxConfig['minimax_default_language'] ?? 'id-ID');
+                            $isProjEn = ($projLang === 'en-US' || (is_string($projLang) && str_starts_with(strtolower($projLang), 'en')));
+                            ?>
+                            <select id="ttsProjectLanguage" class="form-control" style="height:38px; background:#1E293B; color:#FFF; border-color:#334155; font-size:12px; border-radius:8px;" onchange="onTtsProjectLanguageChange(this.value)">
+                                <option value="id-ID" style="background:#1E293B; color:#FFF;" <?php echo (!$isProjEn) ? 'selected' : ''; ?>>Bahasa Indonesia (id-ID)</option>
+                                <option value="en-US" style="background:#1E293B; color:#FFF;" <?php echo ($isProjEn) ? 'selected' : ''; ?>>English (en-US)</option>
+                            </select>
+                        </div>
+                        <!-- Voice Persona -->
+                        <div class="col-sm-4 col-xs-12">
+                            <label class="form-label" style="font-size:11px; color:#94A3B8; margin-bottom:4px;">Karakter Persona Suara:</label>
+                            <?php
+                            $projVoice = $initialProjectData['tts_voice_persona'] ?? '';
+                            $voiceList = $isProjEn ? \Ai\MiniMaxClient::VOICES_EN : \Ai\MiniMaxClient::VOICES_ID;
+                            $defaultVoice = $isProjEn ? 'English_causual_narrator_vv1' : ($minimaxConfig['minimax_default_voice'] ?? 'Indonesian_energetic_streamer_vv2');
+                            if (empty($projVoice) || !isset($voiceList[$projVoice])) {
+                                $projVoice = $defaultVoice;
+                            }
+                            ?>
+                            <select id="ttsProjectVoice" class="form-control" style="height:38px; background:#1E293B; color:#FFF; border-color:#334155; font-size:12px; border-radius:8px;" onchange="if(window.currentVideoProject) window.currentVideoProject.tts_voice_persona = this.value;">
+                                <?php foreach ($voiceList as $v): ?>
+                                    <option value="<?php echo htmlspecialchars($v['id']); ?>" <?php echo ($v['id'] === $projVoice) ? 'selected' : ''; ?> style="background:#1E293B; color:#FFF;">
+                                        <?php echo htmlspecialchars($v['label']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <!-- Speed Slider -->
+                        <div class="col-sm-2 col-xs-6">
+                            <label class="form-label" style="font-size:11px; color:#94A3B8; margin-bottom:4px; display:flex; justify-content:space-between;">
+                                <span>Speed:</span>
+                                <span id="txtTtsSpeedVal" style="color:#10B981; font-weight:700;">1.00x</span>
+                            </label>
+                            <input type="range" id="ttsProjectSpeed" min="0.6" max="1.5" step="0.05" value="1.0" class="form-range" style="width:100%; accent-color:#10B981; margin-top:8px;" oninput="$('#txtTtsSpeedVal').text(parseFloat(this.value).toFixed(2) + 'x')">
+                        </div>
+                        <!-- Volume Slider -->
+                        <div class="col-sm-3 col-xs-6">
+                            <label class="form-label" style="font-size:11px; color:#94A3B8; margin-bottom:4px; display:flex; justify-content:space-between;">
+                                <span>Volume Suara:</span>
+                                <span id="txtTtsVolVal" style="color:#10B981; font-weight:700;">1.00x</span>
+                            </label>
+                            <input type="range" id="ttsProjectVolume" min="0.3" max="2.0" step="0.05" value="1.0" class="form-range" style="width:100%; accent-color:#10B981; margin-top:8px;" oninput="$('#txtTtsVolVal').text(parseFloat(this.value).toFixed(2) + 'x')">
+                        </div>
+                    </div>
+
+                    <!-- BGM (Background Music) Options -->
+                    <div style="background:#1E293B; border-radius:10px; padding:12px 16px; margin-top:10px; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:12px;">
+                        <label style="margin:0; font-size:12px; color:#F8FAFC; display:flex; align-items:center; gap:8px; cursor:pointer;">
+                            <input type="checkbox" id="chkEnableBgm" checked style="width:16px; height:16px; accent-color:#10B981;">
+                            <span>Aktifkan Musik Latar Upbeat (BGM) &mdash; <span style="color:#94A3B8; font-size:11px;">Mengisi jeda hening jika audio narasi singkat</span></span>
+                        </label>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="font-size:11px; color:#94A3B8;">Volume BGM:</span>
+                            <input type="range" id="rngBgmVolume" min="0.05" max="0.50" step="0.02" value="0.18" style="width:100px; accent-color:#10B981;" oninput="$('#txtBgmVolVal').text(Math.round(this.value * 100) + '%')">
+                            <span id="txtBgmVolVal" style="font-size:11px; font-weight:700; color:#34D399; width:35px;">18%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MASTER AUDIO READINESS & SEQUENTIAL PLAYER DECK -->
+                <div id="ttsMasterDeck" class="tts-master-deck">
+                    <div style="display:flex; align-items:center; gap:14px;">
+                        <div class="tts-readiness-icon">
+                            <i class="material-icons">headset</i>
+                        </div>
+                        <div>
+                            <h4 id="ttsMasterReadinessTitle" style="font-size:14px; font-weight:800; color:#0F172A; margin:0 0 2px 0;">Status Narasi: Memuat status adegan...</h4>
+                            <p id="ttsMasterReadinessDesc" style="font-size:12px; color:var(--pp-slate-muted); margin:0;">Audio narasi yang telah di-generate dapat Anda dengarkan per adegan atau putar berurutan.</p>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <button type="button" class="btn-action-secondary" onclick="handleResetAllNaskahToTyping()" style="padding:8px 14px; font-size:12px; font-weight:700;">
+                            <i class="material-icons" style="font-size:15px; color:#10B981; vertical-align:middle;">subtitles</i>
+                            <span>Gunakan Teks Typing untuk Semua</span>
+                        </button>
+                        <button type="button" class="btn-action-secondary" id="btnTogglePlayAll" onclick="handleTogglePlayAllScenes()" style="padding:8px 14px; font-size:12px; font-weight:700;">
+                            <i class="material-icons" id="iconPlayAllMaster" style="font-size:16px; color:#10B981; vertical-align:middle;">play_circle_filled</i>
+                            <span id="txtPlayAllMaster">Putar Semua Narasi Berurutan</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- BATCH TTS PROGRESS BAR -->
+                <div id="ttsBatchProgressWrap" style="display:none; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px; padding:14px 18px; margin-bottom:18px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <span id="ttsBatchProgressStatus" style="font-size:12.5px; font-weight:700; color:#0F172A;">Memproses sintesis suara narasi...</span>
+                        <span id="ttsBatchProgressPercent" style="font-size:12px; font-weight:800; color:#10B981;">0%</span>
+                    </div>
+                    <div class="progress" style="height:8px; margin-bottom:0; background:#E2E8F0; border-radius:4px; overflow:hidden;">
+                        <div id="ttsBatchProgressBar" class="progress-bar" style="width:0%; background:#10B981; transition:width 0.3s ease;"></div>
+                    </div>
+                </div>
+
+                <!-- SCENES AUDIO LIST -->
+                <div id="ttsScenesContainer" style="display:flex; flex-direction:column; gap:14px; margin-bottom:24px;">
+                    <?php if ($initialProjectData && !empty($initialProjectData['scenes'])): ?>
+                        <?php foreach ($initialProjectData['scenes'] as $idx => $sc): 
+                            $sceneNum = $sc['scene_order'] ?? ($idx + 1);
+                            $typingText = $sc['visual_action_desc'] ?? '';
+                            $recipeOriginalText = $sc['direction_source_text'] ?? '';
+                            $ttsText = $sc['tts_text'] ?? ($typingText ?: $recipeOriginalText);
+                            $audioPath = $sc['tts_audio_path'] ?? '';
+                            $hasAudio = !empty($audioPath) && ($sc['tts_status'] ?? '') === 'completed';
+                            $duration = (float)($sc['tts_duration'] ?? 0);
+                            $visualDur = (float)($initialProjectData['clip_duration'] ?? 4.0);
+                            $remainingPadding = number_format(max(0, $visualDur - $duration), 1);
+                            $wordsCount = !empty(trim($ttsText)) ? count(preg_split('/\s+/', trim($ttsText))) : 0;
+                            $charsCount = mb_strlen($ttsText);
+                            $durFormatted = sprintf('%d:%02d', floor($duration / 60), floor(fmod($duration, 60)));
+                            $thumbUrl = !empty($sc['frame_image_path']) ? $sc['frame_image_path'] : '';
+                        ?>
+                            <div class="tts-scene-card" id="ttsSceneCard_<?php echo $sc['id']; ?>">
+                                <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+                                    <?php if (!empty($thumbUrl)): ?>
+                                        <img src="<?php echo htmlspecialchars($thumbUrl); ?>" alt="Scene <?php echo $sceneNum; ?>" style="width:96px; height:160px; object-fit:cover; border-radius:10px; border:1px solid #CBD5E1; flex-shrink:0; background:#1E293B;">
+                                    <?php else: ?>
+                                        <div style="width:96px; height:160px; background:#1E293B; border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#94A3B8; font-size:10px; flex-shrink:0;">
+                                            <i class="material-icons" style="font-size:28px; color:#64748B;">movie</i>
+                                            <span style="margin-top:4px;">Scene <?php echo $sceneNum; ?></span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <span style="background:#0F172A; color:#FFF; font-size:10px; font-weight:800; padding:3px 8px; border-radius:6px; text-align:center; width:100%;">
+                                        SCENE <?php echo $sceneNum; ?>
+                                    </span>
+                                </div>
+
+                                <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:12px;">
+                                    <!-- HEADER BARIS CARD -->
+                                    <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:8px; border-bottom:1px solid #F1F5F9;">
+                                        <div style="display:flex; align-items:center; gap:10px;">
+                                            <strong style="font-size:13.5px; color:#0F172A;">Adegan <?php echo $sceneNum; ?>: <?php echo htmlspecialchars($typingText ?: 'Instruksi Masak'); ?></strong>
+                                            <span style="font-size:11px; color:#64748B; background:#F1F5F9; padding:2px 8px; border-radius:6px;">
+                                                <i class="material-icons" style="font-size:12px; vertical-align:middle;">videocam</i> Klip: <?php echo number_format($visualDur, 1); ?>s
+                                            </span>
+                                        </div>
+                                        <div id="ttsStatusBadge_<?php echo $sc['id']; ?>">
+                                            <?php if ($hasAudio): ?>
+                                                <span class="label label-success" style="font-size:11px; font-weight:700;"><i class="material-icons" style="font-size:12px; vertical-align:middle;">check_circle</i> Audio Siap (<?php echo number_format($duration, 1); ?>s)</span>
+                                            <?php else: ?>
+                                                <span class="label label-default" style="font-size:11px; background:#E2E8F0; color:#475569;"><i class="material-icons" style="font-size:12px; vertical-align:middle;">mic_none</i> Belum Ada Suara</span>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+
+                                    <!-- BLOK 1: ACUAN TEKS (TYPING & RESEP LENGKAP) -->
+                                    <div class="tts-recipe-box" style="display:flex; flex-direction:column; gap:8px;">
+                                        <!-- Sub-block A: Teks Typing Animasi (Rekomendasi Utama) -->
+                                        <div style="background:#FFFFFF; border:1px solid #BBF7D0; border-radius:6px; padding:8px 12px;">
+                                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:6px;">
+                                                <span style="font-size:11px; font-weight:800; color:#166534; display:flex; align-items:center; gap:5px; text-transform:uppercase;">
+                                                    <i class="material-icons" style="font-size:15px; color:#10B981;">subtitles</i>
+                                                    Teks Typing Animasi (Motion Graphics 9:16) &bull; <span style="color:#059669; font-weight:600; text-transform:none;">Rekomendasi Narasi</span>
+                                                </span>
+                                                <button type="button" class="btn-copy-tts-script" onclick="handleCopyNaskahText(<?php echo $sc['id']; ?>, 'typing', this)" style="color:#166534; border-color:#86EFAC; background:#F0FDF4;">
+                                                    <i class="material-icons" style="font-size:12px;">content_copy</i> Gunakan Teks Typing
+                                                </button>
+                                            </div>
+                                            <div style="font-size:12.5px; font-weight:700; color:#0F172A;" id="typingText_<?php echo $sc['id']; ?>">
+                                                <?php echo htmlspecialchars($typingText); ?>
+                                            </div>
+                                        </div>
+
+                                        <!-- Sub-block B: Instruksi Resep Asli (Lengkap) -->
+                                        <div style="padding:2px 4px;">
+                                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px; flex-wrap:wrap; gap:6px;">
+                                                <span style="font-size:10.5px; font-weight:700; color:#92400E; display:flex; align-items:center; gap:4px; text-transform:uppercase;">
+                                                    <i class="material-icons" style="font-size:13px;">menu_book</i>
+                                                    Instruksi Resep Lengkap
+                                                </span>
+                                                <button type="button" class="btn-copy-tts-script" onclick="handleCopyNaskahText(<?php echo $sc['id']; ?>, 'recipe', this)">
+                                                    <i class="material-icons" style="font-size:12px;">content_copy</i> Gunakan Resep Lengkap
+                                                </button>
+                                            </div>
+                                            <div style="font-size:11.5px; line-height:1.4; color:#78350F;" id="recipeOriginalText_<?php echo $sc['id']; ?>">
+                                                <?php echo htmlspecialchars($recipeOriginalText); ?>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- BLOK 2: TEKS NASKAH NARASI TTS (EDITABLE) -->
+                                    <div>
+                                        <div class="tts-script-label-row">
+                                            <label style="font-size:12px; font-weight:800; color:#0F172A; display:flex; align-items:center; gap:6px; margin:0;">
+                                                <i class="material-icons" style="font-size:15px; color:#10B981;">mic</i>
+                                                Naskah Narasi AI (MiniMax TTS yang Akan Dibacakan):
+                                            </label>
+                                            <span class="tts-char-counter" id="charCounter_<?php echo $sc['id']; ?>"><?php echo $charsCount; ?> karakter &bull; ~<?php echo $wordsCount; ?> kata</span>
+                                        </div>
+                                        <textarea id="txtTtsText_<?php echo $sc['id']; ?>" class="form-control" rows="2" style="font-size:12.5px; border-radius:8px; line-height:1.5; resize:vertical;" placeholder="Tuliskan naskah yang dibaca narator..." oninput="handleUpdateCharCounter(<?php echo $sc['id']; ?>)" onchange="handleSaveSceneTtsText(<?php echo $sc['id']; ?>, this.value)"><?php echo htmlspecialchars($ttsText); ?></textarea>
+                                    </div>
+
+                                    <!-- BLOK 3: HASIL AUDIO & PREVIEW -->
+                                    <div id="ttsAudioBoxWrap_<?php echo $sc['id']; ?>">
+                                        <?php if ($hasAudio): ?>
+                                            <div class="tts-preview-box ready" id="audioPreviewBox_<?php echo $sc['id']; ?>">
+                                                <div style="flex:1; min-width:180px;">
+                                                    <div style="font-size:11px; font-weight:800; color:#166534; display:flex; align-items:center; gap:5px; margin-bottom:2px;">
+                                                        <i class="material-icons" style="font-size:14px;">volume_up</i> HASIL GENERATE TTS
+                                                    </div>
+                                                    <div style="font-size:11.5px; color:#475569;">
+                                                        Durasi Audio: <strong><?php echo number_format($duration, 1); ?>s</strong> &bull; Sisa <strong><?php echo $remainingPadding; ?>s</strong> jeda disinkronkan via BGM.
+                                                    </div>
+                                                </div>
+
+                                                <div style="display:flex; align-items:center; gap:12px; flex:1.6; min-width:220px;">
+                                                    <button type="button" class="tts-play-btn" id="btnPlayScene_<?php echo $sc['id']; ?>" onclick="handleTogglePlayScene(<?php echo $sc['id']; ?>)" title="Putar / Jeda Audio">
+                                                        <i class="material-icons" id="iconPlayBtn_<?php echo $sc['id']; ?>" style="font-size:20px;">play_arrow</i>
+                                                    </button>
+                                                    <div class="tts-waveform-bar" onclick="seekSceneAudio(<?php echo $sc['id']; ?>, event)">
+                                                        <div class="tts-waveform-fill" id="waveFill_<?php echo $sc['id']; ?>"></div>
+                                                    </div>
+                                                    <span id="playerTimer_<?php echo $sc['id']; ?>" style="font-size:11.5px; font-weight:700; color:#166534; min-width:45px; text-align:right;">
+                                                        0:00 / <?php echo $durFormatted; ?>
+                                                    </span>
+                                                    <audio id="audioPlayer_<?php echo $sc['id']; ?>" preload="none">
+                                                        <source src="<?php echo htmlspecialchars($audioPath); ?>?t=<?php echo time(); ?>" type="audio/mpeg">
+                                                    </audio>
+                                                </div>
+
+                                                <button type="button" class="btn btn-default btn-xs" id="btnGenTts_<?php echo $sc['id']; ?>" onclick="handleGenerateSceneTts(<?php echo $sc['id']; ?>, this)" style="border-radius:6px; font-weight:700; font-size:11px; height:34px; border-color:#CBD5E1; color:#334155;">
+                                                    <i class="material-icons" style="font-size:13px; color:#10B981; vertical-align:middle;">refresh</i> Generate Ulang
+                                                </button>
+                                            </div>
+                                        <?php else: ?>
+                                            <div class="tts-preview-box empty" id="audioPreviewBox_<?php echo $sc['id']; ?>">
+                                                <div style="flex:1;">
+                                                    <div style="font-size:11px; font-weight:800; color:#64748B; display:flex; align-items:center; gap:5px; margin-bottom:2px;">
+                                                        <i class="material-icons" style="font-size:14px;">info</i> BELUM ADA AUDIO NARASI
+                                                    </div>
+                                                    <div style="font-size:11.5px; color:#64748B;">
+                                                        Klik tombol di samping untuk men-generate suara narasi adegan ini via MiniMax AI.
+                                                    </div>
+                                                </div>
+
+                                                <button type="button" class="btn btn-primary btn-sm" id="btnGenTts_<?php echo $sc['id']; ?>" onclick="handleGenerateSceneTts(<?php echo $sc['id']; ?>, this)" style="background:#10B981; border-color:#059669; border-radius:8px; font-weight:700; font-size:11.5px; padding:6px 14px;">
+                                                    <i class="material-icons" style="font-size:14px; vertical-align:middle;">mic</i> Generate Suara Klip Ini
+                                                </button>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+
+                <!-- FOOTER NAVIGATION -->
+                <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--pp-slate-border); padding-top:20px;">
+                    <button type="button" class="btn-action-secondary" onclick="jumpToVideoStep(3)">
+                        <i class="material-icons">arrow_back</i> Kembali ke Langkah 3: Klip Video
+                    </button>
+                    <button type="button" id="btnNextToStep5" class="btn-action-primary" onclick="jumpToVideoStep(5)">
+                        <span>Lanjut ke Langkah 5: Video Utuh &amp; FFmpeg Stitching</span>
+                        <i class="material-icons">arrow_forward</i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ================= STEP 5: FFMPEG STITCHING & FINAL VIDEO ================= -->
+            <div id="vstep-content-5" class="video-step-section" style="display:none;">
                 <h3 style="font-size:16px; font-weight:700; color:var(--pp-navy); margin-bottom:8px; display:flex; align-items:center; gap:8px;">
                     <i class="material-icons" style="color:var(--pp-success);">check_circle</i>
-                    Langkah 4: Video Vertikal 9:16 Siap Diterbitkan
+                    Langkah 5: Video Vertikal 9:16 Siap Diterbitkan
                 </h3>
                 <p style="font-size:13px; color:var(--pp-slate-muted); margin-bottom:20px;">
-                    FFmpeg telah sukses menggabungkan klip motion, menambahkan background audio upbeat, dan membubuhkan logo brand Airfryer.
+                    FFmpeg menggabungkan klip video adegan, audio narasi TTS MiniMax, musik latar upbeat (BGM), dan motion graphics teks mengetik.
                 </p>
 
                 <div class="video-preview-wrapper">
@@ -927,8 +1278,8 @@ include_once('includes/sidebar.php');
                 </div>
 
                 <div style="border-top:1px solid var(--pp-slate-border); padding-top:20px; margin-top:24px;">
-                    <button type="button" class="btn-action-secondary" onclick="jumpToVideoStep(3)">
-                        <i class="material-icons">arrow_back</i> Kembali ke Langkah 3
+                    <button type="button" class="btn-action-secondary" onclick="jumpToVideoStep(4)">
+                        <i class="material-icons">arrow_back</i> Kembali ke Langkah 4: Narasi Suara AI
                     </button>
                 </div>
             </div>
@@ -944,19 +1295,31 @@ include_once('includes/sidebar.php');
 <script>
     const csrfToken = <?php echo json_encode($csrfToken); ?>;
     const recipesData = <?php echo json_encode($allRecipes, JSON_UNESCAPED_UNICODE); ?>;
-    let currentVideoProject = null;
+    const minimaxConfig = <?php echo json_encode($minimaxConfig, JSON_UNESCAPED_UNICODE); ?>;
+    const minimaxVoicesId = <?php echo json_encode(array_values(\Ai\MiniMaxClient::VOICES_ID), JSON_UNESCAPED_UNICODE); ?>;
+    const minimaxVoicesEn = <?php echo json_encode(array_values(\Ai\MiniMaxClient::VOICES_EN), JSON_UNESCAPED_UNICODE); ?>;
+    let currentVideoProject = <?php echo safe_json_encode($initialProjectData); ?>;
 
     $(document).ready(function() {
         if (recipesData && recipesData.length > 0) {
             onVideoRecipeSelectChange();
         }
 
-        // Check URL parameters for direct project jump (e.g. ?project_id=13&step=4)
-        const urlParams = new URLSearchParams(window.location.search);
-        const pId = parseInt(urlParams.get('project_id'), 10);
-        const pStep = parseInt(urlParams.get('step'), 10) || 4;
-        if (pId > 0) {
-            handleQuickLoadProject(pId, pStep);
+        if (currentVideoProject) {
+            $('#selQuickLoadProject').val(currentVideoProject.id);
+            renderStoryboardScenes(currentVideoProject);
+            jumpToVideoStep(<?php echo $initialStep; ?>);
+            if (<?php echo $initialStep; ?> === 4) {
+                renderStep4TtsDeck();
+            }
+        } else {
+            // Check URL parameters for direct project jump (e.g. ?project_id=13&step=4)
+            const urlParams = new URLSearchParams(window.location.search);
+            const pId = parseInt(urlParams.get('project_id'), 10);
+            const pStep = parseInt(urlParams.get('step'), 10) || 4;
+            if (pId > 0) {
+                handleQuickLoadProject(pId, pStep);
+            }
         }
     });
 
@@ -996,7 +1359,7 @@ include_once('includes/sidebar.php');
             return;
         }
 
-        for (let i = 1; i <= 4; i++) {
+        for (let i = 1; i <= 5; i++) {
             const btn = $('#vstep-btn-' + i);
             const content = $('#vstep-content-' + i);
 
@@ -1005,14 +1368,21 @@ include_once('includes/sidebar.php');
                 content.hide();
             } else if (i === stepNum) {
                 btn.removeClass('done').addClass('active');
-                content.fadeIn(200);
+                content.show().css('display', 'block');
             } else {
                 btn.removeClass('active done');
                 content.hide();
             }
         }
 
-        if (stepNum === 4 && currentVideoProject) {
+        if (stepNum === 4) {
+            $('#vstep-content-4').show().css('display', 'block');
+            if (currentVideoProject) {
+                renderStep4TtsDeck();
+            }
+        }
+
+        if (stepNum === 5 && currentVideoProject) {
             populateStep4ClipsDropdown();
             const vidPath = currentVideoProject.stitched_video_path || currentVideoProject.video_output_path;
             if (vidPath) {
@@ -2068,7 +2438,9 @@ include_once('includes/sidebar.php');
             overlay_width_ratio: $('#selOverlayWidthRatio').val() || '0.86',
             overlay_brand_name: $('#txtOverlayBrandName').val() || '',
             overlay_step_prefix: $('#selOverlayPrefix').val() || 'Step ',
-            overlay_custom_texts: customTexts
+            overlay_custom_texts: customTexts,
+            enable_bgm: $('#chkEnableBgm').is(':checked') ? 1 : 0,
+            bgm_volume: $('#rngBgmVolume').val() || 0.18
         };
 
         $.ajax({
@@ -2409,6 +2781,646 @@ include_once('includes/sidebar.php');
                 }
             }, 40);
         }
+    }
+
+    // =========================================================================
+    // STEP 4: MINI MAX TTS STUDIO FUNCTIONS
+    // =========================================================================
+    function populateTtsProjectVoices(lang, selectedVoice) {
+        const sel = $('#ttsProjectVoice');
+        if (!sel.length) return;
+        sel.empty();
+
+        const isEn = (lang === 'en-US' || (lang && lang.startsWith('en')));
+        const list = isEn ? minimaxVoicesEn : minimaxVoicesId;
+        const defaultVoice = isEn ? 'English_causual_narrator_vv1' : ((minimaxConfig && minimaxConfig.minimax_default_voice) || 'Indonesian_energetic_streamer_vv2');
+
+        let target = selectedVoice;
+        if (!target) {
+            const projectVoice = (currentVideoProject && currentVideoProject.tts_voice_persona) ? currentVideoProject.tts_voice_persona : '';
+            if (isEn && !projectVoice.startsWith('Indonesian_') && projectVoice) {
+                target = projectVoice;
+            } else if (!isEn && !projectVoice.startsWith('English_') && projectVoice) {
+                target = projectVoice;
+            } else {
+                target = defaultVoice;
+            }
+        }
+
+        // Pastikan target benar-benar ada di daftar suara aktif
+        const exists = list.some(v => v.id === target);
+        if (!exists) {
+            target = defaultVoice;
+        }
+
+        list.forEach(v => {
+            const isSel = (v.id === target) ? 'selected' : '';
+            sel.append(`<option value="${v.id}" ${isSel} style="background:#1E293B; color:#FFF;">${escapeHtml(v.label)}</option>`);
+        });
+
+        sel.val(target);
+        if (currentVideoProject) {
+            currentVideoProject.tts_voice_persona = target;
+        }
+    }
+
+    let currentlyPlayingSceneId = null;
+    let isPlaylistPlaying = false;
+    let playlistQueue = [];
+    let playlistIndex = 0;
+
+    function onTtsProjectLanguageChange(lang) {
+        if (currentVideoProject) {
+            currentVideoProject.tts_language = lang;
+        }
+        populateTtsProjectVoices(lang);
+    }
+
+    function formatAudioTime(secs) {
+        if (!secs || isNaN(secs)) return '0:00';
+        const m = Math.floor(secs / 60);
+        const s = Math.floor(secs % 60);
+        return m + ':' + (s < 10 ? '0' : '') + s;
+    }
+
+    function handleUpdateCharCounter(sceneId) {
+        const val = $('#txtTtsText_' + sceneId).val() || '';
+        const words = val.trim() ? val.trim().split(/\s+/).length : 0;
+        $('#charCounter_' + sceneId).html(`${val.length} karakter &bull; ~${words} kata`);
+    }
+
+    function handleCopyNaskahText(sceneId, type, btnElement) {
+        let text = '';
+        if (type === 'typing') {
+            text = $('#typingText_' + sceneId).text().trim();
+        } else if (type === 'recipe') {
+            text = $('#recipeOriginalText_' + sceneId).text().trim();
+        }
+        if (!text) return;
+
+        $('#txtTtsText_' + sceneId).val(text);
+        handleUpdateCharCounter(sceneId);
+        handleSaveSceneTtsText(sceneId, text);
+        const sc = (currentVideoProject.scenes || []).find(s => parseInt(s.id, 10) === parseInt(sceneId, 10));
+        if (sc) sc.tts_text = text;
+        const $btn = $(btnElement);
+        const oldHtml = $btn.html();
+        $btn.html('<i class="material-icons" style="font-size:12px; color:#10B981;">check</i> Disalin!');
+        setTimeout(() => $btn.html(oldHtml), 1800);
+    }
+
+    function handleResetAllNaskahToTyping() {
+        if (!currentVideoProject || !currentVideoProject.scenes) return;
+        if (!confirm('Apakah Anda yakin ingin menyetel semua naskah narasi ke Teks Typing animasi yang ringkas & sinkron?')) {
+            return;
+        }
+        currentVideoProject.scenes.forEach(sc => {
+            const typingText = sc.visual_action_desc || sc.direction_source_text || '';
+            $('#txtTtsText_' + sc.id).val(typingText);
+            handleUpdateCharCounter(sc.id);
+            handleSaveSceneTtsText(sc.id, typingText);
+            sc.tts_text = typingText;
+        });
+        alert('Seluruh naskah narasi berhasil disetel ke Teks Typing!');
+    }
+
+    function handleCopyRecipeText(sceneId, recipeText) {
+        handleCopyNaskahText(sceneId, 'recipe', '#btnCopy_' + sceneId);
+    }
+
+    function seekSceneAudio(sceneId, event) {
+        const audio = document.getElementById('audioPlayer_' + sceneId);
+        if (!audio || !audio.duration) return;
+        const bar = event.currentTarget;
+        const rect = bar.getBoundingClientRect();
+        const clickX = event.clientX - rect.left;
+        const pct = Math.max(0, Math.min(1, clickX / rect.width));
+        audio.currentTime = pct * audio.duration;
+    }
+
+    function updateMasterReadinessStatus() {
+        if (!currentVideoProject || !currentVideoProject.scenes) return;
+        const scenes = currentVideoProject.scenes;
+        const total = scenes.length;
+        const readyScenes = scenes.filter(s => s.tts_status === 'completed' && s.tts_audio_path);
+        const readyCount = readyScenes.length;
+        const pct = total > 0 ? Math.round((readyCount / total) * 100) : 0;
+
+        $('#ttsMasterReadinessTitle').text(`Status Narasi: ${readyCount} dari ${total} Adegan Siap (${pct}%)`);
+        if (readyCount === total && total > 0) {
+            $('#ttsMasterReadinessDesc').html('<span style="color:#10B981; font-weight:700;"><i class="material-icons" style="font-size:13px; vertical-align:middle;">check_circle</i> Seluruh adegan telah memiliki suara narasi.</span> Anda dapat memutar semua atau lanjut ke Langkah 5.');
+        } else {
+            $('#ttsMasterReadinessDesc').text(`${total - readyCount} adegan belum memiliki suara narasi. Silakan generate suara per adegan atau generate sekaligus.`);
+        }
+
+        playlistQueue = readyScenes.map(s => parseInt(s.id, 10));
+        if (playlistQueue.length === 0) {
+            $('#btnTogglePlayAll').prop('disabled', true);
+        } else {
+            $('#btnTogglePlayAll').prop('disabled', false);
+        }
+    }
+
+    function handleTogglePlayScene(sceneId) {
+        const audio = document.getElementById('audioPlayer_' + sceneId);
+        const icon = $('#iconPlayBtn_' + sceneId);
+        const card = $('#ttsSceneCard_' + sceneId);
+
+        if (!audio) return;
+
+        if (currentlyPlayingSceneId && currentlyPlayingSceneId !== sceneId) {
+            stopSceneAudio(currentlyPlayingSceneId);
+        }
+
+        if (audio.paused) {
+            audio.play().then(() => {
+                currentlyPlayingSceneId = sceneId;
+                icon.text('pause');
+                card.addClass('active-playing');
+                monitorAudioProgress(sceneId);
+            }).catch(err => {
+                console.log('Play error:', err);
+            });
+        } else {
+            audio.pause();
+            icon.text('play_arrow');
+            card.removeClass('active-playing');
+            currentlyPlayingSceneId = null;
+        }
+    }
+
+    function stopSceneAudio(sceneId) {
+        const audio = document.getElementById('audioPlayer_' + sceneId);
+        const icon = $('#iconPlayBtn_' + sceneId);
+        const card = $('#ttsSceneCard_' + sceneId);
+        if (audio) {
+            audio.pause();
+            audio.currentTime = 0;
+        }
+        if (icon.length) icon.text('play_arrow');
+        if (card.length) card.removeClass('active-playing');
+    }
+
+    function monitorAudioProgress(sceneId) {
+        const audio = document.getElementById('audioPlayer_' + sceneId);
+        const fill = $('#waveFill_' + sceneId);
+        const timer = $('#playerTimer_' + sceneId);
+
+        if (!audio) return;
+
+        audio.ontimeupdate = function() {
+            if (audio.duration) {
+                const pct = (audio.currentTime / audio.duration) * 100;
+                fill.css('width', pct + '%');
+                timer.text(formatAudioTime(audio.currentTime) + ' / ' + formatAudioTime(audio.duration));
+            }
+        };
+
+        audio.onended = function() {
+            stopSceneAudio(sceneId);
+            currentlyPlayingSceneId = null;
+            if (isPlaylistPlaying) {
+                playNextInPlaylist();
+            }
+        };
+    }
+
+    function handleTogglePlayAllScenes() {
+        if (isPlaylistPlaying) {
+            isPlaylistPlaying = false;
+            if (currentlyPlayingSceneId) stopSceneAudio(currentlyPlayingSceneId);
+            $('#iconPlayAllMaster').text('play_circle_filled');
+            $('#txtPlayAllMaster').text('Putar Semua Narasi Berurutan');
+        } else {
+            if (playlistQueue.length === 0) {
+                alert('Belum ada adegan yang memiliki audio suara narasi.');
+                return;
+            }
+            isPlaylistPlaying = true;
+            playlistIndex = 0;
+            $('#iconPlayAllMaster').text('pause_circle_filled');
+            $('#txtPlayAllMaster').text('Jeda Pemutaran Berurutan');
+            playNextInPlaylist();
+        }
+    }
+
+    function playNextInPlaylist() {
+        if (!isPlaylistPlaying) return;
+        if (playlistIndex < playlistQueue.length) {
+            const scId = playlistQueue[playlistIndex];
+            playlistIndex++;
+            handleTogglePlayScene(scId);
+        } else {
+            isPlaylistPlaying = false;
+            $('#iconPlayAllMaster').text('play_circle_filled');
+            $('#txtPlayAllMaster').text('Putar Semua Narasi Berurutan');
+        }
+    }
+
+    function updateSceneAudioBox(sceneId, audioPath, duration) {
+        if (!sceneId) return;
+        const dur = parseFloat(duration || 0);
+        const visualDur = parseFloat((currentVideoProject && currentVideoProject.clip_duration) || 4.0);
+        const remainingPadding = Math.max(0, visualDur - dur).toFixed(1);
+
+        $('#ttsStatusBadge_' + sceneId).html(
+            `<span class="label label-success" style="font-size:11px; font-weight:700;"><i class="material-icons" style="font-size:12px; vertical-align:middle;">check_circle</i> Audio Siap (${dur.toFixed(1)}s)</span>`
+        );
+
+        $('#ttsAudioBoxWrap_' + sceneId).html(`
+            <div class="tts-preview-box ready" id="audioPreviewBox_${sceneId}">
+                <div style="flex:1; min-width:180px;">
+                    <div style="font-size:11px; font-weight:800; color:#166534; display:flex; align-items:center; gap:5px; margin-bottom:2px;">
+                        <i class="material-icons" style="font-size:14px;">volume_up</i> HASIL GENERATE TTS
+                    </div>
+                    <div style="font-size:11.5px; color:#475569;">
+                        Durasi Audio: <strong>${dur.toFixed(1)}s</strong> &bull; Sisa <strong>${remainingPadding}s</strong> jeda disinkronkan via BGM.
+                    </div>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:12px; flex:1.6; min-width:220px;">
+                    <button type="button" class="tts-play-btn" id="btnPlayScene_${sceneId}" onclick="handleTogglePlayScene(${sceneId})" title="Putar / Jeda Audio">
+                        <i class="material-icons" id="iconPlayBtn_${sceneId}" style="font-size:20px;">play_arrow</i>
+                    </button>
+                    <div class="tts-waveform-bar" onclick="seekSceneAudio(${sceneId}, event)">
+                        <div class="tts-waveform-fill" id="waveFill_${sceneId}"></div>
+                    </div>
+                    <span id="playerTimer_${sceneId}" style="font-size:11.5px; font-weight:700; color:#166534; min-width:45px; text-align:right;">
+                        0:00 / ${formatAudioTime(dur)}
+                    </span>
+                    <audio id="audioPlayer_${sceneId}" preload="none">
+                        <source src="${audioPath}?t=${Date.now()}" type="audio/mpeg">
+                    </audio>
+                </div>
+
+                <button type="button" class="btn btn-default btn-xs" id="btnGenTts_${sceneId}" onclick="handleGenerateSceneTts(${sceneId}, this)" style="border-radius:6px; font-weight:700; font-size:11px; height:34px; border-color:#CBD5E1; color:#334155;">
+                    <i class="material-icons" style="font-size:13px; color:#10B981; vertical-align:middle;">refresh</i> Generate Ulang
+                </button>
+            </div>
+        `);
+    }
+
+    function renderStep4TtsDeck() {
+        if (!currentVideoProject) return;
+
+        const lang = currentVideoProject.tts_language || minimaxConfig.minimax_default_language || 'id-ID';
+        $('#ttsProjectLanguage').val(lang);
+        populateTtsProjectVoices(lang, currentVideoProject.tts_voice_persona);
+
+        const speed = parseFloat(currentVideoProject.tts_speed || minimaxConfig.minimax_default_speed || 1.0);
+        $('#ttsProjectSpeed').val(speed);
+        $('#txtTtsSpeedVal').text(speed.toFixed(2) + 'x');
+
+        const vol = parseFloat(currentVideoProject.tts_volume || minimaxConfig.minimax_default_volume || 1.0);
+        $('#ttsProjectVolume').val(vol);
+        $('#txtTtsVolVal').text(vol.toFixed(2) + 'x');
+
+        const enableBgm = currentVideoProject.tts_enable_bgm !== 0 && currentVideoProject.tts_enable_bgm !== '0';
+        $('#chkEnableBgm').prop('checked', enableBgm);
+
+        const bgmVol = parseFloat(currentVideoProject.tts_bgm_volume || 0.18);
+        $('#rngBgmVolume').val(bgmVol);
+        $('#txtBgmVolVal').text(Math.round(bgmVol * 100) + '%');
+
+        const container = $('#ttsScenesContainer');
+        const scenes = currentVideoProject.scenes || [];
+        if (scenes.length === 0) {
+            container.html('<div class="alert alert-warning" style="border-radius:8px;">Belum ada adegan pada proyek ini. Silakan buat storyboard di Langkah 2 terlebih dahulu.</div>');
+            return;
+        }
+
+        // USULAN A: Anti-Empty Protection. Jika card sudah ada di DOM (dari SSR PHP), perbarui in-place tanpa menghapus DOM
+        const existingCards = $('#ttsScenesContainer .tts-scene-card');
+        if (existingCards.length > 0) {
+            scenes.forEach((sc) => {
+                const audioPath = sc.tts_audio_path || '';
+                const hasAudio = audioPath && sc.tts_status === 'completed';
+                const duration = parseFloat(sc.tts_duration || 0);
+                if (hasAudio) {
+                    updateSceneAudioBox(sc.id, audioPath, duration);
+                }
+                handleUpdateCharCounter(sc.id);
+            });
+            updateMasterReadinessStatus();
+            return;
+        }
+
+        container.empty();
+
+        scenes.forEach((sc, idx) => {
+            const sceneNum = sc.scene_order || (idx + 1);
+            const typingText = sc.visual_action_desc || '';
+            const recipeOriginalText = sc.direction_source_text || '';
+            const ttsText = sc.tts_text || typingText || recipeOriginalText;
+            const audioPath = sc.tts_audio_path || '';
+            const hasAudio = audioPath && sc.tts_status === 'completed';
+            const duration = parseFloat(sc.tts_duration || 0);
+
+            // Visual duration: default 4.0s
+            const visualDur = parseFloat(currentVideoProject.clip_duration || 4.0);
+            const remainingPadding = Math.max(0, visualDur - duration).toFixed(1);
+
+            let thumbHtml = '';
+            if (sc.frame_image_path) {
+                const thumbUrl = sc.frame_image_path;
+                thumbHtml = `<img src="${thumbUrl}" alt="Scene ${sceneNum}" style="width:96px; height:160px; object-fit:cover; border-radius:10px; border:1px solid #CBD5E1; flex-shrink:0; background:#1E293B;">`;
+            } else {
+                thumbHtml = `<div style="width:96px; height:160px; background:#1E293B; border-radius:10px; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#94A3B8; font-size:10px; flex-shrink:0;">
+                    <i class="material-icons" style="font-size:28px; color:#64748B;">movie</i>
+                    <span style="margin-top:4px;">Scene ${sceneNum}</span>
+                </div>`;
+            }
+
+            let statusBadge = hasAudio 
+                ? `<span class="label label-success" style="font-size:11px; font-weight:700;"><i class="material-icons" style="font-size:12px; vertical-align:middle;">check_circle</i> Audio Siap (${duration.toFixed(1)}s)</span>`
+                : `<span class="label label-default" style="font-size:11px; background:#E2E8F0; color:#475569;"><i class="material-icons" style="font-size:12px; vertical-align:middle;">mic_none</i> Belum Ada Suara</span>`;
+
+            // Words and chars count
+            const wordsCount = ttsText.trim() ? ttsText.trim().split(/\s+/).length : 0;
+            const charsCount = ttsText.length;
+
+            // Audio Preview Box HTML
+            let previewBoxHtml = '';
+            if (hasAudio) {
+                previewBoxHtml = `
+                    <div class="tts-preview-box ready" id="audioPreviewBox_${sc.id}">
+                        <div style="flex:1; min-width:180px;">
+                            <div style="font-size:11px; font-weight:800; color:#166534; display:flex; align-items:center; gap:5px; margin-bottom:2px;">
+                                <i class="material-icons" style="font-size:14px;">volume_up</i> HASIL GENERATE TTS
+                            </div>
+                            <div style="font-size:11.5px; color:#475569;">
+                                Durasi Audio: <strong>${duration.toFixed(1)}s</strong> &bull; Sisa <strong>${remainingPadding}s</strong> jeda disinkronkan via BGM.
+                            </div>
+                        </div>
+
+                        <div style="display:flex; align-items:center; gap:12px; flex:1.6; min-width:220px;">
+                            <button type="button" class="tts-play-btn" id="btnPlayScene_${sc.id}" onclick="handleTogglePlayScene(${sc.id})" title="Putar / Jeda Audio">
+                                <i class="material-icons" id="iconPlayBtn_${sc.id}" style="font-size:20px;">play_arrow</i>
+                            </button>
+                            <div class="tts-waveform-bar" onclick="seekSceneAudio(${sc.id}, event)">
+                                <div class="tts-waveform-fill" id="waveFill_${sc.id}"></div>
+                            </div>
+                            <span id="playerTimer_${sc.id}" style="font-size:11.5px; font-weight:700; color:#166534; min-width:45px; text-align:right;">
+                                0:00 / ${formatAudioTime(duration)}
+                            </span>
+                            <audio id="audioPlayer_${sc.id}" preload="none">
+                                <source src="${audioPath}?t=${Date.now()}" type="audio/mpeg">
+                            </audio>
+                        </div>
+
+                        <button type="button" class="btn btn-default btn-xs" id="btnGenTts_${sc.id}" onclick="handleGenerateSceneTts(${sc.id}, this)" style="border-radius:6px; font-weight:700; font-size:11px; height:34px; border-color:#CBD5E1; color:#334155;">
+                            <i class="material-icons" style="font-size:13px; color:#10B981; vertical-align:middle;">refresh</i> Generate Ulang
+                        </button>
+                    </div>
+                `;
+            } else {
+                previewBoxHtml = `
+                    <div class="tts-preview-box empty" id="audioPreviewBox_${sc.id}">
+                        <div style="flex:1;">
+                            <div style="font-size:11px; font-weight:800; color:#64748B; display:flex; align-items:center; gap:5px; margin-bottom:2px;">
+                                <i class="material-icons" style="font-size:14px;">info</i> BELUM ADA AUDIO NARASI
+                            </div>
+                            <div style="font-size:11.5px; color:#64748B;">
+                                Klik tombol di samping untuk men-generate suara narasi adegan ini via MiniMax AI.
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-primary btn-sm" id="btnGenTts_${sc.id}" onclick="handleGenerateSceneTts(${sc.id}, this)" style="background:#10B981; border-color:#059669; border-radius:8px; font-weight:700; font-size:11.5px; padding:6px 14px;">
+                            <i class="material-icons" style="font-size:14px; vertical-align:middle;">mic</i> Generate Suara Klip Ini
+                        </button>
+                    </div>
+                `;
+            }
+
+            const card = $(`
+                <div class="tts-scene-card" id="ttsSceneCard_${sc.id}">
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+                        ${thumbHtml}
+                        <span style="background:#0F172A; color:#FFF; font-size:10px; font-weight:800; padding:3px 8px; border-radius:6px; text-align:center; width:100%;">
+                            SCENE ${sceneNum}
+                        </span>
+                    </div>
+
+                    <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:12px;">
+                        <!-- HEADER BARIS CARD -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:8px; border-bottom:1px solid #F1F5F9;">
+                            <div style="display:flex; align-items:center; gap:10px;">
+                                <strong style="font-size:13.5px; color:#0F172A;">Adegan ${sceneNum}: ${escapeHtml(typingText || 'Instruksi Masak')}</strong>
+                                <span style="font-size:11px; color:#64748B; background:#F1F5F9; padding:2px 8px; border-radius:6px;">
+                                    <i class="material-icons" style="font-size:12px; vertical-align:middle;">videocam</i> Klip: ${visualDur.toFixed(1)}s
+                                </span>
+                            </div>
+                            <div id="ttsStatusBadge_${sc.id}">
+                                ${statusBadge}
+                            </div>
+                        </div>
+
+                        <!-- BLOK 1: ACUAN TEKS (TYPING & RESEP LENGKAP) -->
+                        <div class="tts-recipe-box" style="display:flex; flex-direction:column; gap:8px;">
+                            <!-- Sub-block A: Teks Typing Animasi (Rekomendasi Utama) -->
+                            <div style="background:#FFFFFF; border:1px solid #BBF7D0; border-radius:6px; padding:8px 12px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap; gap:6px;">
+                                    <span style="font-size:11px; font-weight:800; color:#166534; display:flex; align-items:center; gap:5px; text-transform:uppercase;">
+                                        <i class="material-icons" style="font-size:15px; color:#10B981;">subtitles</i>
+                                        Teks Typing Animasi (Motion Graphics 9:16) &bull; <span style="color:#059669; font-weight:600; text-transform:none;">Rekomendasi Narasi</span>
+                                    </span>
+                                    <button type="button" class="btn-copy-tts-script" onclick="handleCopyNaskahText(${sc.id}, 'typing', this)" style="color:#166534; border-color:#86EFAC; background:#F0FDF4;">
+                                        <i class="material-icons" style="font-size:12px;">content_copy</i> Gunakan Teks Typing
+                                    </button>
+                                </div>
+                                <div style="font-size:12.5px; font-weight:700; color:#0F172A;" id="typingText_${sc.id}">
+                                    ${escapeHtml(typingText)}
+                                </div>
+                            </div>
+
+                            <!-- Sub-block B: Instruksi Resep Asli (Lengkap) -->
+                            <div style="padding:2px 4px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px; flex-wrap:wrap; gap:6px;">
+                                    <span style="font-size:10.5px; font-weight:700; color:#92400E; display:flex; align-items:center; gap:4px; text-transform:uppercase;">
+                                        <i class="material-icons" style="font-size:13px;">menu_book</i>
+                                        Instruksi Resep Lengkap
+                                    </span>
+                                    <button type="button" class="btn-copy-tts-script" onclick="handleCopyNaskahText(${sc.id}, 'recipe', this)">
+                                        <i class="material-icons" style="font-size:12px;">content_copy</i> Gunakan Resep Lengkap
+                                    </button>
+                                </div>
+                                <div style="font-size:11.5px; line-height:1.4; color:#78350F;" id="recipeOriginalText_${sc.id}">
+                                    ${escapeHtml(recipeOriginalText)}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- BLOK 2: TEKS NASKAH NARASI TTS (EDITABLE) -->
+                        <div>
+                            <div class="tts-script-label-row">
+                                <label style="font-size:12px; font-weight:800; color:#0F172A; display:flex; align-items:center; gap:6px; margin:0;">
+                                    <i class="material-icons" style="font-size:15px; color:#10B981;">mic</i>
+                                    Naskah Narasi AI (MiniMax TTS yang Akan Dibacakan):
+                                </label>
+                                <span class="tts-char-counter" id="charCounter_${sc.id}">${charsCount} karakter &bull; ~${wordsCount} kata</span>
+                            </div>
+                            <textarea id="txtTtsText_${sc.id}" class="form-control" rows="2" style="font-size:12.5px; border-radius:8px; line-height:1.5; resize:vertical;" placeholder="Tuliskan naskah yang dibaca narator..." oninput="handleUpdateCharCounter(${sc.id})" onchange="handleSaveSceneTtsText(${sc.id}, this.value)">${escapeHtml(ttsText)}</textarea>
+                        </div>
+
+                        <!-- BLOK 3: HASIL AUDIO & PREVIEW -->
+                        <div id="ttsAudioBoxWrap_${sc.id}">
+                            ${previewBoxHtml}
+                        </div>
+                    </div>
+                </div>
+            `);
+
+            container.append(card);
+        });
+
+        updateMasterReadinessStatus();
+    }
+
+    function handleSaveSceneTtsText(sceneId, text) {
+        $.ajax({
+            url: 'video-generator.php',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                ajax_action: 'video_update_scene_tts_text',
+                csrf_token: csrfToken,
+                scene_id: sceneId,
+                tts_text: text
+            }
+        });
+    }
+
+    function handleGenerateSceneTts(sceneId, btn) {
+        const text = $('#txtTtsText_' + sceneId).val();
+        if (!text || text.trim() === '') {
+            alert('Naskah narasi untuk adegan ini tidak boleh kosong.');
+            return;
+        }
+
+        const lang = $('#ttsProjectLanguage').val();
+        const voice = $('#ttsProjectVoice').val();
+        const speed = $('#ttsProjectSpeed').val();
+        const volume = $('#ttsProjectVolume').val();
+
+        const $btn = $(btn);
+        const oldHtml = $btn.html();
+        $btn.prop('disabled', true).html('<i class="material-icons" style="font-size:14px; animation:spin 1s infinite linear;">sync</i> Memproses...');
+
+        $.ajax({
+            url: 'video-generator.php',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                ajax_action: 'video_generate_scene_tts',
+                csrf_token: csrfToken,
+                scene_id: sceneId,
+                text: text,
+                language: lang,
+                voice_persona: voice,
+                speed: speed,
+                volume: volume
+            },
+            success: function(resp) {
+                $btn.prop('disabled', false).html(oldHtml);
+                if (resp && resp.success) {
+                    updateSceneAudioBox(sceneId, resp.audio_url || resp.audio_path, resp.duration);
+
+                    // Update scene in currentVideoProject
+                    const sc = (currentVideoProject.scenes || []).find(s => parseInt(s.id, 10) === parseInt(sceneId, 10));
+                    if (sc) {
+                        sc.tts_audio_path = resp.audio_path || resp.audio_url;
+                        sc.tts_duration = resp.duration;
+                        sc.tts_status = 'completed';
+                        sc.tts_text = text;
+                    }
+                    updateMasterReadinessStatus();
+
+                    // Auto play preview for immediate listening
+                    handleTogglePlayScene(sceneId);
+                } else {
+                    alert('Gagal membuat suara: ' + (resp.error || 'Terjadi kesalahan pada server.'));
+                }
+            },
+            error: function(xhr, status, error) {
+                $btn.prop('disabled', false).html(oldHtml);
+                const errDetail = (xhr.responseJSON && xhr.responseJSON.error) ? xhr.responseJSON.error : error;
+                alert('Gagal menghubungi server MiniMax: ' + errDetail);
+            }
+        });
+    }
+
+    function handleGenerateAllTts() {
+        if (!currentVideoProject) return;
+
+        const lang = $('#ttsProjectLanguage').val();
+        const voice = $('#ttsProjectVoice').val();
+        const speed = $('#ttsProjectSpeed').val();
+        const volume = $('#ttsProjectVolume').val();
+        const enableBgm = $('#chkEnableBgm').is(':checked') ? 1 : 0;
+        const bgmVolume = $('#rngBgmVolume').val();
+
+        const btn = $('#btnBatchGenerateTts');
+        btn.prop('disabled', true).html('<i class="material-icons" style="font-size:16px; animation:spin 1s infinite linear;">sync</i> Sedang Memproses Semua Suara...');
+
+        $('#ttsBatchProgressWrap').fadeIn(200);
+        $('#ttsBatchProgressStatus').text('Menghubungi MiniMax AI t2a_v2...');
+        $('#ttsBatchProgressBar').css('width', '15%');
+        $('#ttsBatchProgressPercent').text('15%');
+
+        $.ajax({
+            url: 'video-generator.php',
+            type: 'POST',
+            dataType: 'json',
+            timeout: 300000,
+            data: {
+                ajax_action: 'video_generate_project_tts_batch',
+                csrf_token: csrfToken,
+                project_id: currentVideoProject.id,
+                language: lang,
+                voice_persona: voice,
+                speed: speed,
+                volume: volume,
+                enable_bgm: enableBgm,
+                bgm_volume: bgmVolume
+            },
+            success: function(resp) {
+                btn.prop('disabled', false).html('<i class="material-icons" style="font-size:16px;">campaign</i> Generate Semua Narasi TTS');
+                $('#ttsBatchProgressBar').css('width', '100%');
+                $('#ttsBatchProgressPercent').text('100%');
+
+                if (resp && resp.success) {
+                    $('#ttsBatchProgressStatus').text('Selesai! Seluruh suara narasi berhasil dibuat.');
+                    setTimeout(function() {
+                        $('#ttsBatchProgressWrap').fadeOut(300);
+                    }, 2500);
+
+                    // USULAN B: In-place update langsung dari resp.results tanpa reload round-trip
+                    if (resp.results && resp.results.length > 0) {
+                        resp.results.forEach(item => {
+                            if (item.success && item.scene_id) {
+                                const sc = (currentVideoProject.scenes || []).find(s => parseInt(s.id, 10) === parseInt(item.scene_id, 10));
+                                if (sc) {
+                                    sc.tts_audio_path = item.audio_path || item.audio_url;
+                                    sc.tts_duration = item.duration;
+                                    sc.tts_status = 'completed';
+                                }
+                                updateSceneAudioBox(item.scene_id, item.audio_url || item.audio_path, item.duration);
+                            }
+                        });
+                    }
+                    updateMasterReadinessStatus();
+                } else {
+                    $('#ttsBatchProgressStatus').text('Gagal sebagian: ' + (resp.error || 'Terjadi kesalahan'));
+                    alert('Gagal: ' + (resp.error || 'Terjadi kesalahan saat memproses suara.'));
+                }
+            },
+            error: function(xhr, status, error) {
+                btn.prop('disabled', false).html('<i class="material-icons" style="font-size:16px;">campaign</i> Generate Semua Narasi TTS');
+                $('#ttsBatchProgressWrap').hide();
+                const errDetail = (xhr.responseJSON && xhr.responseJSON.error) ? xhr.responseJSON.error : error;
+                alert('Gagal menghubungi server MiniMax: ' + errDetail);
+            }
+        });
     }
 </script>
 </body>

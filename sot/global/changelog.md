@@ -1,5 +1,11 @@
 # Changelog
 
+## V2.1.0 — Integrasi MiniMax TTS Studio & Fix Dropdown Persona Suara (29/10/2026)
+- Integrasi MiniMax speech-2.8-turbo TTS Engine dengan persona suara Indonesia & Inggris
+- Sinkronisasi teks narasi otomatis dari typing text dan resep asli
+- SSR Scene Cards & dropdown Karakter Persona Suara stabil untuk Bahasa Indonesia
+- Dukungan background music (BGM) mixing dan audio waveform player
+
 ## V2.0.1 — Adopsi Git-Based Atomic Deployment Mac Mini (28/10/2026)
 - Implementasi mesin deploy-macmini.js atomik
 - Setup perintah bootstrap, status dan rollback

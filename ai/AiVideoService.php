@@ -2,6 +2,8 @@
 
 namespace Ai;
 
+require_once __DIR__ . '/MiniMaxClient.php';
+
 use mysqli;
 use Exception;
 
@@ -11,6 +13,7 @@ class AiVideoService
     private GeminiClient $geminiClient;
     private GlabsClient $glabsClient;
     private FFmpegVideoService $ffmpegService;
+    private MiniMaxClient $minimaxClient;
 
     public function __construct(mysqli $db)
     {
@@ -18,6 +21,7 @@ class AiVideoService
         $this->geminiClient = new GeminiClient();
         $this->glabsClient = new GlabsClient();
         $this->ffmpegService = new FFmpegVideoService();
+        $this->minimaxClient = new MiniMaxClient();
     }
 
     /**
@@ -450,12 +454,19 @@ class AiVideoService
 
         $totalScenes = count($finalScenes);
 
+        // Determine default TTS language and voice from config
+        $defaultTtsLang = ($detectedLang === 'en') ? 'en-US' : 'id-ID';
+        $minimaxConfig = MiniMaxClient::getConfig($this->db);
+        $defaultTtsVoice = $minimaxConfig['minimax_default_voice'] ?? ($detectedLang === 'en' ? 'English_radiant_girl' : 'Indonesian_energetic_streamer_vv2');
+        $defaultTtsSpeed = (float)($minimaxConfig['minimax_default_speed'] ?? 1.00);
+        $defaultTtsVolume = (float)($minimaxConfig['minimax_default_volume'] ?? 1.00);
+
         // 1. Insert Project
         $projectTitle = "Video: " . $recipe['recipe_title'];
         $stmt = $this->db->prepare("INSERT INTO tbl_ai_video_projects 
-            (recipe_id, project_title, kitchen_preset, video_model, aspect_ratio, clip_duration, total_scenes, status, master_anchor_prompt) 
-            VALUES (?, ?, ?, 'omni_flash', ?, 4, ?, 'storyboard_ready', ?)");
-        $stmt->bind_param('isssis', $recipeId, $projectTitle, $kitchenPresetKey, $aspectRatio, $totalScenes, $masterAnchor);
+            (recipe_id, project_title, kitchen_preset, video_model, aspect_ratio, clip_duration, total_scenes, status, master_anchor_prompt, tts_language, tts_voice_persona, tts_speed, tts_volume, tts_enable_bgm) 
+            VALUES (?, ?, ?, 'omni_flash', ?, 4, ?, 'storyboard_ready', ?, ?, ?, ?, ?, 1)");
+        $stmt->bind_param('isssisssdd', $recipeId, $projectTitle, $kitchenPresetKey, $aspectRatio, $totalScenes, $masterAnchor, $defaultTtsLang, $defaultTtsVoice, $defaultTtsSpeed, $defaultTtsVolume);
         if (!$stmt->execute()) {
             return ['success' => false, 'error' => 'Gagal menyimpan proyek video: ' . $this->db->error];
         }
@@ -464,8 +475,8 @@ class AiVideoService
 
         // 2. Insert Scenes
         $insertScene = $this->db->prepare("INSERT INTO tbl_ai_video_scenes 
-            (project_id, scene_order, direction_source_text, visual_action_desc, prompt_t2i, prompt_i2v, frame_status, video_status) 
-            VALUES (?, ?, ?, ?, ?, ?, 'pending', 'pending')");
+            (project_id, scene_order, direction_source_text, visual_action_desc, prompt_t2i, prompt_i2v, frame_status, video_status, tts_text) 
+            VALUES (?, ?, ?, ?, ?, ?, 'pending', 'pending', ?)");
 
         $insertedScenes = [];
         foreach ($finalScenes as $sc) {
@@ -474,8 +485,10 @@ class AiVideoService
             $actionDesc = $sc['visual_action'];
             $promptT2i = $sc['prompt_t2i'];
             $promptI2v = $sc['prompt_i2v'];
+            // Prioritize concise motion graphics typing text (visual_action_desc) for TTS narration
+            $ttsText = !empty($actionDesc) ? $actionDesc : $dirText;
 
-            $insertScene->bind_param('iissss', $projectId, $order, $dirText, $actionDesc, $promptT2i, $promptI2v);
+            $insertScene->bind_param('iisssss', $projectId, $order, $dirText, $actionDesc, $promptT2i, $promptI2v, $ttsText);
             $insertScene->execute();
             $sceneId = $this->db->insert_id;
 
@@ -974,6 +987,22 @@ class AiVideoService
             $clipPaths[] = $currentClip;
         }
 
+        // Prepare audio scenes and TTS settings for FFmpegVideoService
+        $audioScenes = [];
+        foreach ($scenes as $sc) {
+            $audioScenes[] = [
+                'audio_path' => !empty($sc['tts_audio_path']) ? $sc['tts_audio_path'] : null,
+                'duration' => (float)($sc['tts_duration'] ?? 0),
+                'scene_order' => (int)($sc['scene_order'] ?? 1)
+            ];
+        }
+
+        $options['audio_scenes'] = $audioScenes;
+        $options['enable_tts'] = !empty($project['tts_enabled']);
+        $options['enable_bgm'] = !empty($project['tts_enable_bgm']);
+        $options['bgm_volume'] = (float)($project['tts_bgm_volume'] ?? 0.18);
+        $options['clip_duration'] = (float)($project['clip_duration'] ?? 4);
+
         $this->db->query("UPDATE tbl_ai_video_projects SET status = 'stitching' WHERE id = {$projectId}");
 
         $cleanTitle = preg_replace('/[^a-zA-Z0-9_-]/', '_', strtolower($project['project_title']));
@@ -1043,5 +1072,217 @@ class AiVideoService
             'video_url' => 'upload/video/' . $videoFilename,
             'message' => 'Video berhasil disimpan dan aktif pada resep!'
         ];
+    }
+
+    /**
+     * Generate TTS voiceover audio for a single scene using MiniMax AI.
+     */
+    public function generateSceneTts(int $sceneId, array $options = []): array
+    {
+        $stmt = $this->db->prepare("SELECT s.*, p.id as project_id, p.tts_language, p.tts_voice_persona, p.tts_speed, p.tts_volume 
+            FROM tbl_ai_video_scenes s 
+            JOIN tbl_ai_video_projects p ON s.project_id = p.id 
+            WHERE s.id = ? LIMIT 1");
+        $stmt->bind_param('i', $sceneId);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $scene = $res->fetch_assoc();
+        $stmt->close();
+
+        if (!$scene) {
+            return ['success' => false, 'error' => "Scene ID #{$sceneId} tidak ditemukan."];
+        }
+
+        $minimaxConfig = MiniMaxClient::getConfig($this->db);
+        $apiKey = $options['api_key'] ?? $minimaxConfig['minimax_api_key'] ?? '';
+        if (empty($apiKey)) {
+            return ['success' => false, 'error' => 'API Key MiniMax belum dikonfigurasi. Silakan isi di menu Konfigurasi AI.'];
+        }
+
+        // Determine text to read
+        $text = trim($options['text'] ?? '');
+        if ($text === '') {
+            $text = trim($scene['tts_text'] ?? '');
+        }
+        if ($text === '') {
+            $text = trim($scene['visual_action_desc'] ?? '');
+        }
+        if ($text === '') {
+            $text = trim($scene['direction_source_text'] ?? '');
+        }
+
+        // Clean markdown formatting, bullets, etc.
+        $cleanText = preg_replace('/[*_~#`]/', '', $text);
+        $cleanText = trim(preg_replace('/\s+/', ' ', $cleanText));
+
+        if ($cleanText === '') {
+            return ['success' => false, 'error' => "Naskah narasi untuk Scene #{$scene['scene_order']} kosong."];
+        }
+
+        $language = $options['language'] ?? ($scene['tts_language'] ?: ($minimaxConfig['minimax_default_language'] ?: 'id-ID'));
+        $voicePersona = $options['voice_persona'] ?? ($scene['tts_voice_persona'] ?: ($minimaxConfig['minimax_default_voice'] ?: 'Indonesian_energetic_streamer_vv2'));
+        $speed = (float)($options['speed'] ?? ($scene['tts_speed'] ?: ($minimaxConfig['minimax_default_speed'] ?: 1.00)));
+        $volume = (float)($options['volume'] ?? ($scene['tts_volume'] ?: ($minimaxConfig['minimax_default_volume'] ?: 1.00)));
+
+        $baseDir = dirname(__DIR__);
+        $fileName = "tts_proj_{$scene['project_id']}_sc_{$sceneId}_" . time() . ".mp3";
+        $relPath = "upload/ai_tts_audio/{$fileName}";
+        $absPath = $baseDir . '/' . $relPath;
+
+        $this->db->query("UPDATE tbl_ai_video_scenes SET tts_status = 'running' WHERE id = {$sceneId}");
+
+        $ttsRes = $this->minimaxClient->generateVoiceover($cleanText, $voicePersona, $absPath, [
+            'api_key' => $apiKey,
+            'model' => $minimaxConfig['minimax_model'] ?? 'speech-2.8-turbo',
+            'language' => $language,
+            'speed' => $speed,
+            'volume' => $volume
+        ]);
+
+        if (!$ttsRes['success']) {
+            $this->db->query("UPDATE tbl_ai_video_scenes SET tts_status = 'failed' WHERE id = {$sceneId}");
+            return $ttsRes;
+        }
+
+        $duration = (float)($ttsRes['duration'] ?? 0);
+        $safeRel = $this->db->real_escape_string($relPath);
+        $safeText = $this->db->real_escape_string($cleanText);
+
+        $this->db->query("UPDATE tbl_ai_video_scenes SET 
+            tts_text = '{$safeText}', 
+            tts_audio_path = '{$safeRel}', 
+            tts_duration = {$duration}, 
+            tts_status = 'completed' 
+            WHERE id = {$sceneId}");
+
+        return [
+            'success' => true,
+            'scene_id' => $sceneId,
+            'scene_order' => (int)$scene['scene_order'],
+            'audio_path' => $relPath,
+            'audio_url' => $relPath,
+            'duration' => $duration,
+            'text' => $cleanText,
+            'voice_persona' => $voicePersona
+        ];
+    }
+
+    /**
+     * Generate TTS voiceover audio for all scenes in a video project sequentially.
+     */
+    public function generateProjectTtsBatch(int $projectId, array $options = []): array
+    {
+        $project = $this->getProject($projectId);
+        if (!$project) {
+            return ['success' => false, 'error' => "Proyek ID #{$projectId} tidak ditemukan."];
+        }
+
+        // Update project-level TTS settings if provided
+        $lang = $options['language'] ?? ($project['tts_language'] ?: 'id-ID');
+        $voice = $options['voice_persona'] ?? ($project['tts_voice_persona'] ?: 'Indonesian_energetic_streamer_vv2');
+        $speed = (float)($options['speed'] ?? ($project['tts_speed'] ?: 1.00));
+        $volume = (float)($options['volume'] ?? ($project['tts_volume'] ?: 1.00));
+        $enableBgm = isset($options['enable_bgm']) ? ((int)$options['enable_bgm']) : (int)($project['tts_enable_bgm'] ?? 1);
+        $bgmVolume = isset($options['bgm_volume']) ? (float)$options['bgm_volume'] : (float)($project['tts_bgm_volume'] ?? 0.18);
+
+        $stmt = $this->db->prepare("UPDATE tbl_ai_video_projects SET 
+            tts_language = ?, 
+            tts_voice_persona = ?, 
+            tts_speed = ?, 
+            tts_volume = ?, 
+            tts_enable_bgm = ?, 
+            tts_bgm_volume = ? 
+            WHERE id = ?");
+        if ($stmt) {
+            $stmt->bind_param('ssddidi', $lang, $voice, $speed, $volume, $enableBgm, $bgmVolume, $projectId);
+            $stmt->execute();
+            $stmt->close();
+        }
+
+        $scenes = $project['scenes'] ?? [];
+        if (empty($scenes)) {
+            return ['success' => false, 'error' => 'Proyek tidak memiliki scene adegan.'];
+        }
+
+        $results = [];
+        $errors = [];
+
+        foreach ($scenes as $sc) {
+            $sceneId = (int)$sc['id'];
+            $res = $this->generateSceneTts($sceneId, [
+                'language' => $lang,
+                'voice_persona' => $voice,
+                'speed' => $speed,
+                'volume' => $volume
+            ]);
+
+            if ($res['success']) {
+                $results[] = $res;
+            } else {
+                $errors[] = "Scene #{$sc['scene_order']}: " . ($res['error'] ?? 'Gagal generate TTS');
+            }
+        }
+
+        if (empty($results) && !empty($errors)) {
+            return [
+                'success' => false,
+                'error' => implode(' | ', $errors),
+                'results' => $results
+            ];
+        }
+
+        return [
+            'success' => true,
+            'message' => 'Berhasil membuat suara narasi TTS untuk ' . count($results) . ' adegan!',
+            'total_scenes' => count($scenes),
+            'completed_count' => count($results),
+            'results' => $results,
+            'errors' => $errors
+        ];
+    }
+
+    /**
+     * Update project-level TTS settings.
+     */
+    public function updateProjectTtsSettings(int $projectId, array $settings): bool
+    {
+        $lang = $settings['language'] ?? 'id-ID';
+        $voice = $settings['voice_persona'] ?? 'Indonesian_energetic_streamer_vv2';
+        $speed = (float)($settings['speed'] ?? 1.00);
+        $volume = (float)($settings['volume'] ?? 1.00);
+        $enableBgm = isset($settings['enable_bgm']) ? ((int)$settings['enable_bgm']) : 1;
+        $bgmVolume = isset($settings['bgm_volume']) ? (float)$settings['bgm_volume'] : 0.18;
+
+        $stmt = $this->db->prepare("UPDATE tbl_ai_video_projects SET 
+            tts_language = ?, 
+            tts_voice_persona = ?, 
+            tts_speed = ?, 
+            tts_volume = ?, 
+            tts_enable_bgm = ?, 
+            tts_bgm_volume = ? 
+            WHERE id = ?");
+        if ($stmt) {
+            $stmt->bind_param('ssddidi', $lang, $voice, $speed, $volume, $enableBgm, $bgmVolume, $projectId);
+            $res = $stmt->execute();
+            $stmt->close();
+            return $res;
+        }
+        return false;
+    }
+
+    /**
+     * Update TTS text for a specific scene.
+     */
+    public function updateSceneTtsText(int $sceneId, string $text): bool
+    {
+        $cleanText = trim($text);
+        $stmt = $this->db->prepare("UPDATE tbl_ai_video_scenes SET tts_text = ? WHERE id = ?");
+        if ($stmt) {
+            $stmt->bind_param('si', $cleanText, $sceneId);
+            $res = $stmt->execute();
+            $stmt->close();
+            return $res;
+        }
+        return false;
     }
 }

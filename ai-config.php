@@ -17,12 +17,14 @@ require_once 'ai/GeminiClient.php';
 require_once 'ai/GlabsClient.php';
 require_once 'ai/SyncClient.php';
 require_once 'ai/R2Client.php';
+require_once 'ai/MiniMaxClient.php';
 
 use Ai\AiBootstrap;
 use Ai\GeminiClient;
 use Ai\GlabsClient;
 use Ai\SyncClient;
 use Ai\R2Client;
+use Ai\MiniMaxClient;
 
 // Ensure tables are migrated and ready
 if (!AiBootstrap::isMigrated($connect)) {
@@ -220,7 +222,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             $saved = $stmt->execute();
             $stmt->close();
             if ($saved) {
-                echo json_encode(['success' => true, 'message' => 'Seluruh pengaturan AI Engine, Sinkronisasi, dan Cloudflare R2 berhasil disimpan!']);
+                // Also save MiniMax config if provided
+                MiniMaxClient::saveConfig($connect, $_POST);
+                echo json_encode(['success' => true, 'message' => 'Seluruh pengaturan AI Engine, Sinkronisasi, Cloudflare R2, dan MiniMax TTS berhasil disimpan!']);
             } else {
                 echo json_encode(['success' => false, 'error' => 'Gagal menyimpan ke database: ' . $connect->error]);
             }
@@ -287,6 +291,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         exit;
     }
 
+    // 9. SAVE MINIMAX CONFIG ONLY
+    if ($action === 'save_minimax_config') {
+        $saved = MiniMaxClient::saveConfig($connect, $_POST);
+        if ($saved) {
+            echo json_encode(['success' => true, 'message' => 'Pengaturan MiniMax TTS berhasil disimpan!']);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Gagal menyimpan pengaturan MiniMax ke database.']);
+        }
+        exit;
+    }
+
+    // 10. TEST MINIMAX TTS CONNECTION & SAMPLE AUDIO
+    if ($action === 'test_minimax_tts') {
+        $apiKey = trim($_POST['minimax_api_key'] ?? '');
+        $voicePersona = trim($_POST['minimax_default_voice'] ?? '');
+        $sampleText = trim($_POST['sample_text'] ?? '');
+
+        if (empty($apiKey)) {
+            $conf = MiniMaxClient::getConfig($connect);
+            $apiKey = $conf['minimax_api_key'] ?? '';
+        }
+
+        if (empty($apiKey)) {
+            echo json_encode(['success' => false, 'error' => 'MiniMax API Key belum diisi.']);
+            exit;
+        }
+
+        $minimax = new MiniMaxClient();
+        $testRes = $minimax->testConnection($apiKey, $voicePersona, $sampleText);
+        echo json_encode($testRes);
+        exit;
+    }
+
     echo json_encode(['success' => false, 'error' => 'Aksi tidak dikenal.']);
     exit;
 }
@@ -312,6 +349,16 @@ $r2AccessKeyId = $aiConfig['r2_access_key_id'] ?? '';
 $r2SecretAccessKey = $aiConfig['r2_secret_access_key'] ?? '';
 $r2BucketName = $aiConfig['r2_bucket_name'] ?? '';
 $r2PublicDomain = $aiConfig['r2_public_domain'] ?? '';
+
+// Load MiniMax TTS Config
+$minimaxConfig = MiniMaxClient::getConfig($connect);
+$minimaxApiKey = $minimaxConfig['minimax_api_key'] ?? '';
+$minimaxGroupId = $minimaxConfig['minimax_group_id'] ?? '';
+$minimaxModel = $minimaxConfig['minimax_model'] ?? 'speech-2.8-turbo';
+$minimaxDefaultLang = $minimaxConfig['minimax_default_language'] ?? 'id-ID';
+$minimaxDefaultVoice = $minimaxConfig['minimax_default_voice'] ?? 'Indonesian_energetic_streamer_vv2';
+$minimaxDefaultSpeed = (float)($minimaxConfig['minimax_default_speed'] ?? 1.00);
+$minimaxDefaultVolume = (float)($minimaxConfig['minimax_default_volume'] ?? 1.00);
 
 // Load Gemini Keys
 $keysList = $geminiClient->getAllKeys($connect);
@@ -871,6 +918,134 @@ $data = ($userResult && $userResult->num_rows > 0) ? $userResult->fetch_assoc() 
 
             </div>
 
+            <!-- SECTION 6: MINIMAX TEXT-TO-SPEECH (TTS) VOICEOVER ENGINE -->
+            <section class="config-card" id="sec-minimax-tts" style="margin-top:24px; margin-bottom:0;">
+                <div class="config-card-header">
+                    <div class="config-card-header-left">
+                        <div class="config-header-icon" style="background:rgba(16, 185, 129, 0.12); color:#10B981;">
+                            <i class="material-icons">record_voice_over</i>
+                        </div>
+                        <div class="config-card-title">
+                            <h2>6. MiniMax AI Voiceover Engine (Text-to-Speech)</h2>
+                            <p>Sintesis suara narator profesional multibahasa (ID &amp; EN) dengan failover gateway otomatis.</p>
+                        </div>
+                    </div>
+                    <div class="config-card-actions">
+                        <button type="button" class="btn-brand-outline" onclick="testMiniMaxVoiceConnection()" id="btn-test-minimax">
+                            <i class="material-icons" style="font-size:14px;">play_circle</i> Uji Koneksi &amp; Suara
+                        </button>
+                        <button type="button" class="btn-brand-primary" onclick="saveMiniMaxConfiguration()" id="btn-save-minimax" style="padding:8px 16px; font-size:12.5px;">
+                            <i class="material-icons" style="font-size:15px;">save</i> Simpan Pengaturan TTS
+                        </button>
+                    </div>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:20px;">
+                    <!-- API Key & Group ID -->
+                    <div class="row clearfix" style="margin-bottom:0;">
+                        <div class="col-sm-8 col-xs-12">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label class="form-label" for="minimax-api-key">
+                                    <span>MiniMax API Key:</span>
+                                    <span style="font-size:11px; color:#64748B; font-weight:normal;">(Wajib untuk akses API t2a_v2)</span>
+                                </label>
+                                <div class="key-input-wrapper">
+                                    <input type="password" id="minimax-api-key" class="form-control" value="<?php echo htmlspecialchars($minimaxApiKey); ?>" placeholder="Masukkan API Key MiniMax Anda...">
+                                    <button type="button" class="key-toggle-btn" onclick="toggleTokenVisibility('minimax-api-key', this)" title="Tampilkan/Sembunyikan">
+                                        <i class="material-icons" style="font-size:18px;">visibility</i>
+                                    </button>
+                                </div>
+                                <span class="form-helper">Kunci API dari dasbor pengembang MiniMax AI (platform.minimaxi.com atau api.minimax.io).</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 col-xs-12">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label class="form-label" for="minimax-group-id">
+                                    <span>Group ID (Opsional):</span>
+                                </label>
+                                <input type="text" id="minimax-group-id" class="form-control" value="<?php echo htmlspecialchars($minimaxGroupId); ?>" placeholder="Contoh: 1827493...">
+                                <span class="form-helper">Disertakan jika akun Anda menggunakan isolasi group/organization.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Model, Language, Default Voice Persona -->
+                    <div class="row clearfix" style="margin-bottom:0;">
+                        <div class="col-sm-4 col-xs-12">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label class="form-label" for="minimax-model">Model Engine TTS:</label>
+                                <select class="form-control" id="minimax-model">
+                                    <option value="speech-2.8-turbo" <?php if ($minimaxModel === 'speech-2.8-turbo') echo 'selected'; ?>>speech-2.8-turbo (Rekomendasi &mdash; Cepat &amp; Alami)</option>
+                                    <option value="speech-02-turbo" <?php if ($minimaxModel === 'speech-02-turbo') echo 'selected'; ?>>speech-02-turbo (Model Ringan)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 col-xs-12">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label class="form-label" for="minimax-default-lang">Default Bahasa:</label>
+                                <select class="form-control" id="minimax-default-lang" onchange="onMiniMaxLanguageChange(this.value)">
+                                    <option value="id-ID" <?php if ($minimaxDefaultLang === 'id-ID') echo 'selected'; ?>>Bahasa Indonesia (id-ID)</option>
+                                    <option value="en-US" <?php if ($minimaxDefaultLang === 'en-US') echo 'selected'; ?>>English (en-US)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-sm-4 col-xs-12">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label class="form-label" for="minimax-default-voice">Default Voice Persona:</label>
+                                <select class="form-control" id="minimax-default-voice">
+                                    <!-- Populated dynamically via JS -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Speed & Volume Sliders -->
+                    <div class="row clearfix" style="margin-bottom:0;">
+                        <div class="col-sm-6 col-xs-12">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                    <label class="form-label" style="margin:0;">Kecepatan Bicara (Speed):</label>
+                                    <span id="txt-minimax-speed" style="font-size:12px; font-weight:700; color:#10B981;"><?php echo number_format($minimaxDefaultSpeed, 2); ?>x</span>
+                                </div>
+                                <input type="range" id="minimax-default-speed" min="0.5" max="2.0" step="0.05" value="<?php echo $minimaxDefaultSpeed; ?>" class="form-range" style="width:100%; accent-color:#10B981;" oninput="document.getElementById('txt-minimax-speed').textContent = parseFloat(this.value).toFixed(2) + 'x';">
+                                <span class="form-helper">Rentang: 0.5x (Lambat) &mdash; 1.0x (Normal) &mdash; 2.0x (Cepat).</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xs-12">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                    <label class="form-label" style="margin:0;">Volume Suara:</label>
+                                    <span id="txt-minimax-volume" style="font-size:12px; font-weight:700; color:#10B981;"><?php echo number_format($minimaxDefaultVolume, 2); ?>x</span>
+                                </div>
+                                <input type="range" id="minimax-default-volume" min="0.2" max="2.0" step="0.05" value="<?php echo $minimaxDefaultVolume; ?>" class="form-range" style="width:100%; accent-color:#10B981;" oninput="document.getElementById('txt-minimax-volume').textContent = parseFloat(this.value).toFixed(2) + 'x';">
+                                <span class="form-helper">Rentang volume audio narator (default 1.00x).</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LIVE TEST SOUND BOX -->
+                    <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:16px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                            <strong style="font-size:13px; color:#0F172A; display:flex; align-items:center; gap:6px;">
+                                <i class="material-icons" style="font-size:16px; color:#10B981;">volume_up</i>
+                                Uji Suara Sampel MiniMax (Audio Sandbox):
+                            </strong>
+                            <span style="font-size:11px; background:#DCFCE7; color:#15803D; font-weight:700; padding:2px 8px; border-radius:12px;">Instant Player</span>
+                        </div>
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <input type="text" id="minimax-test-text" class="form-control" value="Halo, ini uji coba suara narator AI MiniMax untuk resep masakan air fryer." style="font-size:13px;">
+                            <button type="button" class="btn-brand-primary" onclick="testMiniMaxVoiceConnection()" style="white-space:nowrap; padding:8px 16px;">
+                                <i class="material-icons" style="font-size:16px;">play_arrow</i> Uji Suara
+                            </button>
+                        </div>
+                        <div id="minimax-test-player-wrap" style="margin-top:12px; display:none;">
+                            <audio id="minimax-test-audio-player" controls style="width:100%; height:36px; border-radius:6px;"></audio>
+                            <div id="minimax-test-meta" style="font-size:11px; color:#64748B; margin-top:4px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Bottom Floating Action Bar -->
             <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px; margin-bottom:40px;">
                 <a href="ai-generator.php" class="btn-secondary">Batal / Kembali</a>
@@ -1416,6 +1591,140 @@ $data = ($userResult && $userResult->num_rows > 0) ? $userResult->fetch_assoc() 
         });
     }
 
+    // MiniMax Voice Catalog
+    var MINIMAX_VOICES_ID = <?php echo json_encode(array_values(MiniMaxClient::VOICES_ID)); ?>;
+    var MINIMAX_VOICES_EN = <?php echo json_encode(array_values(MiniMaxClient::VOICES_EN)); ?>;
+    var SAVED_DEFAULT_VOICE = <?php echo json_encode($minimaxDefaultVoice); ?>;
+
+    function populateMiniMaxVoices(lang, selectedVoice) {
+        var sel = document.getElementById('minimax-default-voice');
+        if (!sel) return;
+        sel.innerHTML = '';
+        var list = (lang === 'en-US' || (lang && lang.indexOf('en') === 0)) ? MINIMAX_VOICES_EN : MINIMAX_VOICES_ID;
+        var targetVoice = selectedVoice || SAVED_DEFAULT_VOICE;
+
+        list.forEach(function(v) {
+            var opt = document.createElement('option');
+            opt.value = v.id;
+            opt.textContent = v.label;
+            if (v.id === targetVoice) {
+                opt.selected = true;
+            }
+            sel.appendChild(opt);
+        });
+    }
+
+    function onMiniMaxLanguageChange(lang) {
+        populateMiniMaxVoices(lang);
+    }
+
+    // Save MiniMax Configuration
+    function saveMiniMaxConfiguration() {
+        var btn = document.getElementById('btn-save-minimax');
+        var oldHtml = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="material-icons" style="font-size:15px; animation:spin 1s infinite linear;">sync</i> Menyimpan...';
+        }
+
+        var data = {
+            action: 'save_minimax_config',
+            minimax_api_key: document.getElementById('minimax-api-key').value.trim(),
+            minimax_group_id: document.getElementById('minimax-group-id').value.trim(),
+            minimax_model: document.getElementById('minimax-model').value,
+            minimax_default_language: document.getElementById('minimax-default-lang').value,
+            minimax_default_voice: document.getElementById('minimax-default-voice').value,
+            minimax_default_speed: document.getElementById('minimax-default-speed').value,
+            minimax_default_volume: document.getElementById('minimax-default-volume').value
+        };
+
+        $.ajax({
+            url: 'ai-config.php',
+            type: 'POST',
+            dataType: 'json',
+            data: data,
+            success: function(resp) {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = oldHtml;
+                }
+                if (resp && resp.success) {
+                    alert(resp.message || 'Pengaturan MiniMax TTS berhasil disimpan!');
+                } else {
+                    alert('Gagal: ' + (resp.error || 'Terjadi kesalahan saat menyimpan pengaturan MiniMax.'));
+                }
+            },
+            error: function(xhr, status, error) {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = oldHtml;
+                }
+                var errDetail = (xhr.responseJSON && xhr.responseJSON.error) ? xhr.responseJSON.error : error;
+                alert('Gagal menghubungi server: ' + errDetail);
+            }
+        });
+    }
+
+    // Test MiniMax Voice Connection
+    function testMiniMaxVoiceConnection() {
+        var btn = document.getElementById('btn-test-minimax');
+        var oldHtml = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="material-icons" style="font-size:14px; animation:spin 1s infinite linear;">sync</i> Menghubungi MiniMax...';
+        }
+
+        var wrap = document.getElementById('minimax-test-player-wrap');
+        var player = document.getElementById('minimax-test-audio-player');
+        var meta = document.getElementById('minimax-test-meta');
+
+        var data = {
+            action: 'test_minimax_tts',
+            minimax_api_key: document.getElementById('minimax-api-key').value.trim(),
+            minimax_default_voice: document.getElementById('minimax-default-voice').value,
+            sample_text: document.getElementById('minimax-test-text').value.trim()
+        };
+
+        $.ajax({
+            url: 'ai-config.php',
+            type: 'POST',
+            dataType: 'json',
+            data: data,
+            success: function(resp) {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = oldHtml;
+                }
+                if (resp && resp.success) {
+                    wrap.style.display = 'block';
+                    player.src = resp.audio_url + '?t=' + Date.now();
+                    player.play();
+                    meta.innerHTML = '<span style="color:#059669; font-weight:700;"><i class="material-icons" style="font-size:12px; vertical-align:middle;">check_circle</i> Sukses!</span> ' +
+                        resp.message + ' (Durasi: ' + resp.duration + ' detik, Voice: ' + resp.voice_persona + ')';
+                } else {
+                    wrap.style.display = 'block';
+                    meta.innerHTML = '<span style="color:#DC2626; font-weight:700;"><i class="material-icons" style="font-size:12px; vertical-align:middle;">error</i> Gagal:</span> ' +
+                        (resp.error || 'Terjadi kesalahan saat menguji suara MiniMax.');
+                }
+            },
+            error: function(xhr, status, error) {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = oldHtml;
+                }
+                var errDetail = (xhr.responseJSON && xhr.responseJSON.error) ? xhr.responseJSON.error : error;
+                wrap.style.display = 'block';
+                meta.innerHTML = '<span style="color:#DC2626; font-weight:700;"><i class="material-icons" style="font-size:12px; vertical-align:middle;">error</i> Error:</span> ' + errDetail;
+            }
+        });
+    }
+
+    // Initialize voices on load
+    $(document).ready(function() {
+        var currentLang = document.getElementById('minimax-default-lang') ? document.getElementById('minimax-default-lang').value : 'id-ID';
+        populateMiniMaxVoices(currentLang, SAVED_DEFAULT_VOICE);
+    });
+
     // Save all configurations
     function saveAllConfigurations(e) {
         e = e || window.event;
@@ -1434,7 +1743,14 @@ $data = ($userResult && $userResult->num_rows > 0) ? $userResult->fetch_assoc() 
             r2_access_key_id: document.getElementById('r2-access-key-id') ? document.getElementById('r2-access-key-id').value.trim() : '',
             r2_secret_access_key: document.getElementById('r2-secret-access-key') ? document.getElementById('r2-secret-access-key').value.trim() : '',
             r2_bucket_name: document.getElementById('r2-bucket-name') ? document.getElementById('r2-bucket-name').value.trim() : '',
-            r2_public_domain: document.getElementById('r2-public-domain') ? document.getElementById('r2-public-domain').value.trim() : ''
+            r2_public_domain: document.getElementById('r2-public-domain') ? document.getElementById('r2-public-domain').value.trim() : '',
+            minimax_api_key: document.getElementById('minimax-api-key') ? document.getElementById('minimax-api-key').value.trim() : '',
+            minimax_group_id: document.getElementById('minimax-group-id') ? document.getElementById('minimax-group-id').value.trim() : '',
+            minimax_model: document.getElementById('minimax-model') ? document.getElementById('minimax-model').value : 'speech-2.8-turbo',
+            minimax_default_language: document.getElementById('minimax-default-lang') ? document.getElementById('minimax-default-lang').value : 'id-ID',
+            minimax_default_voice: document.getElementById('minimax-default-voice') ? document.getElementById('minimax-default-voice').value : '',
+            minimax_default_speed: document.getElementById('minimax-default-speed') ? document.getElementById('minimax-default-speed').value : '1.0',
+            minimax_default_volume: document.getElementById('minimax-default-volume') ? document.getElementById('minimax-default-volume').value : '1.0'
         };
 
         var btn = e && e.target ? e.target.closest('button') : null;

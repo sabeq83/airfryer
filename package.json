@@ -1,6 +1,6 @@
 {
   "name": "airfry-studio-v2",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "AirFry Studio V2 Webadmin & AI Video Engine",
   "private": true,
   "scripts": {

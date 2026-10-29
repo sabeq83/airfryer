@@ -6,6 +6,7 @@ require_once __DIR__ . '/AiDatabaseMigration.php';
 require_once __DIR__ . '/AiDatabaseMigrationV2.php';
 require_once __DIR__ . '/AiVideoDatabaseMigration.php';
 require_once __DIR__ . '/AiR2DatabaseMigration.php';
+require_once __DIR__ . '/AiMiniMaxDatabaseMigration.php';
 
 use mysqli;
 use Throwable;
@@ -98,6 +99,20 @@ class AiBootstrap
         } catch (Throwable $e) {
             $hasError = true;
             $messages[] = "Exception R2 Migration: " . $e->getMessage();
+        }
+
+        // 5. Run MiniMax TTS Migration
+        try {
+            $mig5 = new AiMiniMaxDatabaseMigration($db);
+            $res5 = $mig5->run();
+            if (is_array($res5)) {
+                foreach ($res5 as $k => $v) {
+                    $messages[] = is_array($v) ? json_encode($v) : (string)$v;
+                }
+            }
+        } catch (Throwable $e) {
+            $hasError = true;
+            $messages[] = "Exception MiniMax Migration: " . $e->getMessage();
         }
 
         return [

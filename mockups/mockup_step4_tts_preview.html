@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mockup Langkah 4: Studio Narasi Suara AI (MiniMax TTS) — Airfry Studio</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        :root {
+            --navy-900: #0F172A;
+            --navy-800: #1E293B;
+            --navy-700: #334155;
+            --slate-500: #64748B;
+            --slate-400: #94A3B8;
+            --slate-200: #E2E8F0;
+            --slate-100: #F1F5F9;
+            --slate-50:  #F8FAFC;
+            --emerald-500: #10B981;
+            --emerald-600: #059669;
+            --emerald-50:  #ECFDF5;
+            --emerald-100: #D1FAE5;
+            --amber-500: #F59E0B;
+            --amber-50:  #FFFBEB;
+            --amber-100: #FEF3C7;
+            --rose-500:  #EF4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+        }
+
+        body {
+            background: #F8FAFC;
+            color: #1E293B;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        /* Top Bar */
+        .mockup-header {
+            background: #0F172A;
+            color: #FFF;
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #334155;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .header-brand i {
+            color: var(--emerald-500);
+            font-size: 26px;
+        }
+        .header-brand h1 {
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+        .header-badge {
+            background: rgba(16, 185, 129, 0.2);
+            color: #34D399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .container {
+            max-width: 1180px;
+            margin: 28px auto;
+            padding: 0 20px;
+        }
+
+        /* Notice Banner */
+        .mockup-banner {
+            background: linear-gradient(135deg, #1E293B, #0F172A);
+            border-radius: 12px;
+            padding: 18px 24px;
+            color: #F8FAFC;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-left: 4px solid var(--emerald-500);
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
+        }
+        .mockup-banner h2 {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #FFF;
+        }
+        .mockup-banner p {
+            font-size: 12.5px;
+            color: var(--slate-400);
+        }
+
+        /* Stepper */
+        .stepper-nav {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 28px;
+        }
+        .step-pill {
+            background: #FFF;
+            border: 1px solid var(--slate-200);
+            padding: 12px 14px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0.65;
+            transition: all 0.2s ease;
+        }
+        .step-pill.completed {
+            opacity: 0.9;
+            border-color: #CBD5E1;
+        }
+        .step-pill.completed .step-num {
+            background: #10B981;
+            color: #FFF;
+        }
+        .step-pill.active {
+            opacity: 1;
+            background: #FFF;
+            border-color: #10B981;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+        }
+        .step-pill.active .step-num {
+            background: #0F172A;
+            color: #34D399;
+            font-weight: 800;
+            border: 2px solid #10B981;
+        }
+        .step-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--slate-100);
+            color: var(--slate-500);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .step-info {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .step-info span:first-child {
+            font-size: 10.5px;
+            color: var(--slate-500);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .step-info span:last-child {
+            font-size: 12px;
+            font-weight: 700;
+            color: #0F172A;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Studio Settings Card (Dark) */
+        .studio-settings-card {
+            background: #0F172A;
+            border-radius: 14px;
+            padding: 20px 24px;
+            color: #F8FAFC;
+            margin-bottom: 22px;
+            border: 1px solid #334155;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1.6fr 1fr 1fr;
+            gap: 16px;
+            align-items: end;
+        }
+        .form-group label {
+            display: block;
+            font-size: 11.5px;
+            color: #94A3B8;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+        .form-control-dark {
+            width: 100%;
+            height: 40px;
+            background: #1E293B;
+            border: 1px solid #334155;
+            color: #FFF;
+            border-radius: 8px;
+            padding: 0 12px;
+            font-size: 12.5px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+        .form-control-dark:focus {
+            border-color: #10B981;
+        }
+        .range-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .range-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11.5px;
+            color: #94A3B8;
+            font-weight: 600;
+        }
+        .range-val {
+            color: #34D399;
+            font-weight: 700;
+        }
+
+        /* BGM Bar */
+        .bgm-subbar {
+            background: #1E293B;
+            border-radius: 10px;
+            padding: 12px 18px;
+            margin-top: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #334155;
+        }
+        .bgm-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12.5px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Audio Readiness & Master Player Deck */
+        .master-deck {
+            background: #FFFFFF;
+            border: 1px solid #CBD5E1;
+            border-radius: 14px;
+            padding: 18px 22px;
+            margin-bottom: 22px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+        }
+        .readiness-status {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .status-badge-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--emerald-50);
+            color: var(--emerald-600);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border: 1px solid var(--emerald-100);
+        }
+        .readiness-text h3 {
+            font-size: 14px;
+            font-weight: 800;
+            color: #0F172A;
+            margin-bottom: 2px;
+        }
+        .readiness-text p {
+            font-size: 12px;
+            color: var(--slate-500);
+        }
+        .master-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* Scene Card (Enhanced Proposal) */
+        .scene-card {
+            background: #FFFFFF;
+            border: 1px solid var(--slate-200);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 18px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+            display: flex;
+            gap: 20px;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .scene-card:hover {
+            border-color: #94A3B8;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+        }
+        .scene-card.active-playing {
+            border-color: var(--emerald-500);
+            background: #FAFDFA;
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+        }
+
+        /* Thumbnail */
+        .scene-thumb-col {
+            width: 100px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .scene-thumb {
+            width: 100px;
+            height: 178px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 1px solid #CBD5E1;
+            background: #1E293B;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+        .thumb-badge {
+            background: #0F172A;
+            color: #FFF;
+            font-size: 10.5px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            text-align: center;
+            letter-spacing: 0.5px;
+            width: 100%;
+        }
+
+        /* Content Column */
+        .scene-content-col {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .scene-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--slate-100);
+        }
+        .scene-meta-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .scene-meta-title h4 {
+            font-size: 14px;
+            font-weight: 800;
+            color: #0F172A;
+        }
+        .clip-dur-badge {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--slate-500);
+            background: var(--slate-100);
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        /* BLOCK 1: Recipe Original Instruction */
+        .recipe-instruction-box {
+            background: #FFFBEB;
+            border: 1px solid #FEF3C7;
+            border-radius: 10px;
+            padding: 12px 14px;
+            position: relative;
+        }
+        .rib-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .rib-label {
+            font-size: 11px;
+            font-weight: 800;
+            color: #B45309;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-copy-script {
+            background: transparent;
+            border: 1px solid #FCD34D;
+            color: #92400E;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s ease;
+        }
+        .btn-copy-script:hover {
+            background: #FDE68A;
+        }
+        .rib-text {
+            font-size: 12.5px;
+            line-height: 1.5;
+            color: #78350F;
+            font-weight: 500;
+        }
+
+        /* BLOCK 2: Editable TTS Narration Script */
+        .tts-script-box {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .tsb-label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .tsb-label {
+            font-size: 12px;
+            font-weight: 800;
+            color: #0F172A;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .char-counter {
+            font-size: 11px;
+            color: var(--slate-400);
+            font-weight: 600;
+        }
+        .tts-textarea {
+            width: 100%;
+            border: 1.5px solid #CBD5E1;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #0F172A;
+            background: #FFF;
+            resize: vertical;
+            min-height: 60px;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .tts-textarea:focus {
+            border-color: var(--emerald-500);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
+
+        /* BLOCK 3: Audio Result & Preview Box */
+        .audio-preview-box {
+            border-radius: 10px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.2s ease;
+        }
+        .audio-preview-box.ready {
+            background: #F0FDF4;
+            border: 1.5px solid #BBF7D0;
+        }
+        .audio-preview-box.empty {
+            background: #F8FAFC;
+            border: 1.5px dashed #CBD5E1;
+        }
+
+        .ap-info-col {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+        }
+        .ap-status-tag {
+            font-size: 11px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .ap-status-tag.success {
+            color: #166534;
+        }
+        .ap-status-tag.pending {
+            color: #64748B;
+        }
+        .ap-metric {
+            font-size: 11.5px;
+            color: #475569;
+        }
+        .ap-metric strong {
+            color: #0F172A;
+            font-weight: 700;
+        }
+
+        .audio-player-widget {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1.8;
+        }
+        .btn-play-preview {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--emerald-500);
+            color: #FFF;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+            transition: transform 0.15s ease, background 0.15s ease;
+            flex-shrink: 0;
+        }
+        .btn-play-preview:hover {
+            background: var(--emerald-600);
+            transform: scale(1.05);
+        }
+
+        .player-waveform-bar {
+            flex: 1;
+            height: 6px;
+            background: #DCFCE7;
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+        .waveform-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--emerald-500);
+            transition: width 0.1s linear;
+        }
+        .player-timer {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #166534;
+            min-width: 45px;
+            text-align: right;
+        }
+
+        /* Buttons */
+        .btn-brand-primary {
+            background: var(--emerald-500);
+            color: #FFF;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .btn-brand-primary:hover {
+            background: var(--emerald-600);
+        }
+        .btn-secondary {
+            background: #FFF;
+            color: #334155;
+            border: 1px solid #CBD5E1;
+            padding: 9px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .btn-secondary:hover {
+            background: #F1F5F9;
+            border-color: #94A3B8;
+        }
+
+        /* Step Footer Navigation */
+        .step-footer-nav {
+            margin-top: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 24px;
+            border-top: 1px solid var(--slate-200);
+        }
+        .btn-nav-prev {
+            background: #FFF;
+            color: var(--navy-800);
+            border: 1px solid #CBD5E1;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .btn-nav-next {
+            background: #0F172A;
+            color: #FFF;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2);
+            transition: transform 0.15s ease;
+        }
+        .btn-nav-next:hover {
+            transform: translateY(-1px);
+        }
+        .btn-nav-next .badge-ready {
+            background: #10B981;
+            color: #FFF;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: 800;
+        }
+
+        /* Toast notification */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #0F172A;
+            color: #FFF;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 600;
+            display: none;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            z-index: 1000;
+            border-left: 4px solid var(--emerald-500);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOP HEADER -->
+    <header class="mockup-header">
+        <div class="header-brand">
+            <i class="material-icons">record_voice_over</i>
+            <div>
+                <h1>Mockup Studio Narasi Suara AI (Langkah 4)</h1>
+                <div style="font-size:11px; color:#94A3B8;">AirFry Studio v2 &bull; MiniMax t2a_v2 Voiceover Engine</div>
+            </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+            <span class="header-badge">PROYEK #13 : HONEY MUSTARD GLAZED SALMON</span>
+            <a href="../video-generator.php?project_id=13&step=4" style="color:#FFF; font-size:12px; text-decoration:none; background:#334155; padding:6px 12px; border-radius:6px; font-weight:600;">
+                <i class="material-icons" style="font-size:13px; vertical-align:middle;">arrow_back</i> Buka Halaman Asli
+            </a>
+        </div>
+    </header>
+
+    <div class="container">
+
+        <!-- INTRO BANNER -->
+        <div class="mockup-banner">
+            <div>
+                <h2>✨ Mockup Desain Sempurna Langkah 4</h2>
+                <p>Teks Instruksi Masak Asli ditampilkan terpisah sebagai acuan, naskah narasi dapat disunting bebas, dan hasil audio TTS memiliki box preview khusus sebelum melangkah ke Langkah 5.</p>
+            </div>
+            <div style="text-align:right;">
+                <span style="font-size:11px; background:rgba(255,255,255,0.1); padding:4px 10px; border-radius:20px; color:#A7F3D0; font-weight:700;">
+                    Status: Siap Diuji
+                </span>
+            </div>
+        </div>
+
+        <!-- STEPPER NAVIGATION (5 LANGKAH) -->
+        <div class="stepper-nav">
+            <div class="step-pill completed">
+                <div class="step-num"><i class="material-icons" style="font-size:16px;">check</i></div>
+                <div class="step-info">
+                    <span>Langkah 1</span>
+                    <span>Pilih Resep</span>
+                </div>
+            </div>
+            <div class="step-pill completed">
+                <div class="step-num"><i class="material-icons" style="font-size:16px;">check</i></div>
+                <div class="step-info">
+                    <span>Langkah 2</span>
+                    <span>Storyboard &amp; Frame</span>
+                </div>
+            </div>
+            <div class="step-pill completed">
+                <div class="step-num"><i class="material-icons" style="font-size:16px;">check</i></div>
+                <div class="step-info">
+                    <span>Langkah 3</span>
+                    <span>Klip Video (I2V)</span>
+                </div>
+            </div>
+            <div class="step-pill active">
+                <div class="step-num">4</div>
+                <div class="step-info">
+                    <span style="color:#10B981;">Aktif</span>
+                    <span>Narasi Suara AI (TTS)</span>
+                </div>
+            </div>
+            <div class="step-pill">
+                <div class="step-num">5</div>
+                <div class="step-info">
+                    <span>Langkah 5</span>
+                    <span>Video Utuh (FFmpeg)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TTS SETTINGS CARD -->
+        <div class="studio-settings-card">
+            <div class="settings-header">
+                <strong style="font-size:13.5px; display:flex; align-items:center; gap:8px;">
+                    <i class="material-icons" style="color:var(--emerald-500); font-size:19px;">tune</i>
+                    Pengaturan Karakter Suara &amp; Musik Latar Proyek
+                </strong>
+                <span style="font-size:11px; background:rgba(16,185,129,0.2); color:#34D399; font-weight:700; padding:4px 10px; border-radius:12px;">
+                    MiniMax speech-2.8-turbo
+                </span>
+            </div>
+
+            <div class="settings-grid">
+                <div class="form-group">
+                    <label>Bahasa Narasi:</label>
+                    <select id="selLang" class="form-control-dark" onchange="changeVoiceMock(this.value)">
+                        <option value="id-ID" selected>Bahasa Indonesia (id-ID)</option>
+                        <option value="en-US">English (en-US)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Karakter Persona Suara:</label>
+                    <select id="selPersona" class="form-control-dark">
+                        <option value="Indonesian_energetic_streamer_vv2" selected>Indonesian Energetic Streamer (Wanita Santai / Ceria)</option>
+                        <option value="Indonesian_gentle_lady_vv2">Indonesian Gentle Lady (Wanita Halus / Lembut)</option>
+                        <option value="Indonesian_warm_storyteller_vv2">Indonesian Warm Storyteller (Pria Narasi Hangat)</option>
+                        <option value="Indonesian_friendly_guy_vv2">Indonesian Friendly Guy (Pria Ramah / Edukasi)</option>
+                    </select>
+                </div>
+                <div class="range-wrapper">
+                    <div class="range-label">
+                        <span>Speed (Tempo):</span>
+                        <span class="range-val" id="valSpeed">1.00x</span>
+                    </div>
+                    <input type="range" min="0.6" max="1.5" step="0.05" value="1.0" style="accent-color:var(--emerald-500); cursor:pointer;" oninput="document.getElementById('valSpeed').innerText = parseFloat(this.value).toFixed(2)+'x'">
+                </div>
+                <div class="range-wrapper">
+                    <div class="range-label">
+                        <span>Volume Suara:</span>
+                        <span class="range-val" id="valVol">1.00x</span>
+                    </div>
+                    <input type="range" min="0.3" max="2.0" step="0.05" value="1.0" style="accent-color:var(--emerald-500); cursor:pointer;" oninput="document.getElementById('valVol').innerText = parseFloat(this.value).toFixed(2)+'x'">
+                </div>
+            </div>
+
+            <!-- BGM Option -->
+            <div class="bgm-subbar">
+                <label class="bgm-toggle">
+                    <input type="checkbox" id="chkEnableBgm" checked style="width:16px; height:16px; accent-color:var(--emerald-500);">
+                    <span>Aktifkan Musik Latar Upbeat (BGM) &mdash; <span style="color:#94A3B8; font-weight:normal; font-size:11.5px;">Mengisi celah hening jika durasi narasi lebih pendek daripada video</span></span>
+                </label>
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <span style="font-size:11.5px; color:#94A3B8;">Volume Musik:</span>
+                    <input type="range" min="0.05" max="0.50" step="0.02" value="0.18" style="width:100px; accent-color:var(--emerald-500); cursor:pointer;" oninput="document.getElementById('valBgm').innerText = Math.round(this.value * 100)+'%'">
+                    <span id="valBgm" style="font-size:11.5px; font-weight:700; color:#34D399; width:35px;">18%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MASTER AUDIO READINESS & SEQUENTIAL PLAYER DECK -->
+        <div class="master-deck">
+            <div class="readiness-status">
+                <div class="status-badge-icon">
+                    <i class="material-icons">headset</i>
+                </div>
+                <div class="readiness-text">
+                    <h3 id="masterReadinessTitle">Status Narasi: 6 dari 7 Adegan Siap (85%)</h3>
+                    <p id="masterReadinessDesc">Semua audio yang telah di-generate dapat Anda dengarkan satu per satu di bawah atau putar berurutan.</p>
+                </div>
+            </div>
+            <div class="master-actions">
+                <button type="button" class="btn-secondary" id="btnPlayAllPlaylist" onclick="togglePlayAllScenes()">
+                    <i class="material-icons" style="font-size:16px; color:var(--emerald-600);" id="iconPlayAll">play_circle_filled</i>
+                    <span id="txtPlayAll">Putar Semua Narasi Berurutan</span>
+                </button>
+                <button type="button" class="btn-brand-primary" onclick="triggerBatchGenerateMock()">
+                    <i class="material-icons" style="font-size:16px;">campaign</i>
+                    Generate Semua Narasi TTS
+                </button>
+            </div>
+        </div>
+
+        <!-- SCENES LIST -->
+        <div id="scenesContainer">
+
+            <!-- SCENE 1 (CONTOH DENGAN AUDIO READY) -->
+            <div class="scene-card" id="cardScene1">
+                <div class="scene-thumb-col">
+                    <img src="../upload/ai_video_frames/frame_p13_s1_1793176274.jpg" onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&h=350&fit=crop'" alt="Scene 1" class="scene-thumb">
+                    <span class="thumb-badge">SCENE 1</span>
+                </div>
+
+                <div class="scene-content-col">
+                    <div class="scene-card-header">
+                        <div class="scene-meta-title">
+                            <h4>Adegan 1 &bull; Persiapan Air &amp; Preheat</h4>
+                            <span class="clip-dur-badge"><i class="material-icons" style="font-size:12px; vertical-align:middle;">videocam</i> Durasi Klip Video: 4.0s</span>
+                        </div>
+                        <span class="label" style="background:#DCFCE7; color:#15803D; font-size:11px; font-weight:700; padding:3px 10px; border-radius:12px; border:1px solid #BBF7D0;">
+                            <i class="material-icons" style="font-size:13px; vertical-align:middle;">check_circle</i> Audio Siap
+                        </span>
+                    </div>
+
+                    <!-- BLOK 1: INSTRUKSI RESEP ASLI -->
+                    <div class="recipe-instruction-box">
+                        <div class="rib-header">
+                            <span class="rib-label">
+                                <i class="material-icons" style="font-size:14px;">menu_book</i>
+                                Teks Instruksi Masak Asli (Resep)
+                            </span>
+                            <button type="button" class="btn-copy-script" onclick="copyRecipeToScript(1)">
+                                <i class="material-icons" style="font-size:12px;">content_copy</i> Salin ke Naskah Narasi
+                            </button>
+                        </div>
+                        <div class="rib-text" id="recipeText1">
+                            Half-fill a large saucepan with water and bring to the boil. Preheat the air fryer to 200C.
+                        </div>
+                    </div>
+
+                    <!-- BLOK 2: TEKS NASKAH NARASI TTS -->
+                    <div class="tts-script-box">
+                        <div class="tsb-label-row">
+                            <label class="tsb-label" for="ttsText1">
+                                <i class="material-icons" style="font-size:15px; color:var(--emerald-600);">mic</i>
+                                Naskah Narasi AI (MiniMax TTS yang Akan Dibacakan):
+                            </label>
+                            <span class="char-counter" id="counter1">89 karakter &bull; ~14 kata</span>
+                        </div>
+                        <textarea id="ttsText1" class="tts-textarea" rows="2" placeholder="Tuliskan naskah yang dibaca narator..." oninput="updateCounter(1)">Isi setengah panci besar dengan air hingga mendidih. Panaskan air fryer ke suhu 200 derajat Celcius.</textarea>
+                    </div>
+
+                    <!-- BLOK 3: HASIL AUDIO & PREVIEW -->
+                    <div class="audio-preview-box ready" id="audioBox1">
+                        <div class="ap-info-col">
+                            <span class="ap-status-tag success">
+                                <i class="material-icons" style="font-size:15px;">volume_up</i> Hasil Generate TTS
+                            </span>
+                            <div class="ap-metric">
+                                Durasi Audio: <strong>3.7s</strong> &bull; Sisa <strong>0.3s</strong> diisi jeda hening + musik latar BGM.
+                            </div>
+                        </div>
+
+                        <div class="audio-player-widget">
+                            <button type="button" class="btn-play-preview" id="btnPlay1" onclick="togglePlayScene(1)">
+                                <i class="material-icons" id="iconPlay1" style="font-size:20px;">play_arrow</i>
+                            </button>
+                            <div class="player-waveform-bar" onclick="seekAudioMock(1, event)">
+                                <div class="waveform-fill" id="fill1"></div>
+                            </div>
+                            <span class="player-timer" id="timer1">0:00 / 0:03</span>
+                            <audio id="audioElement1" preload="none">
+                                <source src="../upload/ai_tts_audio/tts_proj_13_sc_60_1793229074.mp3" type="audio/mpeg">
+                            </audio>
+                        </div>
+
+                        <button type="button" class="btn-secondary" style="font-size:11px; padding:6px 12px; height:36px;" onclick="simulateRegenerate(1)">
+                            <i class="material-icons" style="font-size:13px; color:var(--emerald-600);">refresh</i> Generate Ulang
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SCENE 2 (CONTOH DENGAN AUDIO READY) -->
+            <div class="scene-card" id="cardScene2">
+                <div class="scene-thumb-col">
+                    <img src="../upload/ai_video_frames/frame_p13_s2_1793176277.jpg" onerror="this.src='https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=200&h=350&fit=crop'" alt="Scene 2" class="scene-thumb">
+                    <span class="thumb-badge">SCENE 2</span>
+                </div>
+
+                <div class="scene-content-col">
+                    <div class="scene-card-header">
+                        <div class="scene-meta-title">
+                            <h4>Adegan 2 &bull; Meracik Honey-Mustard Glaze</h4>
+                            <span class="clip-dur-badge"><i class="material-icons" style="font-size:12px; vertical-align:middle;">videocam</i> Durasi Klip Video: 4.0s</span>
+                        </div>
+                        <span class="label" style="background:#DCFCE7; color:#15803D; font-size:11px; font-weight:700; padding:3px 10px; border-radius:12px; border:1px solid #BBF7D0;">
+                            <i class="material-icons" style="font-size:13px; vertical-align:middle;">check_circle</i> Audio Siap
+                        </span>
+                    </div>
+
+                    <!-- BLOK 1: INSTRUKSI RESEP ASLI -->
+                    <div class="recipe-instruction-box">
+                        <div class="rib-header">
+                            <span class="rib-label">
+                                <i class="material-icons" style="font-size:14px;">menu_book</i>
+                                Teks Instruksi Masak Asli (Resep)
+                            </span>
+                            <button type="button" class="btn-copy-script" onclick="copyRecipeToScript(2)">
+                                <i class="material-icons" style="font-size:12px;">content_copy</i> Salin ke Naskah Narasi
+                            </button>
+                        </div>
+                        <div class="rib-text" id="recipeText2">
+                            Meanwhile, for the glaze, mix together the honey and mustard in a medium–large mixing bowl. Transfer half the glaze to a smaller container and season.
+                        </div>
+                    </div>
+
+                    <!-- BLOK 2: TEKS NASKAH NARASI TTS -->
+                    <div class="tts-script-box">
+                        <div class="tsb-label-row">
+                            <label class="tsb-label" for="ttsText2">
+                                <i class="material-icons" style="font-size:15px; color:var(--emerald-600);">mic</i>
+                                Naskah Narasi AI (MiniMax TTS yang Akan Dibacakan):
+                            </label>
+                            <span class="char-counter" id="counter2">112 karakter &bull; ~18 kata</span>
+                        </div>
+                        <textarea id="ttsText2" class="tts-textarea" rows="2" placeholder="Tuliskan naskah yang dibaca narator..." oninput="updateCounter(2)">Sambil menunggu, campurkan madu dan mustard ke dalam mangkuk untuk saus glaze. Pisahkan separuh bagian untuk dressing.</textarea>
+                    </div>
+
+                    <!-- BLOK 3: HASIL AUDIO & PREVIEW -->
+                    <div class="audio-preview-box ready" id="audioBox2">
+                        <div class="ap-info-col">
+                            <span class="ap-status-tag success">
+                                <i class="material-icons" style="font-size:15px;">volume_up</i> Hasil Generate TTS
+                            </span>
+                            <div class="ap-metric">
+                                Durasi Audio: <strong>3.9s</strong> &bull; Sisa <strong>0.1s</strong> diisi jeda hening + musik latar BGM.
+                            </div>
+                        </div>
+
+                        <div class="audio-player-widget">
+                            <button type="button" class="btn-play-preview" id="btnPlay2" onclick="togglePlayScene(2)">
+                                <i class="material-icons" id="iconPlay2" style="font-size:20px;">play_arrow</i>
+                            </button>
+                            <div class="player-waveform-bar" onclick="seekAudioMock(2, event)">
+                                <div class="waveform-fill" id="fill2"></div>
+                            </div>
+                            <span class="player-timer" id="timer2">0:00 / 0:03</span>
+                            <audio id="audioElement2" preload="none">
+                                <source src="../upload/ai_tts_audio/tts_proj_13_sc_61_1793229078.mp3" type="audio/mpeg">
+                            </audio>
+                        </div>
+
+                        <button type="button" class="btn-secondary" style="font-size:11px; padding:6px 12px; height:36px;" onclick="simulateRegenerate(2)">
+                            <i class="material-icons" style="font-size:13px; color:var(--emerald-600);">refresh</i> Generate Ulang
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SCENE 3 (CONTOH EMPTY STATE / BELUM ADA SUARA) -->
+            <div class="scene-card" id="cardScene3">
+                <div class="scene-thumb-col">
+                    <img src="../upload/ai_video_frames/frame_p13_s3_1793176279.jpg" onerror="this.src='https://images.unsplash.com/photo-1540420773420-3366772f4999?w=200&h=350&fit=crop'" alt="Scene 3" class="scene-thumb">
+                    <span class="thumb-badge">SCENE 3</span>
+                </div>
+
+                <div class="scene-content-col">
+                    <div class="scene-card-header">
+                        <div class="scene-meta-title">
+                            <h4>Adegan 3 &bull; Merebus Kentang</h4>
+                            <span class="clip-dur-badge"><i class="material-icons" style="font-size:12px; vertical-align:middle;">videocam</i> Durasi Klip Video: 4.0s</span>
+                        </div>
+                        <span class="label" style="background:#F1F5F9; color:#64748B; font-size:11px; font-weight:700; padding:3px 10px; border-radius:12px; border:1px solid #E2E8F0;">
+                            <i class="material-icons" style="font-size:13px; vertical-align:middle;">mic_none</i> Belum Ada Suara
+                        </span>
+                    </div>
+
+                    <!-- BLOK 1: INSTRUKSI RESEP ASLI -->
+                    <div class="recipe-instruction-box">
+                        <div class="rib-header">
+                            <span class="rib-label">
+                                <i class="material-icons" style="font-size:14px;">menu_book</i>
+                                Teks Instruksi Masak Asli (Resep)
+                            </span>
+                            <button type="button" class="btn-copy-script" onclick="copyRecipeToScript(3)">
+                                <i class="material-icons" style="font-size:12px;">content_copy</i> Salin ke Naskah Narasi
+                            </button>
+                        </div>
+                        <div class="rib-text" id="recipeText3">
+                            When the water is boiling, add the potatoes and cook for 7 minutes.
+                        </div>
+                    </div>
+
+                    <!-- BLOK 2: TEKS NASKAH NARASI TTS -->
+                    <div class="tts-script-box">
+                        <div class="tsb-label-row">
+                            <label class="tsb-label" for="ttsText3">
+                                <i class="material-icons" style="font-size:15px; color:var(--emerald-600);">mic</i>
+                                Naskah Narasi AI (MiniMax TTS yang Akan Dibacakan):
+                            </label>
+                            <span class="char-counter" id="counter3">68 karakter &bull; ~10 kata</span>
+                        </div>
+                        <textarea id="ttsText3" class="tts-textarea" rows="2" placeholder="Tuliskan naskah yang dibaca narator..." oninput="updateCounter(3)">Begitu air mendidih, masukkan potongan kentang lalu rebus selama 7 menit.</textarea>
+                    </div>
+
+                    <!-- BLOK 3: HASIL AUDIO & PREVIEW (EMPTY STATE) -->
+                    <div class="audio-preview-box empty" id="audioBox3">
+                        <div class="ap-info-col">
+                            <span class="ap-status-tag pending">
+                                <i class="material-icons" style="font-size:15px;">info</i> Belum Ada Audio Narasi
+                            </span>
+                            <div class="ap-metric">
+                                Klik tombol di sebelah kanan untuk men-generate suara klip ini secara instan via MiniMax AI.
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn-brand-primary" id="btnGen3" onclick="simulateGenerateSingle(3)" style="padding:8px 14px; font-size:11.5px;">
+                            <i class="material-icons" style="font-size:14px;">mic</i> Generate Suara Klip Ini
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- FOOTER NAVIGATION MENUJU LANGKAH 5 -->
+        <div class="step-footer-nav">
+            <button type="button" class="btn-nav-prev" onclick="alert('Kembali ke Langkah 3: Klip Video')">
+                <i class="material-icons">arrow_back</i> Kembali ke Langkah 3: Klip Video
+            </button>
+            <div style="display:flex; align-items:center; gap:16px;">
+                <div style="font-size:12px; color:var(--slate-500); text-align:right;">
+                    Semua naskah siap? Langkah berikutnya menggabungkan video klip, narasi suara, &amp; BGM.
+                </div>
+                <button type="button" class="btn-nav-next" onclick="goToStep5Mock()">
+                    <span>Lanjut ke Langkah 5: Video Utuh &amp; FFmpeg</span>
+                    <span class="badge-ready">SIAP DITERBITKAN</span>
+                    <i class="material-icons">arrow_forward</i>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast">Teks berhasil disalin ke naskah narasi!</div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        let currentlyPlayingScene = null;
+        let isPlaylistPlaying = false;
+        let playlistQueue = [1, 2];
+        let playlistIndex = 0;
+
+        function updateCounter(sceneId) {
+            const val = document.getElementById('ttsText' + sceneId).value;
+            const words = val.trim() ? val.trim().split(/\s+/).length : 0;
+            document.getElementById('counter' + sceneId).innerText = `${val.length} karakter • ~${words} kata`;
+        }
+
+        function copyRecipeToScript(sceneId) {
+            const originalText = document.getElementById('recipeText' + sceneId).innerText.trim();
+            const textarea = document.getElementById('ttsText' + sceneId);
+            textarea.value = originalText;
+            updateCounter(sceneId);
+            showToast('Teks instruksi resep disalin ke naskah narasi!');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 2500);
+        }
+
+        function togglePlayScene(sceneId) {
+            const audio = document.getElementById('audioElement' + sceneId);
+            const icon = document.getElementById('iconPlay' + sceneId);
+            const card = document.getElementById('cardScene' + sceneId);
+
+            if (!audio) return;
+
+            if (currentlyPlayingScene && currentlyPlayingScene !== sceneId) {
+                stopSceneAudio(currentlyPlayingScene);
+            }
+
+            if (audio.paused) {
+                audio.play().then(() => {
+                    currentlyPlayingScene = sceneId;
+                    icon.innerText = 'pause';
+                    card.classList.add('active-playing');
+                    monitorAudioProgress(sceneId);
+                }).catch(err => {
+                    console.log('Playback error:', err);
+                    // Mock simulator if file doesn't play directly in local browser
+                    runMockProgress(sceneId);
+                });
+            } else {
+                audio.pause();
+                icon.innerText = 'play_arrow';
+                card.classList.remove('active-playing');
+                currentlyPlayingScene = null;
+            }
+        }
+
+        function stopSceneAudio(sceneId) {
+            const audio = document.getElementById('audioElement' + sceneId);
+            const icon = document.getElementById('iconPlay' + sceneId);
+            const card = document.getElementById('cardScene' + sceneId);
+            if (audio) {
+                audio.pause();
+                audio.currentTime = 0;
+            }
+            if (icon) icon.innerText = 'play_arrow';
+            if (card) card.classList.remove('active-playing');
+        }
+
+        function monitorAudioProgress(sceneId) {
+            const audio = document.getElementById('audioElement' + sceneId);
+            const fill = document.getElementById('fill' + sceneId);
+            const timer = document.getElementById('timer' + sceneId);
+
+            audio.ontimeupdate = function() {
+                if (audio.duration) {
+                    const pct = (audio.currentTime / audio.duration) * 100;
+                    fill.style.width = pct + '%';
+                    timer.innerText = formatTime(audio.currentTime) + ' / ' + formatTime(audio.duration);
+                }
+            };
+
+            audio.onended = function() {
+                stopSceneAudio(sceneId);
+                currentlyPlayingScene = null;
+                if (isPlaylistPlaying) {
+                    playNextInPlaylist();
+                }
+            };
+        }
+
+        function runMockProgress(sceneId) {
+            const icon = document.getElementById('iconPlay' + sceneId);
+            const card = document.getElementById('cardScene' + sceneId);
+            const fill = document.getElementById('fill' + sceneId);
+            const timer = document.getElementById('timer' + sceneId);
+
+            currentlyPlayingScene = sceneId;
+            icon.innerText = 'pause';
+            card.classList.add('active-playing');
+
+            let cur = 0;
+            const total = 3.8;
+            const interval = setInterval(() => {
+                cur += 0.1;
+                const pct = (cur / total) * 100;
+                fill.style.width = pct + '%';
+                timer.innerText = formatTime(cur) + ' / ' + formatTime(total);
+
+                if (cur >= total || currentlyPlayingScene !== sceneId) {
+                    clearInterval(interval);
+                    stopSceneAudio(sceneId);
+                    currentlyPlayingScene = null;
+                    if (isPlaylistPlaying) {
+                        playNextInPlaylist();
+                    }
+                }
+            }, 100);
+        }
+
+        function formatTime(secs) {
+            const m = Math.floor(secs / 60);
+            const s = Math.floor(secs % 60);
+            return m + ':' + (s < 10 ? '0' : '') + s;
+        }
+
+        function togglePlayAllScenes() {
+            if (isPlaylistPlaying) {
+                isPlaylistPlaying = false;
+                if (currentlyPlayingScene) stopSceneAudio(currentlyPlayingScene);
+                document.getElementById('iconPlayAll').innerText = 'play_circle_filled';
+                document.getElementById('txtPlayAll').innerText = 'Putar Semua Narasi Berurutan';
+            } else {
+                isPlaylistPlaying = true;
+                playlistIndex = 0;
+                document.getElementById('iconPlayAll').innerText = 'pause_circle_filled';
+                document.getElementById('txtPlayAll').innerText = 'Jeda Pemutaran Berurutan';
+                playNextInPlaylist();
+            }
+        }
+
+        function playNextInPlaylist() {
+            if (!isPlaylistPlaying) return;
+            if (playlistIndex < playlistQueue.length) {
+                const scId = playlistQueue[playlistIndex];
+                playlistIndex++;
+                togglePlayScene(scId);
+            } else {
+                isPlaylistPlaying = false;
+                document.getElementById('iconPlayAll').innerText = 'play_circle_filled';
+                document.getElementById('txtPlayAll').innerText = 'Putar Semua Narasi Berurutan';
+                showToast('Semua adegan narasi selesai diputar!');
+            }
+        }
+
+        function simulateGenerateSingle(sceneId) {
+            const btn = document.getElementById('btnGen' + sceneId);
+            btn.disabled = true;
+            btn.innerHTML = '<i class="material-icons" style="font-size:14px; animation:spin 1s infinite linear;">sync</i> Sedang Memproses...';
+
+            setTimeout(() => {
+                const box = document.getElementById('audioBox' + sceneId);
+                box.className = 'audio-preview-box ready';
+                box.innerHTML = `
+                    <div class="ap-info-col">
+                        <span class="ap-status-tag success">
+                            <i class="material-icons" style="font-size:15px;">volume_up</i> Hasil Generate TTS
+                        </span>
+                        <div class="ap-metric">
+                            Durasi Audio: <strong>3.2s</strong> &bull; Sisa <strong>0.8s</strong> diisi jeda hening + musik latar BGM.
+                        </div>
+                    </div>
+
+                    <div class="audio-player-widget">
+                        <button type="button" class="btn-play-preview" id="btnPlay3" onclick="togglePlayScene(3)">
+                            <i class="material-icons" id="iconPlay3" style="font-size:20px;">play_arrow</i>
+                        </button>
+                        <div class="player-waveform-bar" onclick="seekAudioMock(3, event)">
+                            <div class="waveform-fill" id="fill3"></div>
+                        </div>
+                        <span class="player-timer" id="timer3">0:00 / 0:03</span>
+                        <audio id="audioElement3" preload="none">
+                            <source src="../upload/ai_tts_audio/tts_proj_13_sc_62_1793229081.mp3" type="audio/mpeg">
+                        </audio>
+                    </div>
+
+                    <button type="button" class="btn-secondary" style="font-size:11px; padding:6px 12px; height:36px;" onclick="simulateRegenerate(3)">
+                        <i class="material-icons" style="font-size:13px; color:var(--emerald-600);">refresh</i> Generate Ulang
+                    </button>
+                `;
+
+                if (!playlistQueue.includes(3)) playlistQueue.push(3);
+                document.getElementById('masterReadinessTitle').innerText = 'Status Narasi: 7 dari 7 Adegan Siap (100%)';
+                showToast('Audio narasi Scene 3 berhasil dibuat!');
+            }, 1200);
+        }
+
+        function simulateRegenerate(sceneId) {
+            showToast('Menghubungi MiniMax AI untuk men-generate suara ulang...');
+            simulateGenerateSingle(sceneId);
+        }
+
+        function triggerBatchGenerateMock() {
+            showToast('Batch generate aktif: seluruh adegan sedang diproses...');
+            simulateGenerateSingle(3);
+        }
+
+        function changeVoiceMock(lang) {
+            const persona = document.getElementById('selPersona');
+            persona.innerHTML = '';
+            if (lang === 'id-ID') {
+                persona.innerHTML = `
+                    <option value="Indonesian_energetic_streamer_vv2" selected>Indonesian Energetic Streamer (Wanita Santai / Ceria)</option>
+                    <option value="Indonesian_gentle_lady_vv2">Indonesian Gentle Lady (Wanita Halus / Lembut)</option>
+                    <option value="Indonesian_warm_storyteller_vv2">Indonesian Warm Storyteller (Pria Narasi Hangat)</option>
+                    <option value="Indonesian_friendly_guy_vv2">Indonesian Friendly Guy (Pria Ramah / Edukasi)</option>
+                `;
+            } else {
+                persona.innerHTML = `
+                    <option value="English_expressive_narrator_v2" selected>English Expressive Narrator (Wanita Sinematik)</option>
+                    <option value="English_dynamic_cook_v2">English Dynamic Cook (Pria Ceria)</option>
+                    <option value="English_gentle_storyteller_v2">English Gentle Storyteller (Wanita Tenang)</option>
+                `;
+            }
+            showToast('Katalog persona diperbarui ke ' + (lang === 'id-ID' ? 'Bahasa Indonesia' : 'English'));
+        }
+
+        function goToStep5Mock() {
+            window.location.href = '../video-generator.php?project_id=13&step=5';
+        }
+    </script>
+</body>
+</html>
